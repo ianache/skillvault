@@ -35,10 +35,9 @@ export async function install(slug, { harness, scope, server, force }) {
   }
 
   const hasFiles = files.length > 0;
-  const skillDir  = hasFiles ? join(dir, slug) : dir;
-  const skillFile = hasFiles
-    ? join(skillDir, `SKILL.${ext}`)
-    : join(dir, `${slug}.${ext}`);
+  // Always install into <dir>/<slug>/SKILL.<ext> — Claude Code requires the directory structure
+  const skillDir  = join(dir, slug);
+  const skillFile = join(skillDir, `SKILL.${ext}`);
 
   // 3. Check if already installed
   const alreadyExists = await access(skillFile).then(() => true).catch(() => false);
