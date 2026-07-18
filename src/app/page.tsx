@@ -64,6 +64,101 @@ export default async function HomePage({ searchParams }: HomeProps) {
         </p>
       </div>
 
+      {/* CLI download banner */}
+      <div
+        style={{
+          borderBottom: "1px solid var(--border)",
+          padding: "10px 24px",
+          background: "var(--raised)",
+          display: "flex",
+          alignItems: "center",
+          gap: "12px",
+          flexWrap: "wrap",
+        }}
+      >
+        <span style={{ fontSize: "13px", color: "var(--muted)" }}>
+          <span style={{ marginRight: "6px" }}>⬇</span>
+          Instala el CLI para gestionar skills desde la terminal:
+        </span>
+        <code
+          style={{
+            fontSize: "12px",
+            color: "var(--accent)",
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+            borderRadius: "4px",
+            padding: "2px 8px",
+            fontFamily: "monospace",
+          }}
+        >
+          skillvault install &lt;slug&gt; --harness claude
+        </code>
+        <div style={{ display: "flex", gap: "8px", marginLeft: "auto" }}>
+          <a
+            href="https://github.com/ianache/skillvault/releases/latest/download/skillvault-win-x64.exe"
+            style={{
+              fontSize: "12px",
+              fontWeight: 600,
+              color: "var(--accent)",
+              background: "var(--surface)",
+              border: "1px solid var(--accent)",
+              borderRadius: "6px",
+              padding: "4px 12px",
+              textDecoration: "none",
+              whiteSpace: "nowrap",
+            }}
+          >
+            ↓ Windows .exe
+          </a>
+          <a
+            href="https://github.com/ianache/skillvault/releases/latest/download/skillvault-macos-x64"
+            style={{
+              fontSize: "12px",
+              fontWeight: 600,
+              color: "var(--text)",
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              borderRadius: "6px",
+              padding: "4px 12px",
+              textDecoration: "none",
+              whiteSpace: "nowrap",
+            }}
+          >
+            ↓ macOS
+          </a>
+          <a
+            href="https://github.com/ianache/skillvault/releases/latest/download/skillvault-linux-x64"
+            style={{
+              fontSize: "12px",
+              fontWeight: 600,
+              color: "var(--text)",
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              borderRadius: "6px",
+              padding: "4px 12px",
+              textDecoration: "none",
+              whiteSpace: "nowrap",
+            }}
+          >
+            ↓ Linux
+          </a>
+          <a
+            href="https://github.com/ianache/skillvault/releases/latest"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              fontSize: "12px",
+              color: "var(--muted)",
+              padding: "4px 8px",
+              textDecoration: "none",
+              whiteSpace: "nowrap",
+            }}
+          >
+            Ver releases →
+          </a>
+        </div>
+      </div>
+
       <CatalogClient initialSkills={skills} initialQuery={q ?? ""} initialType={type ?? ""} />
     </div>
   );

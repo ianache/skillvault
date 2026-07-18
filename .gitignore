@@ -44,3 +44,7 @@ next-env.d.ts
 *.db
 *.db-shm
 *.db-wal
+
+# CLI build artifacts
+cli/dist/
+cli/node_modules/

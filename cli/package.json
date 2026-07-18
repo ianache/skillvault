@@ -9,5 +9,13 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "scripts": {
+    "build": "node build.js",
+    "build:exe": "node build.js && pkg dist/skillvault.bundle.cjs --target node22-win-x64 --output dist/skillvault-win-x64.exe"
+  },
+  "pkg": {
+    "targets": ["node22-win-x64", "node22-macos-x64", "node22-linux-x64"],
+    "outputPath": "dist"
   }
 }

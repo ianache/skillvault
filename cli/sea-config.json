@@ -1,0 +1,5 @@
+{
+  "main": "dist/skillvault.bundle.cjs",
+  "output": "dist/sea-prep.blob",
+  "disableExperimentalSEAWarning": true
+}

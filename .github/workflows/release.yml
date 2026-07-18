@@ -1,0 +1,66 @@
+name: Release CLI
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build bundle
+        working-directory: cli
+        run: node build.js
+
+      - name: Install pkg
+        run: npm install -g @yao-pkg/pkg
+
+      - name: Build Windows exe
+        working-directory: cli
+        run: pkg dist/skillvault.bundle.cjs --target node22-win-x64 --output dist/skillvault-win-x64.exe
+
+      - name: Build macOS binary
+        working-directory: cli
+        run: pkg dist/skillvault.bundle.cjs --target node22-macos-x64 --output dist/skillvault-macos-x64
+        continue-on-error: true
+
+      - name: Build Linux binary
+        working-directory: cli
+        run: pkg dist/skillvault.bundle.cjs --target node22-linux-x64 --output dist/skillvault-linux-x64
+        continue-on-error: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            cli/dist/skillvault-win-x64.exe
+            cli/dist/skillvault-macos-x64
+            cli/dist/skillvault-linux-x64
+          generate_release_notes: true
+          body: |
+            ## Instalación
+
+            ### Windows
+            Descarga `skillvault-win-x64.exe`, renómbralo a `skillvault.exe` y agrégalo a tu PATH.
+
+            ### macOS / Linux
+            ```bash
+            chmod +x skillvault-macos-x64
+            sudo mv skillvault-macos-x64 /usr/local/bin/skillvault
+            ```
+
+            ### Alternativa — Node.js
+            ```bash
+            cd cli && npm install -g .
+            ```
