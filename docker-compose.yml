@@ -1,0 +1,47 @@
+services:
+
+  # ── MySQL 8 ────────────────────────────────────────────────────────────────
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_secret}
+      MYSQL_DATABASE: skillvault
+      MYSQL_USER: skillvault
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-skillvault_secret}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "skillvault", "--password=${MYSQL_PASSWORD:-skillvault_secret}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # ── SkillVault App ─────────────────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        AUTH_KEYCLOAK_ISSUER: ${AUTH_KEYCLOAK_ISSUER}
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "3010:3000"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: mysql://skillvault:${MYSQL_PASSWORD:-skillvault_secret}@db:3306/skillvault
+      AUTH_SECRET: ${AUTH_SECRET}
+      AUTH_KEYCLOAK_ID: ${AUTH_KEYCLOAK_ID}
+      AUTH_KEYCLOAK_SECRET: ${AUTH_KEYCLOAK_SECRET}
+      AUTH_KEYCLOAK_ISSUER: ${AUTH_KEYCLOAK_ISSUER}
+      HOSTNAME: 0.0.0.0
+      PORT: 3000
+
+volumes:
+  mysql_data:
