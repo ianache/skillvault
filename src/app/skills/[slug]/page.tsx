@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { client } from "@/lib/db";
 import { CATEGORY_META, SkillRow, SkillType } from "@/lib/types";
 import type { Metadata } from "next";
+import { FileTree } from "@/components/FileTree";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -255,6 +256,8 @@ export default async function SkillDetailPage({ params }: PageProps) {
                 ))}
               </div>
             </Card>
+
+            <FileTree slug={skill.slug} />
 
             <Card label="Instalar rápido">
               <code

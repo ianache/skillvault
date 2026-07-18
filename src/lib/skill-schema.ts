@@ -43,6 +43,8 @@ export const skillFrontmatterSchema = z.object({
     .optional()
     .default(["claude"]),
   dependencies: z.array(z.string()).optional().default([]),
+  resources: z.array(z.string()).optional().default([]),
+  scripts: z.array(z.string()).optional().default([]),
 });
 
 export type SkillFrontmatter = z.infer<typeof skillFrontmatterSchema>;

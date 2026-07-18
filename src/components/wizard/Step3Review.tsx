@@ -4,13 +4,20 @@ import { useState } from "react";
 import matter from "gray-matter";
 import { CATEGORY_META_WIZARD } from "./wizard-types";
 
+interface AttachedFile {
+  path: string;
+  fileType: "resource" | "script";
+  content: string;
+}
+
 interface Props {
   content: string;
+  attachedFiles?: AttachedFile[];
   onBack: () => void;
   onPublish: () => Promise<{ ok: boolean; slug?: string; error?: string }>;
 }
 
-export function Step3Review({ content, onBack, onPublish }: Props) {
+export function Step3Review({ content, attachedFiles = [], onBack, onPublish }: Props) {
   const [publishing, setPublishing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -225,6 +232,34 @@ export function Step3Review({ content, onBack, onPublish }: Props) {
           {body.trim().slice(0, 600)}{body.trim().length > 600 ? "\n…" : ""}
         </pre>
       </div>
+
+      {/* Attached files */}
+      {attachedFiles.length > 0 && (
+        <div
+          style={{
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+            borderRadius: "4px",
+            padding: "14px",
+            marginBottom: "16px",
+          }}
+        >
+          <SectionLabel>Archivos adjuntos ({attachedFiles.length})</SectionLabel>
+          <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+            {attachedFiles.map((f) => (
+              <div key={f.path} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span style={{ fontSize: "12px" }}>{f.fileType === "script" ? "⚡" : "📄"}</span>
+                <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "11px", color: f.fileType === "script" ? "var(--amber)" : "var(--muted)" }}>
+                  {f.path}
+                </span>
+                <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "10px", color: "var(--faint)", marginLeft: "auto" }}>
+                  {f.content.split("\n").length} líneas
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Error */}
       {error && (
