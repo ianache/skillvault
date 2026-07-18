@@ -1,0 +1,40 @@
+# Override para producción con BD externa (RDS, Cloud SQL, etc.)
+# Uso: helm install skillvault ./helm/skillvault -f helm/skillvault/values-prod.yaml \
+#        --set auth.secret=$AUTH_SECRET \
+#        --set auth.keycloak.secret=$AUTH_KEYCLOAK_SECRET \
+#        --set externalDatabaseUrl=$DATABASE_URL
+
+replicaCount: 2
+
+mysql:
+  enabled: false
+
+# externalDatabaseUrl se pasa en --set al momento del deploy (nunca en archivo)
+
+auth:
+  keycloak:
+    issuer: "https://oauth2.qa.comsatel.com.pe/realms/Apps"
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+  hosts:
+    - host: skillvault.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: skillvault-tls
+      hosts:
+        - skillvault.example.com
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: 1000m
+    memory: 512Mi

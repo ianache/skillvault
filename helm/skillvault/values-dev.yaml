@@ -1,0 +1,31 @@
+# Override para desarrollo local (kind / minikube)
+# Uso: helm install skillvault ./helm/skillvault -f helm/skillvault/values-dev.yaml --set auth.secret=xxx --set auth.keycloak.secret=xxx
+
+image:
+  repository: ghcr.io/ianache/skillvault
+  tag: "0.2.0"
+
+mysql:
+  enabled: true
+  auth:
+    rootPassword: "dev_root"
+    password: "dev_pass"
+  persistence:
+    enabled: false   # emptyDir en dev — no necesita PVC
+
+ingress:
+  enabled: true
+  className: "nginx"
+  hosts:
+    - host: skillvault.local
+      paths:
+        - path: /
+          pathType: Prefix
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi

@@ -1,0 +1,77 @@
+{{- if .Values.mysql.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "skillvault.mysql.fullname" . }}
+  labels:
+    {{- include "skillvault.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "skillvault.mysql.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: Recreate   # evita dos instancias compitiendo por el mismo PVC
+  template:
+    metadata:
+      labels:
+        {{- include "skillvault.mysql.selectorLabels" . | nindent 8 }}
+    spec:
+      securityContext:
+        fsGroup: 999  # grupo mysql dentro de la imagen oficial
+      containers:
+        - name: mysql
+          image: "{{ .Values.mysql.image.repository }}:{{ .Values.mysql.image.tag }}"
+          imagePullPolicy: {{ .Values.mysql.image.pullPolicy }}
+          ports:
+            - name: mysql
+              containerPort: 3306
+              protocol: TCP
+          envFrom:
+            - secretRef:
+                name: {{ include "skillvault.mysql.fullname" . }}
+          args:
+            - --character-set-server=utf8mb4
+            - --collation-server=utf8mb4_unicode_ci
+            - --default-authentication-plugin=mysql_native_password
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/mysql
+            - name: config
+              mountPath: /etc/mysql/conf.d/custom.cnf
+              subPath: my.cnf
+              readOnly: true
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - "mysqladmin ping -u root -p${MYSQL_ROOT_PASSWORD}"
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - "mysql -u ${MYSQL_USER} -p${MYSQL_PASSWORD} -e 'SELECT 1' ${MYSQL_DATABASE}"
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+          {{- with .Values.mysql.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: data
+          {{- if .Values.mysql.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "skillvault.mysql.fullname" . }}-data
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        - name: config
+          configMap:
+            name: {{ include "skillvault.mysql.fullname" . }}-config
+{{- end }}
