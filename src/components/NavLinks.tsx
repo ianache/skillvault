@@ -6,7 +6,8 @@ export function NavLinks() {
   return (
     <nav style={{ display: "flex", alignItems: "center", gap: "4px" }}>
       <NavLink href="/" active={pathname === "/"}>Catálogo</NavLink>
-      <NavLink href="/dashboard" active={pathname.startsWith("/dashboard")}>Mis Skills</NavLink>
+      <NavLink href="/dashboard" active={pathname === "/dashboard"}>Mis Skills</NavLink>
+      <NavLink href="/dashboard/categories" active={pathname.startsWith("/dashboard/categories")}>Categorías</NavLink>
       <NavLink href="/publish" active={pathname.startsWith("/publish")}>Publicar</NavLink>
     </nav>
   );
