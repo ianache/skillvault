@@ -3,7 +3,51 @@ import { client } from "@/lib/db";
 import matter from "gray-matter";
 import { validateSkillFrontmatter } from "@/lib/skill-schema";
 
+function yamlList(arr: string[]) {
+  return arr.length ? arr.map((v) => `  - "${v}"`).join("\n") : "  []";
+}
+
+function buildRawContent(row: Record<string, unknown>): string {
+  const triggers = JSON.parse(row.triggers as string ?? "[]") as string[];
+  const tools    = JSON.parse(row.tools    as string ?? "[]") as string[];
+  const compat   = JSON.parse(row.compatibility as string ?? '["claude"]') as string[];
+  const deps     = JSON.parse(row.dependencies  as string ?? "[]") as string[];
+  const author   = row.author_handle ? `\nauthor: "${row.author_handle}"` : "";
+
+  return `---
+name: "${row.name}"
+description: "${(row.description as string).replace(/"/g, '\\"')}"
+version: "${row.version ?? "1.0.0"}"
+schema_version: "${row.schema_version ?? "1.1"}"${author}
+metadata:
+  type: ${row.type}
+  triggers:
+${yamlList(triggers)}
+  tools:
+${yamlList(tools)}
+compatibility:
+${yamlList(compat)}
+dependencies:
+${deps.length ? deps.map((d) => `  - "${d}"`).join("\n") : "  []"}
+---
+
+# ${row.name}
+
+${row.description}
+
+## Usage
+
+Invoke this skill to use its capabilities.
+`;
+}
+
 function parseSkill(row: Record<string, unknown>) {
+  const triggers = JSON.parse(row.triggers as string ?? "[]");
+  const tools    = JSON.parse(row.tools    as string ?? "[]");
+  const compat   = JSON.parse(row.compatibility as string ?? '["claude"]');
+  const deps     = JSON.parse(row.dependencies  as string ?? "[]");
+  const raw      = (row.raw_content as string) || buildRawContent(row);
+
   return {
     id: row.id,
     slug: row.slug,
@@ -13,11 +57,11 @@ function parseSkill(row: Record<string, unknown>) {
     authorHandle: row.author_handle,
     version: row.version,
     schemaVersion: row.schema_version,
-    triggers: JSON.parse(row.triggers as string ?? "[]"),
-    tools: JSON.parse(row.tools as string ?? "[]"),
-    compatibility: JSON.parse(row.compatibility as string ?? '["claude"]'),
-    dependencies: JSON.parse(row.dependencies as string ?? "[]"),
-    rawContent: row.raw_content,
+    triggers,
+    tools,
+    compatibility: compat,
+    dependencies: deps,
+    rawContent: raw,
     status: row.status,
     installCount: row.install_count,
     createdAt: row.created_at,
