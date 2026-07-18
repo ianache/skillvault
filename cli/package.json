@@ -1,0 +1,13 @@
+{
+  "name": "skillvault",
+  "version": "0.1.0",
+  "description": "CLI para instalar y gestionar skills SKILL.md desde el portal SkillVault",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "skillvault": "./bin/skillvault.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
