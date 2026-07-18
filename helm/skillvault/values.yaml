@@ -1,6 +1,6 @@
 # ── Imagen de la aplicación ────────────────────────────────────────────────────
 image:
-  repository: ghcr.io/ianache/skillvault
+  repository: xnet/skillvault #ghcr.io/ianache/skillvault
   tag: "0.2.0"
   pullPolicy: IfNotPresent
 
