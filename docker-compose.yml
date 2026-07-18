@@ -22,11 +22,14 @@ services:
 
   # ── SkillVault App ─────────────────────────────────────────────────────────
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        AUTH_KEYCLOAK_ISSUER: ${AUTH_KEYCLOAK_ISSUER}
+    # Usa la imagen publicada en Docker Hub (producción)
+    # Para desarrollo local con build propio: comenta "image:" y descomenta "build:"
+    image: xnet/skillvault:${SKILLVAULT_VERSION:-latest}
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    #   args:
+    #     AUTH_KEYCLOAK_ISSUER: ${AUTH_KEYCLOAK_ISSUER}
     restart: unless-stopped
     depends_on:
       db:

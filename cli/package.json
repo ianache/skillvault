@@ -23,6 +23,7 @@
     "outputPath": "dist"
   },
   "devDependencies": {
+    "@yao-pkg/pkg": "^6.21.0",
     "postject": "^1.0.0-alpha.6"
   }
 }
