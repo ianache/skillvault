@@ -1,6 +1,8 @@
 "use client";
 
-import { VALID_TYPES, VALID_HARNESSES, CATEGORY_META_WIZARD } from "./wizard-types";
+import { useState, useEffect } from "react";
+import { VALID_HARNESSES } from "./wizard-types";
+import { Category } from "@/lib/types";
 
 export interface MetadataFields {
   name: string;
@@ -20,6 +22,15 @@ interface Props {
 }
 
 export function Step1Metadata({ data, onChange, onNext }: Props) {
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    fetch("/api/categories")
+      .then((r) => r.json())
+      .then((d) => { if (d.categories) setCategories(d.categories); })
+      .catch(() => {});
+  }, []);
+
   function set<K extends keyof MetadataFields>(key: K, value: MetadataFields[K]) {
     onChange({ ...data, [key]: value });
   }
@@ -113,27 +124,29 @@ export function Step1Metadata({ data, onChange, onNext }: Props) {
         {/* Type */}
         <Field label="Categoría" required hint="Determina la franja de color en las cards">
           <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-            {VALID_TYPES.map((t) => {
-              const m = CATEGORY_META_WIZARD[t];
-              const active = data.type === t;
+            {categories.length === 0 && (
+              <span style={{ fontSize: "12px", color: "var(--muted)" }}>Cargando categorías…</span>
+            )}
+            {categories.map((cat) => {
+              const active = data.type === cat.slug;
               return (
                 <button
-                  key={t}
+                  key={cat.slug}
                   type="button"
-                  onClick={() => set("type", t)}
+                  onClick={() => set("type", cat.slug)}
                   style={{
                     fontFamily: "var(--font-jetbrains-mono), monospace",
                     fontSize: "11px",
                     padding: "5px 12px",
                     borderRadius: "3px",
-                    border: `1px solid ${active ? m.color : "var(--border)"}`,
-                    background: active ? `${m.color}18` : "none",
-                    color: active ? m.color : "var(--muted)",
+                    border: `1px solid ${active ? cat.color : "var(--border)"}`,
+                    background: active ? `${cat.color}18` : "none",
+                    color: active ? cat.color : "var(--muted)",
                     cursor: "pointer",
                     transition: "all .1s",
                   }}
                 >
-                  {m.icon} {m.label}
+                  {cat.icon} {cat.label}
                 </button>
               );
             })}

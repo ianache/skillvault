@@ -8,7 +8,8 @@ interface Step {
 const STEPS: Step[] = [
   { number: 1, label: "Metadatos" },
   { number: 2, label: "Editor" },
-  { number: 3, label: "Revisión" },
+  { number: 3, label: "Requisitos" },
+  { number: 4, label: "Revisión" },
 ];
 
 interface Props {

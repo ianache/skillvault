@@ -66,21 +66,39 @@ export default async function DashboardPage() {
               Gestiona y monitorea todos los skills del catálogo.
             </p>
           </div>
-          <Link
-            href="/publish"
-            style={{
-              fontFamily: "var(--font-geist), sans-serif",
-              fontSize: "13px",
-              fontWeight: 600,
-              padding: "8px 18px",
-              borderRadius: "4px",
-              background: "var(--accent)",
-              color: "#fff",
-              textDecoration: "none",
-            }}
-          >
-            + Publicar skill
-          </Link>
+          <div style={{ display: "flex", gap: "8px" }}>
+            <Link
+              href="/dashboard/categories"
+              style={{
+                fontFamily: "var(--font-geist), sans-serif",
+                fontSize: "13px",
+                fontWeight: 600,
+                padding: "8px 18px",
+                borderRadius: "4px",
+                background: "var(--raised)",
+                color: "var(--text)",
+                textDecoration: "none",
+                border: "1px solid var(--border)",
+              }}
+            >
+              Categorías
+            </Link>
+            <Link
+              href="/publish"
+              style={{
+                fontFamily: "var(--font-geist), sans-serif",
+                fontSize: "13px",
+                fontWeight: 600,
+                padding: "8px 18px",
+                borderRadius: "4px",
+                background: "var(--accent)",
+                color: "#fff",
+                textDecoration: "none",
+              }}
+            >
+              + Publicar skill
+            </Link>
+          </div>
         </div>
 
         {/* Stats row */}

@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import { SkillCard } from "./SkillCard";
 import { DetailPanel } from "./DetailPanel";
-import { CATEGORY_META, SkillRow, SkillType } from "@/lib/types";
+import { Category, SkillRow } from "@/lib/types";
 
 interface Props {
   initialSkills: SkillRow[];
+  initialCategories: Category[];
   initialQuery?: string;
   initialType?: string;
 }
@@ -17,13 +19,29 @@ const SORT_OPTIONS = [
   { value: "az",      label: "A–Z" },
 ];
 
-export function CatalogClient({ initialSkills, initialQuery = "", initialType = "" }: Props) {
+export function CatalogClient({ initialSkills, initialCategories, initialQuery = "", initialType = "" }: Props) {
+  const searchParams = useSearchParams();
   const [skills, setSkills] = useState<SkillRow[]>(initialSkills);
+  const [categories, setCategories] = useState<Category[]>(initialCategories);
   const [query, setQuery] = useState(initialQuery);
-  const [activeType, setActiveType] = useState<SkillType | "">(initialType as SkillType | "");
+  const [activeType, setActiveType] = useState<string>(initialType);
+
+  // Sync query state when URL search params change (e.g. SearchBar navigates to /?q=term)
+  useEffect(() => {
+    const urlQ = searchParams.get("q") ?? "";
+    setQuery(urlQ);
+  }, [searchParams]);
   const [sort, setSort] = useState("popular");
   const [selected, setSelected] = useState<SkillRow | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Refresh categories when they may have changed
+  useEffect(() => {
+    fetch("/api/categories")
+      .then((r) => r.json())
+      .then((d) => { if (d.categories) setCategories(d.categories); })
+      .catch(() => {});
+  }, []);
 
   const fetchSkills = useCallback(async (q: string, type: string, s: string) => {
     setLoading(true);
@@ -41,8 +59,6 @@ export function CatalogClient({ initialSkills, initialQuery = "", initialType = 
     const t = setTimeout(() => fetchSkills(query, activeType, sort), 220);
     return () => clearTimeout(t);
   }, [query, activeType, sort, fetchSkills]);
-
-  const categories = Object.entries(CATEGORY_META) as [SkillType, typeof CATEGORY_META[SkillType]][];
 
   return (
     <div style={{ display: "flex", minHeight: "calc(100vh - 56px)" }}>
@@ -84,17 +100,17 @@ export function CatalogClient({ initialSkills, initialQuery = "", initialType = 
             onClick={() => setActiveType("")}
           />
 
-          {categories.map(([key, meta]) => {
-            const count = initialSkills.filter((s) => s.type === key).length;
+          {categories.map((cat) => {
+            const count = initialSkills.filter((s) => s.type === cat.slug).length;
             return (
               <SidebarItem
-                key={key}
-                active={activeType === key}
-                color={meta.color}
-                icon={meta.icon}
-                label={meta.label}
+                key={cat.slug}
+                active={activeType === cat.slug}
+                color={cat.color}
+                icon={cat.icon}
+                label={cat.label}
                 count={count}
-                onClick={() => setActiveType(activeType === key ? "" : key)}
+                onClick={() => setActiveType(activeType === cat.slug ? "" : cat.slug)}
               />
             );
           })}

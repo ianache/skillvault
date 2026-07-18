@@ -59,7 +59,7 @@ export function Step3Review({ content, attachedFiles = [], onBack, onPublish }: 
             marginBottom: "6px",
           }}
         >
-          Paso 3 — Revisión final
+          Paso 4 — Revisión final
         </h1>
         <p style={{ fontSize: "13px", color: "var(--muted)" }}>
           Revisa los metadatos antes de publicar. Una vez publicado aparecerá en el catálogo.
@@ -101,9 +101,9 @@ export function Step3Review({ content, attachedFiles = [], onBack, onPublish }: 
             >
               {catMeta.icon} {catMeta.label}
             </span>
-            {fm.author && (
+            {fm.author ? (
               <span style={{ fontSize: "12px", color: "var(--muted)" }}>{String(fm.author)}</span>
-            )}
+            ) : null}
           </div>
           <p style={{ fontSize: "12px", color: "var(--muted)", lineHeight: 1.5, margin: 0 }}>
             {String(fm.description ?? "—")}
@@ -302,7 +302,7 @@ export function Step3Review({ content, attachedFiles = [], onBack, onPublish }: 
             cursor: "pointer",
           }}
         >
-          ← Editor
+          ← Requisitos
         </button>
         <button
           onClick={handlePublish}

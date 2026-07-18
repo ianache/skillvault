@@ -1,7 +1,24 @@
 import { client } from "@/lib/db";
 import { CatalogClient } from "@/components/CatalogClient";
 import { AppHeader } from "@/components/AppHeader";
-import { SkillRow, SkillType } from "@/lib/types";
+import { Category, SkillRow, SkillType } from "@/lib/types";
+
+async function getCategories(): Promise<Category[]> {
+  const result = await client.execute(
+    "SELECT slug, label, icon, color, description, sort_order FROM categories ORDER BY sort_order ASC"
+  );
+  return result.rows.map((r) => {
+    const row = r as Record<string, unknown>;
+    return {
+      slug: String(row.slug),
+      label: String(row.label),
+      icon: String(row.icon),
+      color: String(row.color),
+      description: String(row.description),
+      sort_order: Number(row.sort_order),
+    };
+  });
+}
 
 async function getPublishedSkills(): Promise<SkillRow[]> {
   const result = await client.execute(
@@ -20,6 +37,7 @@ async function getPublishedSkills(): Promise<SkillRow[]> {
       triggers: JSON.parse(String(row.triggers ?? "[]")),
       tools: JSON.parse(String(row.tools ?? "[]")),
       compatibility: JSON.parse(String(row.compatibility ?? '["claude"]')),
+      configRequirements: JSON.parse(String(row.config_requirements ?? "[]")),
       status: String(row.status) as SkillRow["status"],
       installCount: Number(row.install_count),
       createdAt: Number(row.created_at),
@@ -34,7 +52,7 @@ interface HomeProps {
 
 export default async function HomePage({ searchParams }: HomeProps) {
   const { q, type } = await searchParams;
-  const skills = await getPublishedSkills();
+  const [skills, categories] = await Promise.all([getPublishedSkills(), getCategories()]);
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
@@ -159,7 +177,7 @@ export default async function HomePage({ searchParams }: HomeProps) {
         </div>
       </div>
 
-      <CatalogClient initialSkills={skills} initialQuery={q ?? ""} initialType={type ?? ""} />
+      <CatalogClient initialSkills={skills} initialCategories={categories} initialQuery={q ?? ""} initialType={type ?? ""} />
     </div>
   );
 }

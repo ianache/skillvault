@@ -207,6 +207,52 @@ export function DetailPanel({ skill, onClose }: Props) {
           </Section>
         )}
 
+        {/* Config Requirements */}
+        {skill.configRequirements && skill.configRequirements.length > 0 && (
+          <Section label={`Requisitos de configuración (${skill.configRequirements.length})`}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+              {skill.configRequirements.map((req) => {
+                const m = REQ_TYPE_META[String(req.type)] ?? { icon: "◇", color: "#8590A8", label: String(req.type) };
+                const detail = reqDetail(req);
+                return (
+                  <div
+                    key={String(req.key)}
+                    style={{
+                      background: "var(--raised)",
+                      border: "1px solid var(--border)",
+                      borderLeft: `3px solid ${m.color}`,
+                      borderRadius: "3px",
+                      padding: "8px 10px",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                      <span style={{ fontSize: "12px" }}>{m.icon}</span>
+                      <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "11px", fontWeight: 700, color: "var(--text)" }}>
+                        {String(req.key)}
+                      </span>
+                      <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "9px", padding: "1px 5px", borderRadius: "3px", border: `1px solid ${m.color}50`, color: m.color }}>
+                        {m.label}
+                      </span>
+                      {Boolean(req.optional) && (
+                        <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "9px", color: "var(--faint)", border: "1px solid var(--border)", padding: "1px 5px", borderRadius: "3px" }}>
+                          opcional
+                        </span>
+                      )}
+                    </div>
+                    {req.label ? <div style={{ fontSize: "11px", color: "var(--muted)", marginTop: "2px" }}>{String(req.label)}</div> : null}
+                    {req.description ? <div style={{ fontSize: "10px", color: "var(--faint)", marginTop: "1px" }}>{String(req.description)}</div> : null}
+                    {detail && (
+                      <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "10px", color: "var(--cyan)", marginTop: "3px" }}>
+                        {detail}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </Section>
+        )}
+
         {/* Compatibility */}
         <Section label="Compatibilidad">
           <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
@@ -337,18 +383,47 @@ export function DetailPanel({ skill, onClose }: Props) {
             </div>
             <div style={{ fontSize: "11px", color: "var(--muted)" }}>instalaciones</div>
           </div>
-          {skill.publishedAt && (
-            <div>
-              <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "18px", fontWeight: 700, color: "var(--text)" }}>
-                {new Date(skill.publishedAt * 1000).toLocaleDateString("es-ES", { month: "short", year: "numeric" })}
+          {(() => {
+            const ts = Number(skill.publishedAt);
+            if (!ts || isNaN(ts)) return null;
+            const d = new Date(ts * 1000);
+            if (isNaN(d.getTime())) return null;
+            return (
+              <div>
+                <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "18px", fontWeight: 700, color: "var(--text)" }}>
+                  {d.toLocaleDateString("es-ES", { month: "short", year: "numeric" })}
+                </div>
+                <div style={{ fontSize: "11px", color: "var(--muted)" }}>publicado</div>
               </div>
-              <div style={{ fontSize: "11px", color: "var(--muted)" }}>publicado</div>
-            </div>
-          )}
+            );
+          })()}
         </div>
       </div>
     </div>
   );
+}
+
+const REQ_TYPE_META: Record<string, { icon: string; color: string; label: string }> = {
+  env_var:    { icon: "⬡", color: "#3B6EFF", label: "Variable de entorno" },
+  executable: { icon: "⚙", color: "#E88B3A", label: "Ejecutable" },
+  runtime:    { icon: "▶", color: "#2ECC8A", label: "Runtime" },
+  service:    { icon: "⇌", color: "#4AB8E8", label: "Servicio" },
+  directory:  { icon: "📁", color: "#C45FD4", label: "Directorio" },
+  file:       { icon: "📄", color: "#8590A8", label: "Archivo" },
+  secret:     { icon: "🔑", color: "#E8503A", label: "Secreto" },
+};
+
+function reqDetail(req: Record<string, unknown>): string {
+  switch (req.type) {
+    case "env_var":    return `$${req.variableName}`;
+    case "executable": return req.versionConstraint ? `${req.executableName} ${req.versionConstraint}` : String(req.executableName ?? "");
+    case "runtime":    return req.versionConstraint ? `${req.runtime} ${req.versionConstraint}` : String(req.runtime ?? "");
+    case "service":    return `${String(req.probeType ?? "tcp").toUpperCase()} ${req.host}:${req.port}`;
+    case "directory":
+    case "file":       return String(req.path ?? "");
+    case "secret":     return String(req.secretKey ?? "");
+    default:           return "";
+  }
 }
 
 function Section({ label, children }: { label: string; children: React.ReactNode }) {

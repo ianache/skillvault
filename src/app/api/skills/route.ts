@@ -15,6 +15,7 @@ function parseSkill(row: Record<string, unknown>) {
     triggers: JSON.parse(row.triggers as string ?? "[]"),
     tools: JSON.parse(row.tools as string ?? "[]"),
     compatibility: JSON.parse(row.compatibility as string ?? '["claude"]'),
+    configRequirements: JSON.parse(row.config_requirements as string ?? "[]"),
     status: row.status,
     installCount: row.install_count,
     createdAt: row.created_at,
@@ -70,7 +71,7 @@ export async function POST(req: NextRequest) {
     }
 
     const fm = fmResult.parsed!;
-    const now = new Date().toISOString();
+    const now = Math.floor(Date.now() / 1000);
 
     // Check for duplicate slug
     const existing = await client.execute({
@@ -87,9 +88,9 @@ export async function POST(req: NextRequest) {
     await client.execute({
       sql: `INSERT INTO skills
         (slug, name, description, type, author_handle, version, schema_version,
-         triggers, tools, compatibility, dependencies, raw_content, status,
+         triggers, tools, compatibility, dependencies, config_requirements, raw_content, status,
          install_count, created_at, updated_at, published_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'published', 0, ?, ?, ?)`,
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'published', 0, ?, ?, ?)`,
       args: [
         fm.name,
         fm.name,
@@ -102,6 +103,7 @@ export async function POST(req: NextRequest) {
         JSON.stringify(fm.metadata.tools ?? []),
         JSON.stringify(fm.compatibility ?? ["claude"]),
         JSON.stringify(fm.dependencies ?? []),
+        JSON.stringify(fm.config_requirements ?? []),
         rawContent,
         now,
         now,

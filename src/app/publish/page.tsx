@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { WizardLayout } from "@/components/wizard/WizardLayout";
 import { Step1Metadata, MetadataFields } from "@/components/wizard/Step1Metadata";
 import { Step2Editor } from "@/components/wizard/Step2Editor";
+import { StepRequirements } from "@/components/wizard/StepRequirements";
 import { Step3Review } from "@/components/wizard/Step3Review";
 import { LocalSkillLoader, LoadedFile } from "@/components/wizard/LocalSkillLoader";
 import { getSkillTemplate } from "@/lib/skill-schema";
@@ -44,8 +45,8 @@ function buildContent(meta: MetadataFields): string {
 
 export default function PublishPage() {
   const router = useRouter();
-  // step 0 = loader, 1-3 = wizard steps
-  const [step, setStep] = useState<0 | 1 | 2 | 3>(0);
+  // step 0 = loader, 1-4 = wizard steps (3 = requirements, 4 = review)
+  const [step, setStep] = useState<0 | 1 | 2 | 3 | 4>(0);
   const [meta, setMeta] = useState<MetadataFields>(DEFAULT_META);
   const [content, setContent] = useState(getSkillTemplate());
   const [attachedFiles, setAttachedFiles] = useState<LoadedFile[]>([]);
@@ -154,10 +155,18 @@ export default function PublishPage() {
         </>
       )}
       {step === 3 && (
+        <StepRequirements
+          content={content}
+          onChange={setContent}
+          onNext={() => setStep(4)}
+          onBack={() => setStep(2)}
+        />
+      )}
+      {step === 4 && (
         <Step3Review
           content={content}
           attachedFiles={attachedFiles}
-          onBack={() => setStep(2)}
+          onBack={() => setStep(3)}
           onPublish={handlePublish}
         />
       )}

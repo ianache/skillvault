@@ -26,6 +26,7 @@ async function getSkill(slug: string): Promise<SkillRow | null> {
     triggers: JSON.parse(String(row.triggers ?? "[]")),
     tools: JSON.parse(String(row.tools ?? "[]")),
     compatibility: JSON.parse(String(row.compatibility ?? '["claude"]')),
+    configRequirements: JSON.parse(String(row.config_requirements ?? "[]")),
     status: String(row.status) as SkillRow["status"],
     installCount: Number(row.install_count),
     createdAt: Number(row.created_at),
@@ -148,12 +149,12 @@ export default async function SkillDetailPage({ params }: PageProps) {
             </div>
             <div style={{ display: "flex", gap: "16px" }}>
               <StatBox label="instalaciones" value={skill.installCount.toLocaleString()} />
-              {skill.publishedAt && (
-                <StatBox
-                  label="publicado"
-                  value={new Date(skill.publishedAt * 1000).toLocaleDateString("es-ES", { month: "short", year: "numeric" })}
-                />
-              )}
+              {skill.publishedAt && !isNaN(skill.publishedAt) && (() => {
+                const d = new Date(skill.publishedAt! * 1000);
+                return isNaN(d.getTime()) ? null : (
+                  <StatBox label="publicado" value={d.toLocaleDateString("es-ES", { month: "short", year: "numeric" })} />
+                );
+              })()}
             </div>
           </div>
 
@@ -226,6 +227,11 @@ export default async function SkillDetailPage({ params }: PageProps) {
                   ))}
                 </div>
               </Card>
+            )}
+
+            {/* Config Requirements */}
+            {skill.configRequirements && skill.configRequirements.length > 0 && (
+              <ConfigRequirementsCard requirements={skill.configRequirements} />
             )}
           </div>
 
@@ -311,6 +317,85 @@ function StatBox({ label, value }: { label: string; value: string }) {
       </div>
       <div style={{ fontSize: "11px", color: "var(--muted)" }}>{label}</div>
     </div>
+  );
+}
+
+const REQ_TYPE_META: Record<string, { icon: string; color: string; label: string }> = {
+  env_var:    { icon: "⬡", color: "#3B6EFF", label: "Variable de entorno" },
+  executable: { icon: "⚙", color: "#E88B3A", label: "Ejecutable" },
+  runtime:    { icon: "▶", color: "#2ECC8A", label: "Runtime" },
+  service:    { icon: "⇌", color: "#4AB8E8", label: "Servicio" },
+  directory:  { icon: "📁", color: "#C45FD4", label: "Directorio" },
+  file:       { icon: "📄", color: "#8590A8", label: "Archivo" },
+  secret:     { icon: "🔑", color: "#E8503A", label: "Secreto" },
+};
+
+function reqDetail(req: Record<string, unknown>): string {
+  switch (req.type) {
+    case "env_var":    return `$${req.variableName}`;
+    case "executable": return req.versionConstraint ? `${req.executableName} ${req.versionConstraint}` : String(req.executableName ?? "");
+    case "runtime":    return req.versionConstraint ? `${req.runtime} ${req.versionConstraint}` : String(req.runtime ?? "");
+    case "service":    return `${String(req.probeType ?? "tcp").toUpperCase()} ${req.host}:${req.port}`;
+    case "directory":
+    case "file":       return String(req.path ?? "");
+    case "secret":     return String(req.secretKey ?? "");
+    default:           return "";
+  }
+}
+
+function ConfigRequirementsCard({ requirements }: { requirements: Record<string, unknown>[] }) {
+  const required = requirements.filter((r) => !r.optional);
+  const optional = requirements.filter((r) => r.optional);
+  return (
+    <Card label={`Requisitos de configuración (${requirements.length})`}>
+      <div style={{ fontSize: "12px", color: "var(--faint)", marginBottom: "12px" }}>
+        {required.length} obligatorio{required.length !== 1 ? "s" : ""} · {optional.length} opcional{optional.length !== 1 ? "es" : ""}
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+        {requirements.map((req) => {
+          const m = REQ_TYPE_META[String(req.type)] ?? { icon: "◇", color: "#8590A8", label: String(req.type) };
+          const detail = reqDetail(req);
+          return (
+            <div
+              key={String(req.key)}
+              style={{
+                background: "var(--bg)",
+                border: "1px solid var(--border)",
+                borderLeft: `3px solid ${m.color}`,
+                borderRadius: "3px",
+                padding: "10px 12px",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "7px", flexWrap: "wrap" }}>
+                <span style={{ fontSize: "13px" }}>{m.icon}</span>
+                <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "12px", fontWeight: 700, color: "var(--text)" }}>
+                  {String(req.key)}
+                </span>
+                <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "9px", padding: "1px 5px", borderRadius: "3px", border: `1px solid ${m.color}50`, color: m.color }}>
+                  {m.label}
+                </span>
+                {Boolean(req.optional) && (
+                  <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "9px", color: "var(--faint)", border: "1px solid var(--border)", padding: "1px 5px", borderRadius: "3px" }}>
+                    opcional
+                  </span>
+                )}
+              </div>
+              {req.label ? (
+                <div style={{ fontSize: "12px", color: "var(--muted)", marginTop: "3px" }}>{String(req.label)}</div>
+              ) : null}
+              {req.description ? (
+                <div style={{ fontSize: "11px", color: "var(--faint)", marginTop: "2px" }}>{String(req.description)}</div>
+              ) : null}
+              {detail && (
+                <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "10px", color: "var(--faint)", marginTop: "4px" }}>
+                  {detail}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </Card>
   );
 }
 

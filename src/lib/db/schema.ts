@@ -40,6 +40,17 @@ export const skillFiles = sqliteTable("skill_files", {
   createdAt: integer("created_at").notNull().default(sql`(unixepoch())`),
 });
 
+export const categories = sqliteTable("categories", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  slug: text("slug").notNull().unique(),
+  label: text("label").notNull(),
+  icon: text("icon").notNull().default("📦"),
+  color: text("color").notNull().default("#8590A8"),
+  description: text("description").notNull().default(""),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: integer("created_at").notNull().default(sql`(unixepoch())`),
+});
+
 export const installs = sqliteTable("installs", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   skillId: integer("skill_id").notNull(),

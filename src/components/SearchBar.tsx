@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Suspense } from "react";
 
 function SearchBarInner() {
@@ -10,21 +10,35 @@ function SearchBarInner() {
   const searchParams = useSearchParams();
   const [value, setValue] = useState(searchParams.get("q") ?? "");
 
-  const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setValue(e.target.value);
-    },
-    []
-  );
+  // Debounce: update URL 300ms after the user stops typing
+  useEffect(() => {
+    const t = setTimeout(() => {
+      if (pathname === "/") {
+        // Already on catalog — update URL param so CatalogClient reacts
+        if (value.trim()) {
+          router.replace(`/?q=${encodeURIComponent(value.trim())}`, { scroll: false });
+        } else {
+          router.replace("/", { scroll: false });
+        }
+      }
+    }, 300);
+    return () => clearTimeout(t);
+  }, [value, pathname, router]);
+
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setValue(e.target.value);
+  }, []);
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Enter" && value.trim()) {
-      // Navigate to catalog with query param; catalog reads it as initial filter
-      router.push(`/?q=${encodeURIComponent(value.trim())}`);
+    if (e.key === "Enter") {
+      // Navigate to catalog immediately on Enter (even from other pages)
+      const q = value.trim();
+      if (q) router.push(`/?q=${encodeURIComponent(q)}`);
+      else router.push("/");
     }
     if (e.key === "Escape") {
       setValue("");
-      if (pathname === "/") router.push("/");
+      if (pathname === "/") router.replace("/", { scroll: false });
     }
   }
 

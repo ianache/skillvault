@@ -115,7 +115,7 @@ export async function PATCH(
   }
 
   const fm = fmResult.parsed!;
-  const now = new Date().toISOString();
+  const now = Math.floor(Date.now() / 1000);
 
   await client.execute({
     sql: `UPDATE skills SET

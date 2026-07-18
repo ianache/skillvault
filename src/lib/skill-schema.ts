@@ -1,6 +1,7 @@
 import { z } from "zod";
 
-export const VALID_TYPES = ["code", "docs", "data", "ui", "infra", "ai"] as const;
+// Types are now dynamic — managed through /dashboard/categories
+export const VALID_TYPES = ["code", "docs", "data", "ui", "infra", "ai"] as const; // kept for legacy reference only
 export const VALID_TOOLS = [
   "Read", "Write", "Edit", "Glob", "Grep", "PowerShell", "Bash",
   "Agent", "Artifact", "WebFetch", "WebSearch", "Skill", "AskUserQuestion",
@@ -29,9 +30,7 @@ export const skillFrontmatterSchema = z.object({
   schema_version: z.string().optional().default("1.1"),
   author: z.string().optional(),
   metadata: z.object({
-    type: z.enum(VALID_TYPES, {
-      errorMap: () => ({ message: `Tipo debe ser: ${VALID_TYPES.join(", ")}` }),
-    }),
+    type: z.string().min(1, "Categoría requerida"),
     triggers: z
       .array(z.string().max(60, "Trigger max 60 chars"))
       .min(1, "Al menos 1 trigger requerido"),
@@ -45,6 +44,23 @@ export const skillFrontmatterSchema = z.object({
   dependencies: z.array(z.string()).optional().default([]),
   resources: z.array(z.string()).optional().default([]),
   scripts: z.array(z.string()).optional().default([]),
+  config_requirements: z.array(z.object({
+    key: z.string().min(1),
+    type: z.enum(["env_var", "executable", "runtime", "service", "directory", "file", "secret"]),
+    label: z.string().min(1),
+    description: z.string().optional().default(""),
+    optional: z.boolean().optional().default(false),
+    // type-specific (all optional at schema level; validated contextually)
+    variableName: z.string().optional(),
+    executableName: z.string().optional(),
+    runtime: z.enum(["node", "python", "java", "dotnet", "ruby", "go"]).optional(),
+    versionConstraint: z.string().optional(),
+    probeType: z.enum(["tcp", "http"]).optional(),
+    host: z.string().optional(),
+    port: z.number().optional(),
+    path: z.string().optional(),
+    secretKey: z.string().optional(),
+  })).optional().default([]),
 });
 
 export type SkillFrontmatter = z.infer<typeof skillFrontmatterSchema>;
@@ -175,6 +191,8 @@ compatibility:
   - claude
 
 dependencies: []
+
+config_requirements: []
 ---
 
 # ${name}
