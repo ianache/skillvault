@@ -1,0 +1,19 @@
+<svg width="32" height="32" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fondo redondeado -->
+  <rect x="4" y="4" width="152" height="152" rx="36" fill="#3B6EFF"/>
+
+  <!-- Arcos de capacidad (skill layers) -->
+  <path d="M80 34 A46 46 0 0 1 126 80" stroke="white" stroke-width="9" stroke-linecap="round" fill="none" opacity=".9"/>
+  <path d="M80 52 A28 28 0 0 1 108 80" stroke="white" stroke-width="6.5" stroke-linecap="round" fill="none" opacity=".55"/>
+  <path d="M80 68 A12 12 0 0 1 92 80" stroke="white" stroke-width="5" stroke-linecap="round" fill="none" opacity=".28"/>
+
+  <!-- Nodo del skill activado -->
+  <circle cx="126" cy="80" r="9" fill="white"/>
+
+  <!-- Agente AI: círculo + triángulo play -->
+  <circle cx="80" cy="80" r="22" fill="white" fill-opacity=".18" stroke="white" stroke-width="2.5"/>
+  <path d="M74 71L94 80L74 89Z" fill="white"/>
+
+  <!-- Punto de origen (capacidad instalada) -->
+  <circle cx="80" cy="34" r="6" fill="white" opacity=".75"/>
+</svg>
