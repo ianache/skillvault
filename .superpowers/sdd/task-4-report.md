@@ -37,3 +37,16 @@ Status: DONE_WITH_CONCERNS
 - Required `pnpm lint` could not run: the installed pnpm is 9.0.0 while the project requires 9.15.9. Corepack could not download the pinned version because of a local certificate verification failure.
 - Running the local ESLint binary across the entire repository still fails on existing unrelated lint errors, including existing effect-rule errors in `SkillEditor` and other components.
 - Full TypeScript checking reports existing dependency-injection typing errors in the pre-existing review-route contract tests (`typeof auth` and `DbClient.close` requirements). The Task 4 handler dependencies use structural types and do not add to those errors.
+
+## Review Fixes
+
+- Disabled `POST /api/skills/:slug/files` with `405` so published attachments cannot bypass review requests; public `GET` is unchanged.
+- When `PATCH /api/skills/:slug` omits `files`, it now submits the published `skill_files` as `changeType: "unchanged"`. An explicitly supplied `files` array remains authoritative.
+
+### Tests And Results
+
+- RED: `node_modules/.bin/tsx --test src/lib/review/api-contract.test.ts` failed with the legacy files POST reaching the `skills` query and PATCH submitting `files: []`.
+- PASS: `node_modules/.bin/tsx --test src/lib/review/api-contract.test.ts` - 6 passing, 0 failing.
+- PASS: `node_modules/.bin/tsx --test src/lib/review/*.test.ts` - 17 passing, 0 failing.
+- PASS: scoped `node_modules/.bin/eslint` for the changed API routes and contract test.
+- PASS: `git diff --check`.

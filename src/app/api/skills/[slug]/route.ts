@@ -121,6 +121,18 @@ export function createSkillDetailHandlers(dependencies: Partial<RouteDependencie
 
     try {
       const skillId = Number(skill.rows[0].id);
+      const files = input.files === undefined
+        ? (await database.execute({
+          sql: "SELECT path, file_type, content FROM skill_files WHERE skill_id = ? ORDER BY file_type, path",
+          args: [skillId],
+        })).rows.map((file) => ({
+          path: String(file.path),
+          fileType: file.file_type as "resource" | "script",
+          content: String(file.content),
+          changeType: "unchanged" as const,
+        }))
+        : input.files;
+      const reviewInput = { ...input, files };
       const openRequest = await database.execute({
         sql: `SELECT id FROM skill_review_requests
           WHERE skill_id = ? AND author_id = ? AND status IN ('pending', 'changes_requested')
@@ -128,8 +140,8 @@ export function createSkillDetailHandlers(dependencies: Partial<RouteDependencie
         args: [skillId, actor.id],
       });
       const request = openRequest.rows.length > 0
-        ? await update(Number(openRequest.rows[0].id), input, actor, database)
-        : await create({ ...input, skillId }, actor, database);
+        ? await update(Number(openRequest.rows[0].id), reviewInput, actor, database)
+        : await create({ ...reviewInput, skillId }, actor, database);
 
       return NextResponse.json(
         { slug: request.slug, reviewRequestId: request.id, status: request.status },

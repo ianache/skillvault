@@ -12,8 +12,8 @@ type RouteDependencies = {
   create: (input: CreateReviewRequestInput, actor: ReviewActor, database: ReviewDatabaseClient) => Promise<ReviewRequest>;
 };
 
-function parseFiles(value: unknown): ReviewFileInput[] | null {
-  if (value === undefined) return [];
+function parseFiles(value: unknown): ReviewFileInput[] | null | undefined {
+  if (value === undefined) return undefined;
   if (!Array.isArray(value)) return null;
   const files: ReviewFileInput[] = [];
   for (const file of value) {
@@ -48,7 +48,10 @@ export async function skillSubmissionBody(request: Request): Promise<CreateRevie
   const { rawContent, files } = body as Record<string, unknown>;
   const parsedFiles = parseFiles(files);
   if (typeof rawContent !== "string" || !rawContent || parsedFiles === null) return null;
-  return { rawContent, files: parsedFiles };
+  return {
+    rawContent,
+    ...(parsedFiles === undefined ? {} : { files: parsedFiles }),
+  };
 }
 
 function parseSkill(row: Record<string, unknown>) {

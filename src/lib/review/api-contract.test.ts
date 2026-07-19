@@ -5,6 +5,7 @@ import { createReviewRequestsHandlers } from "../../app/api/review-requests/rout
 import { createReviewDecisionHandlers } from "../../app/api/review-requests/[id]/decision/route";
 import { createSkillHandlers } from "../../app/api/skills/route";
 import { createSkillDetailHandlers } from "../../app/api/skills/[slug]/route";
+import { POST as postSkillFiles } from "../../app/api/skills/[slug]/files/route";
 import type { ReviewDatabaseClient, ReviewRequest } from "./types";
 
 const reviewerSession = {
@@ -119,9 +120,24 @@ test("POST /api/skills creates a review request instead of a published skill", a
   assert.equal(executedSql.some((sql) => sql.includes("INSERT INTO skills")), false);
 });
 
-test("PATCH /api/skills/:slug updates an open review request and preserves published rawContent", async () => {
+test("POST /api/skills/:slug/files is disabled while files are reviewed", async () => {
+  const response = await postSkillFiles(
+    new NextRequest("http://test/api/skills/demo-skill/files", {
+      method: "POST",
+      body: JSON.stringify({
+        files: [{ path: "resources/replaced.md", fileType: "resource", content: "Replacement" }],
+      }),
+    }),
+    { params: Promise.resolve({ slug: "demo-skill" }) }
+  );
+
+  assert.equal(response.status, 405);
+});
+
+test("PATCH /api/skills/:slug preserves published files when files are omitted", async () => {
   const originalRawContent = validRawContent;
   const publishedRawContent = originalRawContent;
+  const publishedFiles = [{ path: "resources/reference.md", fileType: "resource", content: "Reference" }];
   let updateInput: unknown;
   const { PATCH } = createSkillDetailHandlers({
     getSession: async () => authorSession as never,
@@ -130,6 +146,9 @@ test("PATCH /api/skills/:slug updates an open review request and preserves publi
         const sql = typeof input === "string" ? input : input.sql;
         if (sql.includes("SELECT id, raw_content FROM skills")) {
           return { rows: [{ id: 4, raw_content: publishedRawContent }] };
+        }
+        if (sql.includes("SELECT path, file_type, content FROM skill_files")) {
+          return { rows: [{ path: "resources/reference.md", file_type: "resource", content: "Reference" }] };
         }
         if (sql.includes("SELECT id FROM skill_review_requests")) {
           return { rows: [{ id: 9 }] };
@@ -153,7 +172,10 @@ test("PATCH /api/skills/:slug updates an open review request and preserves publi
 
   assert.equal(response.status, 201);
   assert.deepEqual(await response.json(), { slug: "demo-skill", reviewRequestId: 9, status: "pending" });
-  assert.deepEqual(updateInput, { rawContent: updatedRawContent, files: [] });
+  assert.deepEqual(updateInput, {
+    rawContent: updatedRawContent,
+    files: [{ ...publishedFiles[0], changeType: "unchanged" }],
+  });
   assert.equal(publishedRawContent, originalRawContent);
 });
 
