@@ -41,7 +41,7 @@ visit(resolve(ROOT, "bin/skillvault.js"));
 // --- Transform each module: ESM → CJS-compatible ---
 function transformModule(id, src, fromDir) {
   // Strip shebang
-  src = src.replace(/^#!.*\n/, "");
+  src = src.replace(/^#![^\r\n]*(?:\r?\n|$)/, "");
 
   // Replace: import { a, b } from "./foo.js"  →  const { a, b } = __require("./foo.js")
   src = src.replace(
@@ -120,7 +120,7 @@ for (const mod of modules) {
 
 // Entry point: just transform imports, don't wrap in registry
 const entry = modules.find(m => m.id === "bin/skillvault.js");
-let entrySrc = entry.src.replace(/^#!.*\n/, "");
+let entrySrc = entry.src.replace(/^#![^\r\n]*(?:\r?\n|$)/, "");
 
 entrySrc = entrySrc.replace(
   /^import\s+\{([^}]+)\}\s+from\s+["'](\.[^"']+)["'];?/gm,

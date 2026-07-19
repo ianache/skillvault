@@ -1,18 +1,18 @@
-import { rm, access } from "fs/promises";
+import { access, rm } from "fs/promises";
 import { join } from "path";
-import { resolveInstallDir } from "../config.js";
-import { fmt, printSuccess, printError, printWarn } from "../ui.js";
+import { resolveInstallDir, validateSkillSlug } from "../config.js";
+import { fmt, printSuccess, printWarn } from "../ui.js";
 
 export async function remove(slug, { harness, scope }) {
   console.log(`\n${fmt.bold("SkillVault")} · remove\n`);
+  validateSkillSlug(slug);
 
   const { dir, ext } = resolveInstallDir(harness, scope);
-
-  // Try subdirectory first (skills with adjuntos), then single file
-  const subDir  = join(dir, slug);
+  const subDir = join(dir, slug);
+  const skillFile = join(subDir, `SKILL.${ext}`);
   const singleFile = join(dir, `${slug}.${ext}`);
 
-  const hasSub  = await access(subDir).then(() => true).catch(() => false);
+  const hasSub = await access(skillFile).then(() => true).catch(() => false);
   const hasSingle = await access(singleFile).then(() => true).catch(() => false);
 
   if (!hasSub && !hasSingle) {

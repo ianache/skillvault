@@ -11,8 +11,9 @@
     "node": ">=18"
   },
   "scripts": {
+    "test": "node --test",
     "build": "node build.js",
-    "build:exe": "node build.js && pkg dist/skillvault.bundle.cjs --target node22-win-x64 --output dist/skillvault-win-x64.exe"
+    "build:exe": "node build.js && node --experimental-sea-config sea-config.json && node build-sea-exe.js"
   },
   "pkg": {
     "targets": [

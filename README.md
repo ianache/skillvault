@@ -96,6 +96,7 @@ npm install -g .
 ```bash
 # Instalar un skill desde el portal
 skillvault install db-migrate --harness claude --scope global
+skillvault install db-migrate --harness codex --scope global
 
 # Buscar skills
 skillvault search "database migration"
@@ -113,19 +114,26 @@ skillvault remove db-migrate --harness claude --scope global
 | Flag | Default | Descripción |
 |---|---|---|
 | `--harness` | `claude` | Harness destino: `claude`, `codex`, `opencode`, `agy`, `cursor` |
-| `--scope` | `global` | `global` (`~/.claude/skills/`) o `local` (`.claude/skills/`) |
+| `--scope` | `global` | `global` o `local`; el directorio exacto depende del harness |
 | `--server` | `http://localhost:3010` | URL del portal |
 | `--force` | — | Sobreescribir si ya está instalado |
 
 ### Rutas de instalación por harness
 
-| Harness | Global | Extensión |
-|---|---|---|
-| `claude` | `~/.claude/skills/` | `.md` |
-| `codex` | `~/.codex/skills/` | `.md` |
-| `opencode` | `~/.opencode/skills/` | `.md` |
-| `agy` | `~/.agy/skills/` | `.md` |
-| `cursor` | `~/.cursor/rules/` | `.mdc` |
+SkillVault instala cada skill nuevo en una carpeta identificada por el slug:
+`<root>/<slug>/SKILL.<ext>`. Los archivos planos antiguos se siguen detectando
+en `list` y `remove` como formato legacy, pero `install` siempre usa carpeta.
+
+| Harness | Global | Local | Archivo |
+|---|---|---|---|
+| `claude` | `~/.claude/skills/<slug>/SKILL.md` | `.claude/skills/<slug>/SKILL.md` | `SKILL.md` |
+| `codex` | `${CODEX_HOME:-~/.codex}/skills/<slug>/SKILL.md` | `.codex/skills/<slug>/SKILL.md` | `SKILL.md` |
+| `opencode` | `~/.opencode/skills/<slug>/SKILL.md` | `.opencode/skills/<slug>/SKILL.md` | `SKILL.md` |
+| `agy` | `~/.agy/skills/<slug>/SKILL.md` | `.agy/skills/<slug>/SKILL.md` | `SKILL.md` |
+| `cursor` | `~/.cursor/rules/<slug>/SKILL.mdc` | `.cursor/rules/<slug>/SKILL.mdc` | `SKILL.mdc` |
+
+Para Codex, el scope global respeta `CODEX_HOME` si esta variable existe. Esto
+evita instalar en `~/.codex` cuando el harness está usando otro home efectivo.
 
 ---
 
