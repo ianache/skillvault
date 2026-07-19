@@ -92,10 +92,18 @@ export default async function SignInPage({
           pointerEvents: "none",
         }} />
 
-        <div style={{ position: "relative", zIndex: 1, textAlign: "center", maxWidth: "340px" }}>
-          {/* Logotipo */}
-          <div style={{ marginBottom: "24px" }}>
-            <svg width="108" height="108" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <div style={{ position: "relative", zIndex: 1, textAlign: "center", maxWidth: "360px" }}>
+
+          {/* Logo lockup: icono + nombre en fila */}
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "20px",
+            marginBottom: "20px",
+          }}>
+            {/* Icono SVG */}
+            <svg width="88" height="88" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
               <defs>
                 <filter id="svGlow1" x="-50%" y="-50%" width="200%" height="200%">
                   <feGaussianBlur stdDeviation="3.5" result="blur"/>
@@ -114,14 +122,8 @@ export default async function SignInPage({
                   <stop offset="100%" stopColor="#3B6EFF" stopOpacity="0"/>
                 </radialGradient>
               </defs>
-
-              {/* Halo exterior */}
               <circle cx="80" cy="80" r="72" fill="url(#svHaloGrad)"/>
-
-              {/* Órbita guía */}
               <circle cx="80" cy="80" r="52" stroke="#3B6EFF" strokeWidth=".8" strokeDasharray="2 5" opacity=".3"/>
-
-              {/* Skill nodes en órbita */}
               <g transform="translate(80,28)">
                 <circle r="11" fill="#0C0F1A" stroke="#3B6EFF" strokeWidth="1.5" opacity=".9"/>
                 <text x="0" y="4" textAnchor="middle" fontFamily="monospace" fontSize="9" fill="#3B6EFF" fontWeight="700">{"{/}"}</text>
@@ -138,29 +140,26 @@ export default async function SignInPage({
                 <circle r="11" fill="#0C0F1A" stroke="#E88B3A" strokeWidth="1.5" opacity=".9"/>
                 <text x="0" y="4" textAnchor="middle" fontFamily="monospace" fontSize="9" fill="#E88B3A" fontWeight="700">API</text>
               </g>
-
-              {/* Líneas de flujo skill → agente */}
               <line x1="80" y1="39" x2="80" y2="62" stroke="#3B6EFF" strokeWidth="1" strokeDasharray="3 3" opacity=".5"/>
               <line x1="121" y1="80" x2="98" y2="80" stroke="#2ECC8A" strokeWidth="1" strokeDasharray="3 3" opacity=".5"/>
               <line x1="80" y1="121" x2="80" y2="98" stroke="#C45FD4" strokeWidth="1" strokeDasharray="3 3" opacity=".5"/>
               <line x1="39" y1="80" x2="62" y2="80" stroke="#E88B3A" strokeWidth="1" strokeDasharray="3 3" opacity=".5"/>
-
-              {/* Núcleo del Agente AI */}
               <circle cx="80" cy="80" r="22" fill="url(#svCoreGrad)" filter="url(#svGlow2)"/>
               <circle cx="80" cy="80" r="18" fill="none" stroke="rgba(255,255,255,.2)" strokeWidth=".8"/>
-              {/* Triángulo activar */}
               <path d="M80 69L88 87H72L80 69Z" fill="none" stroke="white" strokeWidth="1.8" strokeLinejoin="round" opacity=".9"/>
               <circle cx="80" cy="81" r="2.5" fill="white" opacity=".85"/>
             </svg>
-          </div>
 
-          {/* Nombre y tagline */}
-          <h1 style={{ fontSize: "28px", fontWeight: 700, margin: "0 0 8px", letterSpacing: "-0.5px" }}>
-            SkillVault
-          </h1>
-          <p style={{ color: "var(--muted)", fontSize: "14px", lineHeight: 1.6, margin: "0 0 40px" }}>
-            El catálogo de skills reutilizables para<br />Claude Code y agentes de IA.
-          </p>
+            {/* Nombre + tagline alineados al icono */}
+            <div style={{ textAlign: "left" }}>
+              <h1 style={{ fontSize: "26px", fontWeight: 700, margin: "0 0 6px", letterSpacing: "-0.5px", lineHeight: 1 }}>
+                SkillVault
+              </h1>
+              <p style={{ color: "var(--muted)", fontSize: "13px", lineHeight: 1.5, margin: 0 }}>
+                El catálogo de skills reutilizables<br />para Claude Code y agentes de IA.
+              </p>
+            </div>
+          </div>
 
           {/* Botón Keycloak */}
           <form action={async () => {
