@@ -15,7 +15,7 @@ export function assertCanEditRequest(
   if (request.status !== "pending" && request.status !== "changes_requested") {
     throw new Error("Request is not editable");
   }
-  if (!hasRole(actor, "admin") && request.authorId !== actor.id) {
+  if (request.authorId !== actor.id) {
     throw new Error("Only the author can edit this request");
   }
 }

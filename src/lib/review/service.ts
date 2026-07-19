@@ -241,10 +241,15 @@ export async function addReviewComment(
   actor: ReviewActor,
   client: ReviewDatabaseClient
 ): Promise<ReviewComment> {
-  await getReviewRequest(id, actor, client);
+  const request = await getReviewRequest(id, actor, client);
   const body = input.body.trim();
   if (!body) throw new Error("Comment is required");
-  const filePath = input.filePath ? validateReviewFilePath(input.filePath) : null;
+  const filePath = input.filePath === null || input.filePath === undefined
+    ? null
+    : validateReviewFilePath(input.filePath);
+  if (filePath && filePath !== "SKILL.md" && !request.files.some((file) => file.path === filePath)) {
+    throw new Error("Comment file path must match an attached file");
+  }
   await client.execute({
     sql: `INSERT INTO skill_review_comments
       (review_request_id, file_path, author_id, author_handle, body)
@@ -280,6 +285,7 @@ export async function decideReviewRequest(
     : input.decision === "reject"
       ? "rejected"
       : "changes_requested";
+  // Task 6 activates skills after approval; this task records only review state.
   await client.execute({
     sql: `UPDATE skill_review_requests
       SET status = ?, reviewer_id = ?, reviewer_handle = ?, general_comment = ?,
