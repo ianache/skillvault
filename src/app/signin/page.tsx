@@ -94,22 +94,64 @@ export default async function SignInPage({
 
         <div style={{ position: "relative", zIndex: 1, textAlign: "center", maxWidth: "340px" }}>
           {/* Logotipo */}
-          <div style={{
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "80px", height: "80px",
-            borderRadius: "18px",
-            border: "2px solid #3B6EFF",
-            background: "rgba(59,110,255,0.1)",
-            marginBottom: "24px",
-            fontFamily: "var(--font-jetbrains-mono), monospace",
-            fontSize: "28px",
-            fontWeight: 700,
-            color: "#3B6EFF",
-            letterSpacing: "-2px",
-          }}>
-            SV
+          <div style={{ marginBottom: "24px" }}>
+            <svg width="108" height="108" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <filter id="svGlow1" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="3.5" result="blur"/>
+                  <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+                <filter id="svGlow2" x="-80%" y="-80%" width="260%" height="260%">
+                  <feGaussianBlur stdDeviation="7" result="blur"/>
+                  <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+                <radialGradient id="svCoreGrad" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#3B6EFF" stopOpacity=".9"/>
+                  <stop offset="100%" stopColor="#1A3BAF" stopOpacity=".6"/>
+                </radialGradient>
+                <radialGradient id="svHaloGrad" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#3B6EFF" stopOpacity=".14"/>
+                  <stop offset="100%" stopColor="#3B6EFF" stopOpacity="0"/>
+                </radialGradient>
+              </defs>
+
+              {/* Halo exterior */}
+              <circle cx="80" cy="80" r="72" fill="url(#svHaloGrad)"/>
+
+              {/* Órbita guía */}
+              <circle cx="80" cy="80" r="52" stroke="#3B6EFF" strokeWidth=".8" strokeDasharray="2 5" opacity=".3"/>
+
+              {/* Skill nodes en órbita */}
+              <g transform="translate(80,28)">
+                <circle r="11" fill="#0C0F1A" stroke="#3B6EFF" strokeWidth="1.5" opacity=".9"/>
+                <text x="0" y="4" textAnchor="middle" fontFamily="monospace" fontSize="9" fill="#3B6EFF" fontWeight="700">{"{/}"}</text>
+              </g>
+              <g transform="translate(132,80)">
+                <circle r="11" fill="#0C0F1A" stroke="#2ECC8A" strokeWidth="1.5" opacity=".9"/>
+                <text x="0" y="4" textAnchor="middle" fontFamily="monospace" fontSize="9" fill="#2ECC8A" fontWeight="700">MEM</text>
+              </g>
+              <g transform="translate(80,132)">
+                <circle r="11" fill="#0C0F1A" stroke="#C45FD4" strokeWidth="1.5" opacity=".9"/>
+                <text x="0" y="4" textAnchor="middle" fontFamily="monospace" fontSize="9" fill="#C45FD4" fontWeight="700">WEB</text>
+              </g>
+              <g transform="translate(28,80)">
+                <circle r="11" fill="#0C0F1A" stroke="#E88B3A" strokeWidth="1.5" opacity=".9"/>
+                <text x="0" y="4" textAnchor="middle" fontFamily="monospace" fontSize="9" fill="#E88B3A" fontWeight="700">API</text>
+              </g>
+
+              {/* Líneas de flujo skill → agente */}
+              <line x1="80" y1="39" x2="80" y2="62" stroke="#3B6EFF" strokeWidth="1" strokeDasharray="3 3" opacity=".5"/>
+              <line x1="121" y1="80" x2="98" y2="80" stroke="#2ECC8A" strokeWidth="1" strokeDasharray="3 3" opacity=".5"/>
+              <line x1="80" y1="121" x2="80" y2="98" stroke="#C45FD4" strokeWidth="1" strokeDasharray="3 3" opacity=".5"/>
+              <line x1="39" y1="80" x2="62" y2="80" stroke="#E88B3A" strokeWidth="1" strokeDasharray="3 3" opacity=".5"/>
+
+              {/* Núcleo del Agente AI */}
+              <circle cx="80" cy="80" r="22" fill="url(#svCoreGrad)" filter="url(#svGlow2)"/>
+              <circle cx="80" cy="80" r="18" fill="none" stroke="rgba(255,255,255,.2)" strokeWidth=".8"/>
+              {/* Triángulo activar */}
+              <path d="M80 69L88 87H72L80 69Z" fill="none" stroke="white" strokeWidth="1.8" strokeLinejoin="round" opacity=".9"/>
+              <circle cx="80" cy="81" r="2.5" fill="white" opacity=".85"/>
+            </svg>
           </div>
 
           {/* Nombre y tagline */}
