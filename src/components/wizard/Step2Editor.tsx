@@ -130,7 +130,7 @@ export function Step2Editor({ content, onChange, onNext, onBack }: Props) {
   // Sync external content changes into editor (e.g. reset)
   useEffect(() => {
     if (!viewRef.current) return;
-    const view = viewRef.current as { state: { doc: { toString: () => string } }; dispatch: (tr: unknown) => void; state: unknown };
+    const view = viewRef.current as { state: { doc: { toString: () => string } }; dispatch: (tr: unknown) => void };
     const current = (view as { state: { doc: { toString: () => string } } }).state.doc.toString();
     if (current !== content) {
       const { EditorState } = require("@codemirror/state");

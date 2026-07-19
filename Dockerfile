@@ -1,5 +1,5 @@
 FROM node:20-alpine AS base
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
 
 # ── deps ──────────────────────────────────────────────────────────────────────
 FROM base AS deps
@@ -38,4 +38,4 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 USER skillvault
 EXPOSE 3000
-ENTRYPOINT ["docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

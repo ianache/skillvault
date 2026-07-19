@@ -25,6 +25,7 @@ export function DetailPanel({ skill, onClose }: Props) {
   const [liveCount, setLiveCount] = useState<number | null>(null);
 
   if (!skill) return null;
+  const selectedSkill = skill;
 
   const meta = CATEGORY_META[skill.type] ?? { label: skill.type, color: "#8590A8", icon: "◇" };
   const h = HARNESSES[harness];
@@ -38,7 +39,7 @@ export function DetailPanel({ skill, onClose }: Props) {
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
     // Increment counter in background
-    fetch(`/api/skills/${skill.slug}/install`, { method: "POST" })
+    fetch(`/api/skills/${selectedSkill.slug}/install`, { method: "POST" })
       .then((r) => r.json())
       .then((d) => { if (d.installCount) setLiveCount(d.installCount); })
       .catch(() => {});

@@ -22,15 +22,14 @@ services:
 
   # ── SkillVault App ─────────────────────────────────────────────────────────
   app:
-    # Usa la imagen publicada en Docker Hub (producción)
-    # Para desarrollo local con build propio: comenta "image:" y descomenta "build:"
+    # Build the local image used by docker-compose up app.
     image: xnet/skillvault:${SKILLVAULT_VERSION:-latest}
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile
-    #   args:
-    #     AUTH_KEYCLOAK_ISSUER: ${AUTH_KEYCLOAK_ISSUER}
-    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        AUTH_KEYCLOAK_ISSUER: ${AUTH_KEYCLOAK_ISSUER}
+    # restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
@@ -43,6 +42,8 @@ services:
       AUTH_KEYCLOAK_ID: ${AUTH_KEYCLOAK_ID}
       AUTH_KEYCLOAK_SECRET: ${AUTH_KEYCLOAK_SECRET}
       AUTH_KEYCLOAK_ISSUER: ${AUTH_KEYCLOAK_ISSUER}
+      AUTH_TRUST_HOST: "true"
+      AUTH_URL: ${AUTH_URL:-http://localhost:3010}
       HOSTNAME: 0.0.0.0
       PORT: 3000
 

@@ -72,7 +72,10 @@ export const client: DbClient = {
     return c.execute(input);
   },
   close: async () => {
-    if (_instance) await _instance.client.close();
+    if (_instance) {
+      await _instance.client.close();
+      _instance = null;
+    }
   },
 };
 
@@ -80,6 +83,3 @@ export async function getDb() {
   const { db } = await init();
   return db;
 }
-
-// Eager init to avoid first-request latency
-if (typeof process !== "undefined") init().catch(() => {});

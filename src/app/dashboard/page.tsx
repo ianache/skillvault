@@ -3,6 +3,8 @@ import { AppHeader } from "@/components/AppHeader";
 import Link from "next/link";
 import { DashboardClient } from "@/components/dashboard/DashboardClient";
 
+export const dynamic = "force-dynamic";
+
 async function getStats() {
   const [skillsRes, installsRes, typesRes] = await Promise.all([
     client.execute("SELECT COUNT(*) as count FROM skills WHERE status = 'published'"),

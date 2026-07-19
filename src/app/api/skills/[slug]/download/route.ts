@@ -33,14 +33,14 @@ export async function GET(
     folder.file(f.path as string, f.content as string);
   }
 
-  const buffer = await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" });
+  const buffer = await zip.generateAsync({ type: "arraybuffer", compression: "DEFLATE" });
 
   return new NextResponse(buffer, {
     status: 200,
     headers: {
       "Content-Type": "application/zip",
       "Content-Disposition": `attachment; filename="${slug}.zip"`,
-      "Content-Length": String(buffer.length),
+      "Content-Length": String(buffer.byteLength),
     },
   });
 }

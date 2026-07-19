@@ -3,6 +3,8 @@ import { AppHeader } from "@/components/AppHeader";
 import { CategoriesManager } from "@/components/CategoriesManager";
 import { Category } from "@/lib/types";
 
+export const dynamic = "force-dynamic";
+
 async function getCategories(): Promise<Category[]> {
   const result = await client.execute(
     "SELECT slug, label, icon, color, description, sort_order FROM categories ORDER BY sort_order ASC"

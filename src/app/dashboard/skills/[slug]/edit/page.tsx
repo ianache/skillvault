@@ -5,6 +5,8 @@ import { SkillEditor } from "@/components/dashboard/SkillEditor";
 import { VersionHistory } from "@/components/dashboard/VersionHistory";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 interface Props {
   params: Promise<{ slug: string }>;
 }
