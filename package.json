@@ -12,7 +12,8 @@
         "migrate:timestamps": "tsx src/lib/db/migrate-timestamps.ts",
         "migrate:mysql": "tsx src/lib/db/migrate-mysql-init.ts",
         "migrate:review-workflow": "tsx src/lib/db/migrate-review-workflow.ts",
-        "migrate:review-workflow:mysql": "tsx src/lib/db/migrate-review-workflow-mysql.ts"
+        "migrate:review-workflow:mysql": "tsx src/lib/db/migrate-review-workflow-mysql.ts",
+        "test:review": "tsx --test src/lib/review/*.test.ts"
     },
     "dependencies": {
         "@codemirror/commands": "^6.10.4",
