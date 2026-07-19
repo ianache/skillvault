@@ -100,6 +100,12 @@ function validateSubmission(rawContent: string, files: ReviewFileInput[] = []) {
   return { frontmatter: frontmatter.parsed!, files: normalizedFiles };
 }
 
+function assertValidDecision(input: DecideReviewRequestInput): void {
+  if (!["approve", "reject", "request_changes"].includes(input.decision)) {
+    throw new Error("Invalid review decision");
+  }
+}
+
 async function getRequestRow(id: number, client: ReviewDatabaseClient): Promise<ReviewRequest> {
   const result = await client.execute({
     sql: "SELECT * FROM skill_review_requests WHERE id = ?",
@@ -270,6 +276,7 @@ export async function decideReviewRequest(
   actor: ReviewActor,
   client: ReviewDatabaseClient
 ): Promise<ReviewRequest> {
+  assertValidDecision(input);
   const request = await getRequestRow(id, client);
   if (request.authorId === actor.id) throw new Error("Author cannot approve own request");
   if (!canReview(actor)) throw new Error("Reviewer role is required");

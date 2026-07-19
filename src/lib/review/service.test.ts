@@ -117,6 +117,13 @@ test("request_changes requires comment", async () => {
   );
 });
 
+test("invalid review decision is rejected", async () => {
+  await assert.rejects(
+    () => decideReviewRequest(1, { decision: "anything" as never }, reviewerActor, createFakeClient()),
+    /Invalid review decision/
+  );
+});
+
 test("admin cannot edit another author's request", async () => {
   await assert.rejects(
     () => updateReviewRequest(1, { rawContent: validRawContent, files: [] }, adminActor, createFakeClient()),
