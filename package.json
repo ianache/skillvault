@@ -10,7 +10,9 @@
         "lint": "eslint",
         "migrate:requirements": "tsx src/lib/db/migrate-requirements.ts",
         "migrate:timestamps": "tsx src/lib/db/migrate-timestamps.ts",
-        "migrate:mysql": "tsx src/lib/db/migrate-mysql-init.ts"
+        "migrate:mysql": "tsx src/lib/db/migrate-mysql-init.ts",
+        "migrate:review-workflow": "tsx src/lib/db/migrate-review-workflow.ts",
+        "migrate:review-workflow:mysql": "tsx src/lib/db/migrate-review-workflow-mysql.ts"
     },
     "dependencies": {
         "@codemirror/commands": "^6.10.4",

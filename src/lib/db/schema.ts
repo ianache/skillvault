@@ -40,6 +40,47 @@ export const skillFiles = sqliteTable("skill_files", {
   createdAt: integer("created_at").notNull().default(sql`(unixepoch())`),
 });
 
+export const skillReviewRequests = sqliteTable("skill_review_requests", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  skillId: integer("skill_id"),
+  slug: text("slug").notNull(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  type: text("type").notNull(),
+  version: text("version").notNull(),
+  schemaVersion: text("schema_version").notNull().default("1.1"),
+  authorId: text("author_id").notNull(),
+  authorHandle: text("author_handle"),
+  rawContent: text("raw_content").notNull(),
+  status: text("status").notNull().default("pending"),
+  reviewerId: text("reviewer_id"),
+  reviewerHandle: text("reviewer_handle"),
+  generalComment: text("general_comment"),
+  submittedAt: integer("submitted_at").notNull().default(sql`(unixepoch())`),
+  reviewedAt: integer("reviewed_at"),
+  updatedAt: integer("updated_at").notNull().default(sql`(unixepoch())`),
+});
+
+export const skillReviewFiles = sqliteTable("skill_review_files", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  reviewRequestId: integer("review_request_id").notNull(),
+  path: text("path").notNull(),
+  fileType: text("file_type").notNull(),
+  content: text("content").notNull().default(""),
+  changeType: text("change_type").notNull().default("added"),
+  createdAt: integer("created_at").notNull().default(sql`(unixepoch())`),
+});
+
+export const skillReviewComments = sqliteTable("skill_review_comments", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  reviewRequestId: integer("review_request_id").notNull(),
+  filePath: text("file_path"),
+  authorId: text("author_id").notNull(),
+  authorHandle: text("author_handle"),
+  body: text("body").notNull(),
+  createdAt: integer("created_at").notNull().default(sql`(unixepoch())`),
+});
+
 export const categories = sqliteTable("categories", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   slug: text("slug").notNull().unique(),
