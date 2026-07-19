@@ -1,7 +1,55 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/auth";
 import { client } from "@/lib/db";
-import matter from "gray-matter";
-import { validateSkillFrontmatter, validateBodySections } from "@/lib/skill-schema";
+import { createReviewRequest } from "@/lib/review/service";
+import type { CreateReviewRequestInput, ReviewActor, ReviewDatabaseClient, ReviewFileInput, ReviewRequest } from "@/lib/review/types";
+import { actorFromSession, errorResponse } from "../review-requests/route-utils";
+import type { Session } from "next-auth";
+
+type RouteDependencies = {
+  getSession: () => Promise<Session | null>;
+  database: ReviewDatabaseClient;
+  create: (input: CreateReviewRequestInput, actor: ReviewActor, database: ReviewDatabaseClient) => Promise<ReviewRequest>;
+};
+
+function parseFiles(value: unknown): ReviewFileInput[] | null {
+  if (value === undefined) return [];
+  if (!Array.isArray(value)) return null;
+  const files: ReviewFileInput[] = [];
+  for (const file of value) {
+    if (!file || typeof file !== "object") return null;
+    const entry = file as Record<string, unknown>;
+    if (
+      typeof entry.path !== "string" ||
+      (entry.fileType !== "resource" && entry.fileType !== "script") ||
+      (entry.content !== undefined && typeof entry.content !== "string") ||
+      (entry.changeType !== undefined && !["added", "modified", "deleted", "unchanged"].includes(String(entry.changeType)))
+    ) {
+      return null;
+    }
+    files.push({
+      path: entry.path,
+      fileType: entry.fileType,
+      ...(typeof entry.content === "string" ? { content: entry.content } : {}),
+      ...(entry.changeType !== undefined ? { changeType: entry.changeType as ReviewFileInput["changeType"] } : {}),
+    });
+  }
+  return files;
+}
+
+export async function skillSubmissionBody(request: Request): Promise<CreateReviewRequestInput | null> {
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return null;
+  }
+  if (!body || typeof body !== "object") return null;
+  const { rawContent, files } = body as Record<string, unknown>;
+  const parsedFiles = parseFiles(files);
+  if (typeof rawContent !== "string" || !rawContent || parsedFiles === null) return null;
+  return { rawContent, files: parsedFiles };
+}
 
 function parseSkill(row: Record<string, unknown>) {
   return {
@@ -23,96 +71,62 @@ function parseSkill(row: Record<string, unknown>) {
   };
 }
 
-export async function GET(req: NextRequest) {
-  const { searchParams } = req.nextUrl;
-  const q = searchParams.get("q") ?? "";
-  const type = searchParams.get("type") ?? "";
-  const sort = searchParams.get("sort") ?? "popular";
+export function createSkillHandlers(dependencies: Partial<RouteDependencies> = {}) {
+  const getSession = dependencies.getSession ?? auth;
+  const database = dependencies.database ?? client;
+  const create = dependencies.create ?? createReviewRequest;
 
-  let sql = `SELECT * FROM skills WHERE status = 'published'`;
-  const args: (string | number)[] = [];
+  async function GET(req: NextRequest) {
+    const { searchParams } = req.nextUrl;
+    const q = searchParams.get("q") ?? "";
+    const type = searchParams.get("type") ?? "";
+    const sort = searchParams.get("sort") ?? "popular";
 
-  if (q) {
-    sql += ` AND (name LIKE ? OR description LIKE ? OR triggers LIKE ?)`;
-    args.push(`%${q}%`, `%${q}%`, `%${q}%`);
+    let sql = `SELECT * FROM skills WHERE status = 'published'`;
+    const args: (string | number)[] = [];
+
+    if (q) {
+      sql += ` AND (name LIKE ? OR description LIKE ? OR triggers LIKE ?)`;
+      args.push(`%${q}%`, `%${q}%`, `%${q}%`);
+    }
+    if (type) {
+      sql += ` AND type = ?`;
+      args.push(type);
+    }
+
+    const orderMap: Record<string, string> = {
+      popular: "install_count DESC",
+      recent: "created_at DESC",
+      az: "name ASC",
+    };
+    sql += ` ORDER BY ${orderMap[sort] ?? "install_count DESC"}`;
+
+    const result = await database.execute({ sql, args });
+    const skills = result.rows.map((r) => parseSkill(r as Record<string, unknown>));
+
+    return NextResponse.json({ skills, total: skills.length });
   }
-  if (type) {
-    sql += ` AND type = ?`;
-    args.push(type);
+
+  async function POST(req: NextRequest) {
+    const session = await getSession();
+    const actor = session ? actorFromSession(session) : null;
+    if (!actor) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const input = await skillSubmissionBody(req);
+    if (!input) return NextResponse.json({ error: "rawContent y files[] inválidos" }, { status: 400 });
+
+    try {
+      const request = await create(input, actor, database);
+      return NextResponse.json(
+        { slug: request.slug, reviewRequestId: request.id, status: request.status },
+        { status: 201 }
+      );
+    } catch (error) {
+      return errorResponse(error);
+    }
   }
 
-  const orderMap: Record<string, string> = {
-    popular: "install_count DESC",
-    recent: "created_at DESC",
-    az: "name ASC",
-  };
-  sql += ` ORDER BY ${orderMap[sort] ?? "install_count DESC"}`;
-
-  const result = await client.execute({ sql, args });
-  const skills = result.rows.map((r) => parseSkill(r as Record<string, unknown>));
-
-  return NextResponse.json({ skills, total: skills.length });
+  return { GET, POST };
 }
 
-export async function POST(req: NextRequest) {
-  try {
-    const { rawContent } = await req.json();
-    if (!rawContent || typeof rawContent !== "string") {
-      return NextResponse.json({ error: "rawContent requerido" }, { status: 400 });
-    }
-
-    const parsed = matter(rawContent);
-    const fmResult = validateSkillFrontmatter(parsed.data);
-    if (!fmResult.valid) {
-      return NextResponse.json(
-        { error: "Frontmatter inválido", errors: fmResult.errors },
-        { status: 422 }
-      );
-    }
-
-    const fm = fmResult.parsed!;
-    const now = Math.floor(Date.now() / 1000);
-
-    // Check for duplicate slug
-    const existing = await client.execute({
-      sql: "SELECT id FROM skills WHERE slug = ?",
-      args: [fm.name],
-    });
-    if (existing.rows.length > 0) {
-      return NextResponse.json(
-        { error: `Ya existe un skill con el nombre "${fm.name}"` },
-        { status: 409 }
-      );
-    }
-
-    await client.execute({
-      sql: `INSERT INTO skills
-        (slug, name, description, type, author_handle, version, schema_version,
-         triggers, tools, compatibility, dependencies, config_requirements, raw_content, status,
-         install_count, created_at, updated_at, published_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'published', 0, ?, ?, ?)`,
-      args: [
-        fm.name,
-        fm.name,
-        fm.description,
-        fm.metadata.type,
-        fm.author ?? null,
-        fm.version ?? "1.0.0",
-        fm.schema_version ?? "1.1",
-        JSON.stringify(fm.metadata.triggers),
-        JSON.stringify(fm.metadata.tools ?? []),
-        JSON.stringify(fm.compatibility ?? ["claude"]),
-        JSON.stringify(fm.dependencies ?? []),
-        JSON.stringify(fm.config_requirements ?? []),
-        rawContent,
-        now,
-        now,
-        now,
-      ],
-    });
-
-    return NextResponse.json({ slug: fm.name }, { status: 201 });
-  } catch (e) {
-    return NextResponse.json({ error: String(e) }, { status: 500 });
-  }
-}
+export const { GET, POST } = createSkillHandlers();

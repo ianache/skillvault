@@ -3,6 +3,8 @@ import test from "node:test";
 import { NextRequest } from "next/server";
 import { createReviewRequestsHandlers } from "../../app/api/review-requests/route";
 import { createReviewDecisionHandlers } from "../../app/api/review-requests/[id]/decision/route";
+import { createSkillHandlers } from "../../app/api/skills/route";
+import { createSkillDetailHandlers } from "../../app/api/skills/[slug]/route";
 import type { ReviewDatabaseClient, ReviewRequest } from "./types";
 
 const reviewerSession = {
@@ -21,6 +23,139 @@ const database: ReviewDatabaseClient = {
 };
 
 const context = { params: Promise.resolve({ id: "1" }) };
+
+const authorSession = {
+  user: {
+    id: "author-1",
+    name: "Author",
+    email: "author@example.test",
+    roles: ["author"],
+  },
+};
+
+const validRawContent = `---
+name: demo-skill
+description: A complete enough description for the demo review skill.
+version: 1.0.0
+schema_version: "1.1"
+metadata:
+  type: code
+  triggers:
+    - demo
+compatibility:
+  - claude
+---
+# Demo Skill
+
+## Descripcion
+
+Demo description.
+
+## Cuando usar
+
+Use this demo.
+
+## Instrucciones
+
+Follow these instructions.`;
+
+const updatedRawContent = validRawContent.replace("Follow these instructions.", "Follow the updated instructions.");
+
+function reviewRequest(overrides: Partial<ReviewRequest> = {}): ReviewRequest {
+  return {
+    id: 9,
+    skillId: null,
+    slug: "demo-skill",
+    name: "demo-skill",
+    description: "A complete enough description for the demo review skill.",
+    type: "code",
+    version: "1.0.0",
+    schemaVersion: "1.1",
+    authorId: "author-1",
+    authorHandle: "Author",
+    rawContent: validRawContent,
+    status: "pending",
+    reviewerId: null,
+    reviewerHandle: null,
+    generalComment: null,
+    submittedAt: 1,
+    reviewedAt: null,
+    updatedAt: 1,
+    ...overrides,
+  };
+}
+
+test("POST /api/skills creates a review request instead of a published skill", async () => {
+  const executedSql: string[] = [];
+  let createInput: unknown;
+  const { POST } = createSkillHandlers({
+    getSession: async () => authorSession as never,
+    database: {
+      async execute(input) {
+        executedSql.push(typeof input === "string" ? input : input.sql);
+        return { rows: [] };
+      },
+    },
+    create: async (input) => {
+      createInput = input;
+      return reviewRequest();
+    },
+  });
+
+  const response = await POST(new NextRequest("http://test/api/skills", {
+    method: "POST",
+    body: JSON.stringify({
+      rawContent: validRawContent,
+      files: [{ path: "resources/reference.md", fileType: "resource", content: "Reference" }],
+    }),
+  }));
+
+  assert.equal(response.status, 201);
+  assert.deepEqual(await response.json(), { slug: "demo-skill", reviewRequestId: 9, status: "pending" });
+  assert.deepEqual(createInput, {
+    rawContent: validRawContent,
+    files: [{ path: "resources/reference.md", fileType: "resource", content: "Reference" }],
+  });
+  assert.equal(executedSql.some((sql) => sql.includes("INSERT INTO skills")), false);
+});
+
+test("PATCH /api/skills/:slug updates an open review request and preserves published rawContent", async () => {
+  const originalRawContent = validRawContent;
+  const publishedRawContent = originalRawContent;
+  let updateInput: unknown;
+  const { PATCH } = createSkillDetailHandlers({
+    getSession: async () => authorSession as never,
+    database: {
+      async execute(input) {
+        const sql = typeof input === "string" ? input : input.sql;
+        if (sql.includes("SELECT id, raw_content FROM skills")) {
+          return { rows: [{ id: 4, raw_content: publishedRawContent }] };
+        }
+        if (sql.includes("SELECT id FROM skill_review_requests")) {
+          return { rows: [{ id: 9 }] };
+        }
+        throw new Error(`Unexpected query: ${sql}`);
+      },
+    },
+    update: async (_id, input) => {
+      updateInput = input;
+      return reviewRequest({ skillId: 4, rawContent: updatedRawContent });
+    },
+  });
+
+  const response = await PATCH(
+    new NextRequest("http://test/api/skills/demo-skill", {
+      method: "PATCH",
+      body: JSON.stringify({ rawContent: updatedRawContent }),
+    }),
+    { params: Promise.resolve({ slug: "demo-skill" }) }
+  );
+
+  assert.equal(response.status, 201);
+  assert.deepEqual(await response.json(), { slug: "demo-skill", reviewRequestId: 9, status: "pending" });
+  assert.deepEqual(updateInput, { rawContent: updatedRawContent, files: [] });
+  assert.equal(publishedRawContent, originalRawContent);
+});
 
 test("unauthenticated create returns 401", async () => {
   const { POST } = createReviewRequestsHandlers({ getSession: async () => null as never });
