@@ -2,7 +2,7 @@
 # Uso: helm install skillvault ./helm/skillvault -f helm/skillvault/values-dev.yaml --set auth.secret=xxx --set auth.keycloak.secret=xxx
 
 image:
-  repository: ghcr.io/ianache/skillvault
+  repository: xnet/skillvault
   tag: "0.2.0"
 
 mysql:
