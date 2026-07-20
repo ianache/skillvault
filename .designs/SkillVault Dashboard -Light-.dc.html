@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#f7f5f0"/><path d="M50 20l20 9v22l-20 9-20-9V29l20-9z" fill="#a9772e" transform="translate(0,5) scale(0.75) translate(11,3)"/></svg></template>
+  <style>
+    body { margin: 0; background: #f7f5f0; }
+    * { box-sizing: border-box; }
+    input::placeholder { color: #8a8f99; }
+    @keyframes svToastIn { from { opacity:0; transform:translate(-50%,8px); } to { opacity:1; transform:translate(-50%,0); } }
+  </style>
+</helmet>
+
+<div style="min-height:100vh; width:100%; background:#f7f5f0; font-family:'Space Grotesk',sans-serif; color:#1a1d21; position:relative;">
+
+  <!-- Top nav -->
+  <header style="display:flex; align-items:center; gap:22px; padding:16px 32px; background:#ffffff; border-bottom:1px solid #e6e1d8; position:sticky; top:0; z-index:5;">
+    <div style="display:flex; align-items:center; gap:9px; flex-shrink:0;">
+      <div style="width:30px; height:30px; border-radius:8px; background:linear-gradient(155deg,#a9772e,#7a5f26); display:flex; align-items:center; justify-content:center; box-shadow:0 3px 10px rgba(169,119,46,0.22);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2.6L20 7v10l-8 4.4L4 17V7l8-4.4z" fill="#1a1d21"></path>
+          <path d="M8 9.6v4.8l4 2.2 4-2.2V9.6L12 7.4 8 9.6z" fill="#a9772e"></path>
+        </svg>
+      </div>
+      <span style="font-weight:700; font-size:16px; letter-spacing:-0.01em;">SkillVault</span>
+    </div>
+
+    <div style="flex:1; max-width:420px; display:flex; align-items:center; gap:8px; background:#f0ede6; border:1px solid #e6e1d8; border-radius:8px; padding:9px 14px;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8a8f99" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+      <input type="text" placeholder="Buscar skills, triggers, herramientas..." style="border:none; outline:none; background:transparent; font-family:'Space Grotesk',sans-serif; font-size:13.5px; color:#1a1d21; width:100%;"/>
+    </div>
+
+    <nav style="display:flex; align-items:center; gap:26px; margin-left:auto;">
+      <sc-for list="{{ navLinks }}" as="link" hint-placeholder-count="4">
+        <span style="font-size:14px; font-weight:{{ link.weight }}; color:{{ link.color }}; cursor:pointer;">{{ link.label }}</span>
+      </sc-for>
+    </nav>
+
+    <div style="display:flex; align-items:center; gap:12px; padding-left:14px; border-left:1px solid #e6e1d8;">
+      <button style="width:30px; height:30px; border-radius:50%; border:1px solid #d8d2c5; background:#ffffff; color:#5c6270; font-size:13px; cursor:pointer;" style-hover="background:#f0ede6;">☾</button>
+      <div style="width:30px; height:30px; border-radius:50%; background:#a9772e; color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; font-family:'JetBrains Mono',monospace;">IA</div>
+      <button style="background:transparent; border:none; color:#5c6270; font-family:'Space Grotesk',sans-serif; font-size:13.5px; font-weight:600; cursor:pointer;" style-hover="color:#1a1d21;">Salir</button>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <main style="max-width:1200px; margin:0 auto; padding:{{ mainPad }};">
+    <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:20px; margin-bottom:22px; flex-wrap:wrap;">
+      <div>
+        <h1 style="margin:0; font-size:26px; font-weight:700; letter-spacing:-0.01em;">Gestión de categorías</h1>
+        <p style="margin:8px 0 0; color:#5c6270; font-size:14.5px;">Las categorías organizan el catálogo. Solo administradores pueden gestionarlas.</p>
+      </div>
+      <button onClick="{{ onCreateClick }}" style="flex-shrink:0; padding:12px 22px; border-radius:8px; border:none; background:#a9772e; color:#fff; font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:700; cursor:pointer; box-shadow:0 2px 8px rgba(169,119,46,0.22);" style-hover="background:#946a29;">+ Nueva categoría</button>
+    </div>
+
+    <div style="display:flex; align-items:center; gap:8px; background:#ffffff; border:1px solid #e6e1d8; border-radius:8px; padding:10px 14px; margin-bottom:20px; max-width:340px;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8a8f99" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+      <input type="text" value="{{ query }}" onChange="{{ onQueryChange }}" placeholder="Buscar categoría..." style="border:none; outline:none; background:transparent; font-family:'Space Grotesk',sans-serif; font-size:13.5px; color:#1a1d21; width:100%;"/>
+    </div>
+
+    <sc-if value="{{ hasResults }}" hint-placeholder-val="{{ true }}">
+      <div style="background:#ffffff; border:1px solid #e6e1d8; border-radius:12px; box-shadow:0 1px 2px rgba(20,20,20,0.04); overflow:hidden;">
+        <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+          <div style="display:grid; grid-template-columns:1fr 140px 160px 90px 190px; gap:16px; padding:14px 24px; border-bottom:1px solid #e6e1d8;">
+            <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.04em; color:#8a8f99;">ICONO NOMBRE / DESCRIPCIÓN</span>
+            <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.04em; color:#8a8f99;">SLUG</span>
+            <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.04em; color:#8a8f99;">COLOR</span>
+            <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.04em; color:#8a8f99;">SKILLS</span>
+            <span></span>
+          </div>
+        </sc-if>
+
+        <sc-for list="{{ categories }}" as="cat" hint-placeholder-count="6">
+          <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+            <div style="display:grid; grid-template-columns:1fr 140px 160px 90px 190px; gap:16px; align-items:center; padding:20px 24px; border-bottom:1px solid #e6e1d8;">
+              <div style="display:flex; gap:14px; align-items:flex-start;">
+                <div style="width:38px; height:38px; border-radius:9px; background:#f0ede6; border:1px solid #e6e1d8; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5c6270" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{ cat.iconPath }}"></path></svg>
+                </div>
+                <div>
+                  <div style="font-size:15px; font-weight:700;">{{ cat.name }}</div>
+                  <div style="font-size:13px; color:#5c6270; margin-top:3px; line-height:1.4; max-width:340px;">{{ cat.desc }}</div>
+                </div>
+              </div>
+              <span style="font-family:'JetBrains Mono',monospace; font-size:13px; color:#5c6270;">{{ cat.slug }}</span>
+              <div style="display:flex; align-items:center; gap:9px;">
+                <span style="width:10px; height:10px; border-radius:50%; background:{{ cat.color }}; flex-shrink:0;"></span>
+                <span style="font-family:'JetBrains Mono',monospace; font-size:12.5px; color:#5c6270;">{{ cat.color }}</span>
+              </div>
+              <span onClick="{{ cat.onViewSkills }}" style="font-family:'JetBrains Mono',monospace; font-size:13.5px; color:#a9772e; cursor:pointer; text-decoration:underline; text-underline-offset:2px;">{{ cat.skills }}</span>
+              <div style="display:flex; gap:8px; justify-content:flex-end;">
+                <button onClick="{{ onCreateClick }}" style="padding:8px 16px; border-radius:7px; border:1px solid #d8d2c5; background:#ffffff; color:#1a1d21; font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:600; cursor:pointer;" style-hover="background:#f0ede6;">Editar</button>
+                <span title="{{ cat.deleteTitle }}">
+                  <button onClick="{{ cat.onDeleteClick }}" disabled="{{ cat.locked }}" style="padding:8px 16px; border-radius:7px; border:1px solid {{ cat.deleteBorder }}; background:#ffffff; color:{{ cat.deleteColor }}; font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:600; cursor:{{ cat.deleteCursor }};" style-hover="{{ cat.deleteHover }}">Eliminar</button>
+                </span>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:18px 20px; border-bottom:1px solid #e6e1d8; display:flex; flex-direction:column; gap:12px;">
+              <div style="display:flex; gap:12px; align-items:flex-start;">
+                <div style="width:36px; height:36px; border-radius:9px; background:#f0ede6; border:1px solid #e6e1d8; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5c6270" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{ cat.iconPath }}"></path></svg>
+                </div>
+                <div>
+                  <div style="font-size:15px; font-weight:700;">{{ cat.name }}</div>
+                  <div style="font-size:12.5px; color:#5c6270; margin-top:3px; line-height:1.4;">{{ cat.desc }}</div>
+                </div>
+              </div>
+              <div style="display:flex; flex-wrap:wrap; gap:14px; font-size:12.5px; color:#5c6270;">
+                <span style="font-family:'JetBrains Mono',monospace;">slug: {{ cat.slug }}</span>
+                <span style="display:flex; align-items:center; gap:6px;"><span style="width:9px; height:9px; border-radius:50%; background:{{ cat.color }};"></span><span style="font-family:'JetBrains Mono',monospace;">{{ cat.color }}</span></span>
+                <span onClick="{{ cat.onViewSkills }}" style="font-family:'JetBrains Mono',monospace; color:#a9772e; text-decoration:underline; text-underline-offset:2px; cursor:pointer;">{{ cat.skills }} skills</span>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <button onClick="{{ onCreateClick }}" style="flex:1; padding:9px 0; border-radius:7px; border:1px solid #d8d2c5; background:#ffffff; color:#1a1d21; font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:600; cursor:pointer;">Editar</button>
+                <button onClick="{{ cat.onDeleteClick }}" disabled="{{ cat.locked }}" title="{{ cat.deleteTitle }}" style="flex:1; padding:9px 0; border-radius:7px; border:1px solid {{ cat.deleteBorder }}; background:#ffffff; color:{{ cat.deleteColor }}; font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:600; cursor:{{ cat.deleteCursor }};">Eliminar</button>
+              </div>
+            </div>
+          </sc-if>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showEmpty }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#ffffff; border:1px dashed #d8d2c5; border-radius:12px; padding:56px 24px; text-align:center;">
+        <div style="font-size:15px; font-weight:600; margin-bottom:6px;">Sin resultados</div>
+        <p style="margin:0 0 20px; color:#5c6270; font-size:13.5px;">No hay categorías que coincidan con "{{ query }}".</p>
+        <button onClick="{{ onCreateClick }}" style="padding:11px 20px; border-radius:8px; border:none; background:#a9772e; color:#fff; font-family:'Space Grotesk',sans-serif; font-size:13.5px; font-weight:700; cursor:pointer;">+ Nueva categoría</button>
+      </div>
+    </sc-if>
+  </main>
+
+  <sc-if value="{{ confirmOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed; inset:0; background:rgba(26,29,33,0.32); display:flex; align-items:center; justify-content:center; z-index:20; padding:20px;">
+      <div style="background:#ffffff; border-radius:12px; padding:26px; max-width:380px; width:100%; box-shadow:0 12px 32px rgba(20,20,20,0.18);">
+        <div style="font-size:16px; font-weight:700; margin-bottom:8px;">¿Eliminar "{{ confirmName }}"?</div>
+        <p style="margin:0 0 22px; color:#5c6270; font-size:13.5px; line-height:1.5;">Esta acción no se puede deshacer. La categoría dejará de estar disponible en el catálogo.</p>
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+          <button onClick="{{ onCancelDelete }}" style="padding:9px 18px; border-radius:7px; border:1px solid #d8d2c5; background:#ffffff; color:#1a1d21; font-family:'Space Grotesk',sans-serif; font-size:13.5px; font-weight:600; cursor:pointer;">Cancelar</button>
+          <button onClick="{{ onConfirmDelete }}" style="padding:9px 18px; border-radius:7px; border:none; background:#b1502e; color:#fff; font-family:'Space Grotesk',sans-serif; font-size:13.5px; font-weight:700; cursor:pointer;">Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toastVisible }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed; left:50%; bottom:28px; transform:translateX(-50%); background:#1a1d21; color:#f7f5f0; padding:12px 20px; border-radius:8px; font-size:13.5px; font-weight:500; box-shadow:0 8px 24px rgba(20,20,20,0.22); z-index:30; animation:svToastIn .25s ease;">{{ toastMessage }}</div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900}}">
+
+class Component extends DCLogic {
+  state = {
+    query: '',
+    confirmId: null,
+    toastMessage: '',
+    toastVisible: false,
+    width: typeof window !== 'undefined' ? window.innerWidth : 1440,
+    categories: [
+      { id: 'code', name: 'Code', desc: 'Skills de programación, revisión de código y desarrollo de software.', slug: 'code', color: '#3B6EFF', skills: 0, iconPath: 'M8 9l-4 4 4 4M16 9l4 4-4 4M14 4l-4 16' },
+      { id: 'docs', name: 'Docs', desc: 'Generación y gestión de documentación técnica.', slug: 'docs', color: '#2ECC8A', skills: 1, iconPath: 'M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zM14 2v5h5M8 12h8M8 16h8M8 8h4' },
+      { id: 'data', name: 'Data', desc: 'Análisis de datos, ETL y visualizaciones.', slug: 'data', color: '#4AB8E8', skills: 0, iconPath: 'M4 20V10M10 20V4M16 20v-7M22 20v-3' },
+      { id: 'ui', name: 'UI / Frontend', desc: 'Diseño y desarrollo de interfaces de usuario.', slug: 'ui', color: '#C45FD4', skills: 0, iconPath: 'M3 5h18v14H3zM3 9h18M8 9v10' },
+      { id: 'infra', name: 'Infra', desc: 'Infraestructura, DevOps y configuración de entornos.', slug: 'infra', color: '#E88B3A', skills: 0, iconPath: 'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1L7 17M17 7l2.1-2.1' },
+      { id: 'ai', name: 'AI & Agents', desc: 'Integración con modelos de IA y construcción de agentes.', slug: 'ai', color: '#E8503A', skills: 0, iconPath: 'M4 4h16v16H4zM9 9h6v6H9zM1 9h3M1 15h3M20 9h3M20 15h3M9 1v3M15 1v3M9 20v3M15 20v3' },
+    ],
+  };
+
+  componentDidMount() {
+    this._onResize = () => this.setState({ width: window.innerWidth });
+    window.addEventListener('resize', this._onResize);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('resize', this._onResize);
+  }
+
+  showToast(message) {
+    if (this._toastTimer) clearTimeout(this._toastTimer);
+    this.setState({ toastMessage: message, toastVisible: true });
+    this._toastTimer = setTimeout(() => this.setState({ toastVisible: false }), 2600);
+  }
+
+  renderVals() {
+    const navLinks = [
+      { label: 'Catálogo', weight: 500, color: '#5c6270' },
+      { label: 'Mis Skills', weight: 500, color: '#5c6270' },
+      { label: 'Categorías', weight: 700, color: '#1a1d21' },
+      { label: 'Publicar', weight: 500, color: '#5c6270' },
+    ];
+
+    const q = this.state.query.trim().toLowerCase();
+    const filtered = this.state.categories.filter(c =>
+      !q || c.name.toLowerCase().includes(q) || c.slug.toLowerCase().includes(q) || c.desc.toLowerCase().includes(q)
+    );
+
+    const categories = filtered.map(c => {
+      const locked = c.skills > 0;
+      return {
+        ...c,
+        locked,
+        deleteBorder: locked ? '#e6e1d8' : '#e0b8a3',
+        deleteColor: locked ? '#b7b2a8' : '#b1502e',
+        deleteCursor: locked ? 'not-allowed' : 'pointer',
+        deleteHover: locked ? '' : 'background:#fbeee7;',
+        deleteTitle: locked ? `No se puede eliminar: ${c.skills} skill${c.skills === 1 ? '' : 's'} asignado${c.skills === 1 ? '' : 's'}` : 'Eliminar categoría',
+        onDeleteClick: () => { if (!locked) this.setState({ confirmId: c.id }); },
+        onViewSkills: () => this.showToast(`Ver skills de "${c.name}" (próximamente)`),
+      };
+    });
+
+    const confirmCat = this.state.categories.find(c => c.id === this.state.confirmId);
+    const isDesktop = this.state.width >= 768;
+
+    return {
+      navLinks,
+      categories,
+      query: this.state.query,
+      onQueryChange: (e) => this.setState({ query: e.target.value }),
+      hasResults: categories.length > 0,
+      showEmpty: categories.length === 0,
+      isDesktop,
+      isMobile: !isDesktop,
+      mainPad: isDesktop ? '44px 32px 80px' : '28px 18px 60px',
+      onCreateClick: () => this.showToast('Formulario de categoría — disponible en el flujo completo'),
+      confirmOpen: !!confirmCat,
+      confirmName: confirmCat ? confirmCat.name : '',
+      onCancelDelete: () => this.setState({ confirmId: null }),
+      onConfirmDelete: () => {
+        const name = confirmCat ? confirmCat.name : '';
+        this.setState(s => ({ categories: s.categories.filter(c => c.id !== s.confirmId), confirmId: null }));
+        this.showToast(`Categoría "${name}" eliminada`);
+      },
+      toastMessage: this.state.toastMessage,
+      toastVisible: this.state.toastVisible,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

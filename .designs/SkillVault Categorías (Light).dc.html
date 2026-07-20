@@ -1,0 +1,55 @@
+# SkillVault — Design Doc (Versión Light)
+
+**Autor:** UX/UI · **Estado:** Draft · **Última actualización:** 2026-07-19
+**Relación:** complementa a `DESIGN.md` (versión dark, base actual). Mismos principios y layout; cambia el modo de color.
+
+## 1. Objetivo
+
+Definir el tema claro ("light mode") de SkillVault manteniendo la identidad de marca (acentos dorado/teal/índigo) y la jerarquía tipográfica ya establecida, adaptando contraste y superficies a fondo claro.
+
+## 2. Tokens de color — Light
+
+| Token | Dark (referencia) | Light | Uso |
+|---|---|---|---|
+| `--bg` | `#0b0d10` | `#f7f5f0` | Fondo general (blanco cálido, no blanco puro) |
+| `--sidebar-bg` | `#101317` | `#ffffff` | Fondo del panel lateral |
+| `--surface` | `#14181d` | `#ffffff` | Tarjetas (KPIs, listas) |
+| `--surface-alt` | `#161b24` | `#f0ede6` | Botones secundarios / fondo hover |
+| `--border` | `#1f242b` | `#e6e1d8` | Bordes de tarjetas y separadores |
+| `--border-strong` | `#232830` | `#d8d2c5` | Bordes de controles interactivos |
+| `--text` | `#f2f0ea` | `#1a1d21` | Texto primario |
+| `--text-dim` | `#8b9099` | `#5c6270` | Texto secundario / labels |
+| `--text-faint` | `#5b616b` | `#8a8f99` | Texto terciario / metadata |
+| `--accent-gold` | `#cfa554` | `#a9772e` | Acento primario — oscurecido para AA sobre blanco |
+| `--accent-teal` | `#4fd1c5` | `#0f9488` | Acento secundario (positivo / estado operativo) |
+| `--accent-indigo` | `#8f94ff` | `#5a5fd6` | Acento terciario (contribuyentes) |
+
+**Regla de conversión:** cada acento se oscurece ~20–25% respecto al valor dark para mantener contraste ≥4.5:1 sobre `--bg` claro; los fondos de "chip"/badge (`rgba(accent, 0.12)`) se mantienen con la misma opacidad pero sobre el acento ya oscurecido.
+
+## 3. Qué NO cambia
+
+- Tipografía (Space Grotesk + JetBrains Mono), tamaños y pesos.
+- Layout de dos paneles, grid de KPIs y columnas Top 5.
+- Radios, espaciado, estructura de componentes (logo mark, nav, botón SSO, panel de versión/estado, KPI card, Top-5 list card).
+- Animación de entrada `fadeUp` de las KPI cards.
+
+## 4. Ajustes específicos por componente
+
+| Componente | Ajuste en light |
+|---|---|
+| **Logo mark** | Fondo degradado dorado se mantiene (funciona igual sobre blanco); ícono interior sigue en `#0b0d10`→ pasa a `#1a1d21` para igualar `--text`. |
+| **Nav item activo** | Fondo `rgba(accent-gold-light, 0.12)`, texto/ícono en `--accent-gold` light. |
+| **Botón SSO Keycloak** | Fondo `--surface-alt`, borde `--border-strong`, hover a `#e8e3d8`. Ícono llave en `--accent-gold` light. |
+| **Panel versión/estado** | Fondo `--sidebar-bg` con borde `--border`; punto de estado en `--accent-teal` light con halo `rgba(accent-teal-light, 0.15)`. |
+| **KPI card / Top-5 card** | Fondo blanco puro, borde `--border`; sombra sutil opcional (`0 1px 2px rgba(20,20,20,0.04)`) para separar de `--bg` dado el contraste más bajo entre superficie y fondo que en dark. |
+| **Barras de progreso (Top 5)** | Track en `#ece8de` (equivalente claro de `#1f242b`); relleno mantiene el `barColor` de cada columna (teal / gold / índigo / terracota). |
+
+## 5. Accesibilidad
+
+- Todos los acentos re-oscurecidos pasan contraste AA (4.5:1) para texto pequeño sobre `--bg`/`--surface` blancos.
+- Verificar especialmente `--accent-gold` sobre blanco puro (uso en texto de nav activo) — valor `#a9772e` cumple ~4.6:1.
+
+## 6. Pendiente
+
+- Definir si el modo se selecciona por preferencia del sistema (`prefers-color-scheme`) o toggle manual en la UI.
+- Confirmar tokens exactos al integrarse con Tailwind config del repo `skill-review-workflow`.

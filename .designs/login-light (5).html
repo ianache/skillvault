@@ -1,0 +1,97 @@
+# Handoff: SkillVault — App Screens (Light theme)
+
+## Overview
+SkillVault is a catalog platform for AI-agent skills (harness-compatible SKILL.md packages). This bundle covers the core authenticated app screens in the **light theme**: Dashboard/login shell, Categories admin, Skills catalog, "Mis Skills" management, and the multi-step "Publicar Skill" wizard. A dark-theme variant of the dashboard is also included for reference.
+
+## About the Design Files
+The HTML files in this bundle are **design references built as interactive HTML prototypes** — they show intended look, structure, and behavior (including working filters, sorting, a functional multi-step wizard with state, and modals/toasts) but are not production code to copy directly. The task is to **recreate this design in the target codebase's React environment**, following React + the app's existing patterns, organized with **Atomic Design** (atoms → molecules → organisms → templates → pages).
+
+## Fidelity
+**High-fidelity.** Colors, typography, spacing, and interaction states below are final — implement pixel-accurately. Sample data (skill names, counts, dates) is illustrative placeholder content; wire to real data.
+
+## Screens
+
+### 1. Dashboard (`login.html` / `login-light.html`)
+Two-panel shell: sidebar (logo, nav, SSO login, version/status) + KPI grid (Skills publicados, Instalaciones de skills, Contribuyentes) + 4 "Top 5" ranked lists (instalaciones, stars, contribuyentes, categorías). See prior handoff section below for full spec.
+
+### 2. Gestión de categorías (`categorias-light.html`)
+Admin table: search, responsive (desktop grid rows ⇄ mobile stacked cards at <768px), row = icon + name/desc + slug (mono) + color swatch+hex + skills count (link, styled underline, opens toast placeholder) + Editar/Eliminar actions. "Eliminar" disabled with a tooltip (`title` attr) when the category has skills assigned. Deleting opens a confirm modal; delete/edit/create/view-skills all surface a bottom toast for feedback. Empty state (no search results) shows a message + CTA. Primary action "+ Nueva categoría" lives in the page header, top-right, aligned with the title.
+
+### 3. Catálogo de Skills (`catalogo-light.html`)
+Top nav (shared across app, see Organisms) + page title + install-CLI banner (command snippet always full-width on its own row, download buttons for Windows/macOS/Linux) + two-pane body: **sidebar category filter (fixed, non-scrolling)** + **results grid (independently vertically scrollable, no visible scrollbar)**. Sort control (Populares/Recientes/A-Z), live search, skill cards (name+version, category chip, description, `/trigger` chip, installs count, harness tag).
+
+### 4. Mis Skills / Dashboard interno (`mis-skills-light.html`)
+Publisher's own dashboard: page header (title+subtitle left, "Categorías" secondary + "+ Publicar skill" primary buttons right), 4 KPI cards (dot-accent style, not the sketch's top-color-bar style), "Por categoría" chip summary row, filter bar (search, category `<select>`, 4 sort toggle buttons, page indicator), and a skills table (color-accent bar + name/author/desc, tipo chip, versión, installs, publicado date, edit/copy-link icon actions).
+
+### 5. Publicar Skill — wizard (`publicar-skill-light.html`)
+Multi-step, multi-entry-point flow, all state-driven (React state in the mock):
+- **Entry / Upload stage**: "Cargar skill local" — expected-structure code block, two dashed drop cards (Seleccionar carpeta / Subir .zip), a detected-folder success panel (border turns teal, shows "carpeta: x", "SKILL.md encontrado", "Cargar en el wizard →"), and a text link "Empezar desde cero sin cargar archivos".
+- **Step 1 — Metadatos**: **two variants** depending on entry point:
+  - *Loaded from folder*: compact pre-filled form (name, version, category select, author, description) — fields already populated from the parsed SKILL.md.
+  - *From scratch*: richer empty-state form matching the reference screenshot — labeled fields with inline helper text top-right of each label (char counts, format hints), **Categoría as a clickable chip row** (not a select) with per-category icon/color, required-field asterisks, Trigger principal (required), Triggers adicionales (textarea, one per line), Autor, and Compatibilidad declarada as toggleable harness chips (claude/codex/opencode/agy/cursor, claude pre-selected). "Siguiente → Editor" is disabled (grey, not-allowed cursor) until name, description, category, and trigger principal are filled; submitting generates the SKILL.md front-matter for Step 2.
+- **Step 2 — Editor**: Editor/Preview tabs, line-numbered textarea editing the raw SKILL.md, right-side "N avisos" warnings panel (field + message), char/line count footer.
+- **Step 3 — Requisitos**: 7 requirement-type chips (Variable de entorno, Ejecutable, Runtime, Servicio/Endpoint, Directorio, Archivo, Secreto — each with a distinct color/icon); clicking adds a requirement row (type badge + editable key input + remove); empty state when none declared; "+ Añadir requisito" button.
+- **Step 4 — Revisión final**: read-only summary cards (Identidad, Triggers, Herramientas, Compatibilidad, Cuerpo del skill scrollable preview) + "Publicar skill →".
+- **Published**: confirmation screen with success icon and skill name.
+- **Header stepper** (shown once past the upload stage): 4 steps (Metadatos/Editor/Requisitos/Revisión), each a numbered/checked circle + label, connected by a line that turns teal as steps complete; breadcrumb "SkillVault / Publicar Skill" always visible top-left.
+
+## Atomic Design breakdown
+
+### Atoms
+- **LogoMark** — 28–36px rounded-square, gold gradient (`linear-gradient(155deg, #a9772e, #7a5f26)`), hexagon-module SVG icon.
+- **NavLink** (top nav) — text link, active = `font-weight:700, color:#1a1d21`; inactive = `500, #5c6270`.
+- **Chip/Badge** — pill or rounded-rect, colored border+bg at ~12–20% opacity of a category/type/status color, mono or UI font depending on content.
+- **StatusDot** — 8–10px circle with soft halo shadow (used for KPI accent dots and platform status).
+- **IconButton** — 28–30px square/circle, border `#d8d2c5` or accent, icon centered.
+- **Input / Textarea / Select** — `padding:10–11px 12–14px`, `border:1px solid #e6e1d8`, `border-radius:7–8px`, mono font for code-like values (slugs, versions, triggers), UI font otherwise.
+- **PrimaryButton** — `background:#a9772e`, white text, `border-radius:8px`, bold, hover `#946a29`.
+- **SecondaryButton** — white bg, `border:1px solid #d8d2c5`, hover `background:#f0ede6`.
+- **Toast** — dark pill (`#1a1d21` bg, off-white text), fixed bottom-center, auto-dismiss ~2.5s, slide/fade-in.
+
+### Molecules
+- **KPI Card** (2 variants) — badge-icon+value+label (Dashboard) and dot-accent+value+label (Mis Skills); both `border-radius:12px`, `padding:20px`, subtle shadow.
+- **NavItem** (sidebar) — icon + label + active tint background.
+- **Top-5 Row** — rank + name/value + progress bar relative to set max.
+- **Category Filter Row** (catalog sidebar) — icon + name + count, active tint background, click filters results.
+- **Table Row** (categories / mis-skills) — icon or color bar + name/desc + metadata columns + action buttons; has a **mobile stacked-card equivalent** below 768px.
+- **Stepper Step** — numbered/checked circle + label + connecting line, 3 states (upcoming/active/done).
+- **Requirement Row** — type badge + key input + remove button.
+- **Confirm Modal** — centered card, title + body copy + Cancel/Confirm buttons, scrim backdrop.
+
+### Organisms
+- **TopNav** — logo, global search, nav links, theme toggle, avatar, "Salir" — shared verbatim across Catálogo/Categorías/Mis Skills.
+- **Sidebar** (Dashboard) — logo, nav list, SSO button, version/status panel, vertically centered.
+- **KPI Grid**, **Top-5 Grid**, **Skills Table**, **Skill Card Grid**, **Publish Wizard Step Panel** (swaps content per step, described above).
+
+### Templates
+- **AppShellTemplate** — sticky TopNav + `max-width:1200–1400px` centered content column; used by Categorías/Catálogo/Mis Skills.
+- **SidebarDashboardTemplate** — fixed sidebar + fluid main; used by the Dashboard/login screen.
+- **WizardTemplate** — breadcrumb+stepper header (no global search/nav) + centered `max-width:960px` step content + fixed prev/next footer row.
+
+### Pages
+Dashboard (dark/light), Gestión de categorías, Catálogo de Skills, Mis Skills, Publicar Skill (upload → 4 steps → published).
+
+## Interactions & Behavior
+- All filters/search/sort in Categorías, Catálogo, and Mis Skills are **live, client-side** in the mock (no debounce implemented — add one for a real API-backed search).
+- Category delete requires confirm-modal acceptance; disabled when `skills > 0` (tooltip explains why).
+- Catalog results pane and category sidebar have **independent scroll** — sidebar/header/banner stay fixed, only the card grid scrolls, scrollbar hidden (`scrollbar-width:none` / `::-webkit-scrollbar{display:none}`) while remaining fully scrollable via wheel/touch/keyboard.
+- Publish wizard: step is fully client-state driven; back/forward buttons never lose entered data; Step 1 "from scratch" gates progression on required-field validation; submitting Step 1 (from-scratch) synthesizes the SKILL.md shown in Step 2's editor.
+- Toasts confirm destructive/save actions; auto-dismiss after ~2.6s.
+
+## State Management
+- Each page mock owns local component state (query strings, active filters/sort, wizard step/stage, form field values, requirement list, modal/toast visibility). In the real app this maps to: per-page local UI state (filters, sort, modal open) + a shared wizard/store for the multi-step publish flow (persist draft across steps, ideally to a backend draft record so a refresh doesn't lose progress — not modeled in the static mock).
+- Theme (dark/light): pick one source of truth (context/CSS vars), don't duplicate markup per theme as these mocks do — see `DESIGN.md` / `DESIGN-light.md` for the full token mapping.
+
+## Design Tokens
+Full rationale, dark+light token tables, typography and spacing scale: see `DESIGN.md` (dark) and `DESIGN-light.md` (light) in this bundle. Summary — display/UI font **Space Grotesk**, data/mono font **JetBrains Mono**; primary accent gold `#a9772e` (light) / `#cfa554` (dark); teal `#0f9488`/`#4fd1c5` for positive/success/status; indigo `#5a5fd6`/`#8f94ff` for a third data category; terracotta `#c46a3f`/`#e08a6b` for a fourth. Category swatch colors (blue/green/cyan/purple/orange/red in the categories table) are **user data**, not brand tokens — keep them as freely assignable per-category colors.
+
+## Assets
+No external images. All icons are inline stroke SVGs (line-icon style, `stroke-width:1.8–2.4`, 13–20px) — recreate as an SVG/icon-component set or map onto the app's existing icon library.
+
+## Files
+- `login.html`, `login-light.html` — Dashboard (dark, light)
+- `categorias-light.html` — Gestión de categorías
+- `catalogo-light.html` — Catálogo de Skills
+- `mis-skills-light.html` — Mis Skills / dashboard interno
+- `publicar-skill-light.html` — Publicar Skill wizard (upload + 4 steps + published)
+- `DESIGN.md`, `DESIGN-light.md` — design tokens and rationale (dark/light)

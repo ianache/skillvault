@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#0b0d10"/><path d="M50 20l20 9v22l-20 9-20-9V29l20-9z" fill="#cfa554" transform="translate(0,5) scale(0.75) translate(11,3)"/></svg></template>
+  <style>
+    body { margin: 0; background: #0b0d10; }
+    * { box-sizing: border-box; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-thumb { background: #232830; border-radius: 4px; }
+    @keyframes svFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</helmet>
+
+<div style="display:flex; min-height:100vh; width:100%; background:#0b0d10; font-family:'Space Grotesk',sans-serif; color:#f2f0ea;">
+
+  <!-- Sidebar -->
+  <aside style="width:264px; flex-shrink:0; background:#101317; border-right:1px solid #1f242b; display:flex; flex-direction:column; justify-content:center; padding:28px 20px; position:sticky; top:0; height:100vh;">
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:40px;">
+      <div style="width:36px; height:36px; border-radius:9px; background:linear-gradient(155deg,#cfa554,#8f7233); display:flex; align-items:center; justify-content:center; box-shadow:0 4px 14px rgba(207,165,84,0.25); flex-shrink:0;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2.6L20 7v10l-8 4.4L4 17V7l8-4.4z" fill="#0b0d10"></path>
+          <path d="M8 9.6v4.8l4 2.2 4-2.2V9.6L12 7.4 8 9.6z" fill="#cfa554"></path>
+          <circle cx="12" cy="12" r="1.6" fill="#0b0d10"></circle>
+        </svg>
+      </div>
+      <div>
+        <div style="font-weight:700; font-size:17px; letter-spacing:-0.01em; line-height:1;">SkillVault</div>
+        <div style="font-size:11px; color:#8b9099; margin-top:3px; font-family:'JetBrains Mono',monospace;">agent skill catalog</div>
+      </div>
+    </div>
+
+    <nav style="display:flex; flex-direction:column; gap:2px;">
+      <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="5">
+        
+      </sc-for>
+    <div style="border-top:1px solid #1f242b; padding-top:18px; margin-top:18px;">
+      
+      <button style="width:100%; display:flex; align-items:center; justify-content:center; gap:9px; background:#161b24; border:1px solid #232830; color:#f2f0ea; padding:11px 14px; border-radius:8px; font-family:'Space Grotesk',sans-serif; font-size:13.5px; font-weight:600; cursor:pointer;" style-hover="background:#1b212b; border-color:#2c3340;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#cfa554" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 7a4 4 0 1 1-4 4"></path>
+          <path d="M11 11L3 19v2h2l8-8"></path>
+          <path d="M16 6l2 2"></path>
+        </svg>
+        Iniciar sesión con Keycloak
+      </button>
+    </div></nav>
+
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-top:20px; padding:12px 14px; background:#101317; border:1px solid #1f242b; border-radius:8px;">
+      <span style="font-family:'JetBrains Mono',monospace; font-size:11.5px; color:#8b9099;">v2.4.1</span>
+      <div style="display:flex; align-items:center; gap:7px;">
+        <span style="font-size:11px; color:#8b9099;">Status</span>
+        <span style="position:relative; width:9px; height:9px; border-radius:50%; background:#4fd1c5; box-shadow:0 0 0 3px rgba(79,209,197,0.18); flex-shrink:0;"></span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main style="flex:1; padding:36px 44px 60px; max-width:1400px;">
+
+
+    <!-- KPI grid -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(190px,1fr)); gap:16px; margin-bottom:40px;">
+      <sc-for list="{{ kpis }}" as="kpi" hint-placeholder-count="6">
+        <div style="background:#14181d; border:1px solid #1f242b; border-radius:12px; padding:20px; opacity:0; animation:svFadeUp .5s ease forwards; animation-delay:{{ kpi.delay }};">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+            <div style="width:32px; height:32px; border-radius:8px; background:{{ kpi.iconBg }}; display:flex; align-items:center; justify-content:center;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{ kpi.iconColor }}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="{{ kpi.iconPath }}"></path>
+              </svg>
+            </div>
+            <sc-if value="{{ showDeltas }}" hint-placeholder-val="{{ true }}">
+              <span style="font-size:11.5px; font-family:'JetBrains Mono',monospace; color:#4fd1c5; background:rgba(79,209,197,0.1); padding:3px 7px; border-radius:5px;">{{ kpi.delta }}</span>
+            </sc-if>
+          </div>
+          <div style="font-size:26px; font-weight:700; font-family:'JetBrains Mono',monospace; letter-spacing:-0.01em;">{{ kpi.value }}</div>
+          <div style="font-size:12.5px; color:#8b9099; margin-top:5px;">{{ kpi.label }}</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <!-- Top lists -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px,1fr)); gap:18px;">
+      <sc-for list="{{ topLists }}" as="col" hint-placeholder-count="3">
+        <div style="background:#14181d; border:1px solid #1f242b; border-radius:12px; padding:{{ cardPad }};">
+          <div style="display:flex; align-items:center; justify-content:between; margin-bottom:16px;">
+            <h3 style="margin:0; font-size:14.5px; font-weight:600;">{{ col.title }}</h3>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:{{ rowGap }};">
+            <sc-for list="{{ col.rows }}" as="row" hint-placeholder-count="5">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <div style="width:22px; font-family:'JetBrains Mono',monospace; font-size:12px; color:#5b616b; flex-shrink:0;">{{ row.rank }}</div>
+                <div style="flex:1; min-width:0;">
+                  <div style="display:flex; align-items:baseline; justify-content:space-between; gap:8px;">
+                    <span style="font-size:13.5px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ row.name }}</span>
+                    <span style="font-size:12px; font-family:'JetBrains Mono',monospace; color:#8b9099; flex-shrink:0;">{{ row.value }}</span>
+                  </div>
+                  <div style="height:4px; background:#1f242b; border-radius:2px; margin-top:6px; overflow:hidden;">
+                    <div style="height:100%; width:{{ row.pct }}%; background:{{ col.barColor }}; border-radius:2px;"></div>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </main>
+</div>
+]]&gt;
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900},&quot;accentColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#cfa554&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#cfa554&quot;,&quot;#4fd1c5&quot;,&quot;#8f94ff&quot;,&quot;#e08a6b&quot;]},&quot;density&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;comfortable&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;comfortable&quot;,&quot;compact&quot;]},&quot;showDeltas&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const accent = this.props.accentColor ?? '#cfa554';
+    const density = this.props.density ?? 'comfortable';
+    const showDeltas = this.props.showDeltas ?? true;
+    const cardPad = density === 'compact' ? '16px' : '20px';
+    const rowGap = density === 'compact' ? '10px' : '14px';
+
+    const navItems = [
+      { label: 'Dashboard', iconPath: 'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z', bg: 'rgba(207,165,84,0.12)', color: accent },
+      { label: 'Skills', iconPath: 'M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8', bg: 'transparent', color: '#8b9099' },
+      { label: 'Contribuyentes', iconPath: 'M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75', bg: 'transparent', color: '#8b9099' },
+      { label: 'Categorías', iconPath: 'M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z', bg: 'transparent', color: '#8b9099' },
+      { label: 'Harness', iconPath: 'M4 4h16v16H4zM9 9h6v6H9zM1 9h3M1 15h3M20 9h3M20 15h3M9 1v3M15 1v3M9 20v3M15 20v3', bg: 'transparent', color: '#8b9099' },
+    ];
+
+    const kpis = [
+      { label: 'Skills publicados', value: '1,284', delta: '+18', iconBg: 'rgba(207,165,84,0.12)', iconColor: '#cfa554', iconPath: 'M20 6L9 17l-5-5', delay: '0s' },
+      { label: 'Instalaciones de skills', value: '38,940', delta: '+2.1k', iconBg: 'rgba(79,209,197,0.12)', iconColor: '#4fd1c5', iconPath: 'M12 3v14M5 12l7 7 7-7M4 21h16', delay: '.05s' },
+      { label: 'Contribuyentes', value: '512', delta: '+34', iconBg: 'rgba(207,165,84,0.12)', iconColor: '#cfa554', iconPath: 'M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z', delay: '.15s' },
+    ];
+
+    const mkRows = (items) => {
+      const max = Math.max(...items.map(i => i.raw));
+      return items.map((it, i) => ({ rank: String(i + 1).padStart(2, '0'), name: it.name, value: it.value, pct: Math.round((it.raw / max) * 100) }));
+    };
+
+    const topLists = [
+      {
+        title: 'Top 5 Skills · instalaciones', barColor: '#4fd1c5',
+        rows: mkRows([
+          { name: 'web-search', value: '9.2k', raw: 9200 },
+          { name: 'code-interpreter', value: '7.8k', raw: 7800 },
+          { name: 'browser-automation', value: '6.1k', raw: 6100 },
+          { name: 'sql-query', value: '4.4k', raw: 4400 },
+          { name: 'vector-search', value: '3.9k', raw: 3900 },
+        ]),
+      },
+      {
+        title: 'Top 5 Skills · stars', barColor: '#cfa554',
+        rows: mkRows([
+          { name: 'pdf-reader', value: '1,240', raw: 1240 },
+          { name: 'notion-sync', value: '980', raw: 980 },
+          { name: 'git-ops', value: '870', raw: 870 },
+          { name: 'image-gen', value: '760', raw: 760 },
+          { name: 'slack-notify', value: '640', raw: 640 },
+        ]),
+      },
+      {
+        title: 'Top 5 Contribuyentes', barColor: '#8f94ff',
+        rows: mkRows([
+          { name: 'lu.martinez', value: '86 skills', raw: 86 },
+          { name: 'devon.k', value: '71 skills', raw: 71 },
+          { name: 'sara.chen', value: '64 skills', raw: 64 },
+          { name: 'r.ferreira', value: '52 skills', raw: 52 },
+          { name: 'akira.n', value: '47 skills', raw: 47 },
+        ]),
+      },
+      {
+        title: 'Top 5 Categorías', barColor: '#e08a6b',
+        rows: mkRows([
+          { name: 'Automatización web', value: '214 skills', raw: 214 },
+          { name: 'Procesamiento de datos', value: '178 skills', raw: 178 },
+          { name: 'Integración APIs', value: '156 skills', raw: 156 },
+          { name: 'Generación de contenido', value: '129 skills', raw: 129 },
+          { name: 'DevOps / CI-CD', value: '98 skills', raw: 98 },
+        ]),
+      },
+    ];
+
+    return { navItems, kpis, topLists, showDeltas, cardPad, rowGap };
+  }
+}
+</script>
+</body>
+</html>
