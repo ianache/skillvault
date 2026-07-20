@@ -140,11 +140,9 @@ async function activateApprovedRequest(
   });
   const publishedAt = Math.floor(Date.now() / 1000);
 
-  await client.execute("BEGIN");
-  try {
-    let skillId = request.skillId;
-    if (skillId === null) {
-      await client.execute({
+  let skillId = request.skillId;
+  if (skillId === null) {
+    await client.execute({
         sql: `INSERT INTO skills
           (slug, name, description, type, author_id, author_handle, version, schema_version,
            triggers, tools, compatibility, dependencies, raw_content, status, published_at)
@@ -165,15 +163,15 @@ async function activateApprovedRequest(
           request.rawContent,
           publishedAt,
         ],
-      });
-      const inserted = await client.execute({
+    });
+    const inserted = await client.execute({
         sql: "SELECT id FROM skills WHERE slug = ? AND status = 'published' LIMIT 1",
         args: [request.slug],
-      });
-      if (inserted.rows.length === 0) throw new Error("activation failed: published skill was not created");
-      skillId = asNumber(inserted.rows[0].id);
-    } else {
-      await client.execute({
+    });
+    if (inserted.rows.length === 0) throw new Error("activation failed: published skill was not created");
+    skillId = asNumber(inserted.rows[0].id);
+  } else {
+    await client.execute({
         sql: `UPDATE skills
           SET slug = ?, name = ?, description = ?, type = ?, author_id = ?, author_handle = ?,
               version = ?, schema_version = ?, triggers = ?, tools = ?, compatibility = ?,
@@ -197,33 +195,28 @@ async function activateApprovedRequest(
           publishedAt,
           skillId,
         ],
-      });
-    }
+    });
+  }
 
-    await client.execute({ sql: "DELETE FROM skill_files WHERE skill_id = ?", args: [skillId] });
-    for (const file of reviewFiles.rows.map(toFile)) {
-      if (file.changeType === "deleted") continue;
-      await client.execute({
+  await client.execute({ sql: "DELETE FROM skill_files WHERE skill_id = ?", args: [skillId] });
+  for (const file of reviewFiles.rows.map(toFile)) {
+    if (file.changeType === "deleted") continue;
+    await client.execute({
         sql: "INSERT INTO skill_files (skill_id, path, file_type, content) VALUES (?, ?, ?, ?)",
         args: [skillId, file.path, file.fileType, file.content],
-      });
-    }
-    await client.execute({
+    });
+  }
+  await client.execute({
       sql: "INSERT INTO skill_versions (skill_id, version, raw_content) VALUES (?, ?, ?)",
       args: [skillId, request.version, request.rawContent],
-    });
-    await client.execute({
+  });
+  await client.execute({
       sql: `UPDATE skill_review_requests
         SET status = ?, reviewer_id = ?, reviewer_handle = ?, general_comment = ?,
             reviewed_at = ?, updated_at = ?
         WHERE id = ?`,
       args: ["approved", actor.id, actor.handle ?? null, comment, publishedAt, publishedAt, request.id],
-    });
-    await client.execute("COMMIT");
-  } catch (error) {
-    await client.execute("ROLLBACK").catch(() => undefined);
-    throw error;
-  }
+  });
 }
 
 export async function createReviewRequest(
@@ -397,7 +390,10 @@ export async function decideReviewRequest(
       ? "rejected"
       : "changes_requested";
   if (input.decision === "approve") {
-    await activateApprovedRequest(request, actor, input.comment?.trim() ?? null, client);
+    if (!client.transaction) throw new Error("Database transactions are required for approval");
+    await client.transaction((transactionClient) =>
+      activateApprovedRequest(request, actor, input.comment?.trim() ?? null, transactionClient)
+    );
   } else {
     const decidedAt = Math.floor(Date.now() / 1000);
     await client.execute({

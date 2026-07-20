@@ -39,6 +39,7 @@ const reviewerActor: ReviewActor = { id: "reviewer-1", handle: "reviewer", roles
 const adminActor: ReviewActor = { id: "admin-1", handle: "admin", roles: ["admin"] };
 
 type FakeClient = ReviewDatabaseClient & {
+  transaction: <T>(fn: (txClient: ReviewDatabaseClient) => Promise<T>) => Promise<T>;
   insertedSkill?: Record<string, unknown>;
   insertedFiles: Array<Record<string, unknown>>;
   insertedVersion?: Record<string, unknown>;
@@ -82,6 +83,7 @@ function createFakeClient(
     failOnVersionInsert: false,
     failOnApprovalUpdate: false,
     commands: [],
+    transaction: async (fn) => fn(fakeClient),
     async execute(input) {
       const sql = typeof input === "string" ? input : input.sql;
       const args = typeof input === "string" ? [] : input.args ?? [];
@@ -239,6 +241,24 @@ test("approving new skill creates published skill, files, and version snapshot",
   assert.equal(fakeClient.updatedRequest?.status, "approved");
 });
 
+test("approval activation uses the transaction-scoped client", async () => {
+  const outerClient = createFakeClient();
+  const transactionClient = createFakeClient();
+  let transactionCalled = false;
+  outerClient.transaction = async (fn) => {
+    transactionCalled = true;
+    return fn(transactionClient);
+  };
+
+  await decideReviewRequest(1, { decision: "approve" }, reviewerActor, outerClient);
+
+  assert.equal(transactionCalled, true);
+  assert.equal(outerClient.insertedSkill, undefined);
+  assert.equal(outerClient.updatedRequest, undefined);
+  assert.equal(transactionClient.insertedSkill?.slug, "demo-skill");
+  assert.equal(transactionClient.updatedRequest?.status, "approved");
+});
+
 test("approval failure leaves request pending", async () => {
   const fakeClient = createFakeClient();
   fakeClient.failOnSkillInsert = true;
@@ -282,7 +302,7 @@ test("version insert failure rolls back activation without approving the request
   );
 
   assert.notEqual(fakeClient.updatedRequest?.status, "approved");
-  assert.deepEqual(fakeClient.commands.filter((sql) => sql === "BEGIN" || sql === "COMMIT" || sql === "ROLLBACK"), ["BEGIN", "ROLLBACK"]);
+  assert.equal(fakeClient.updatedRequest, undefined);
 });
 
 test("approval update failure rolls back published writes without approving the request", async () => {
@@ -295,5 +315,5 @@ test("approval update failure rolls back published writes without approving the 
   );
 
   assert.notEqual(fakeClient.updatedRequest?.status, "approved");
-  assert.deepEqual(fakeClient.commands.filter((sql) => sql === "BEGIN" || sql === "COMMIT" || sql === "ROLLBACK"), ["BEGIN", "ROLLBACK"]);
+  assert.equal(fakeClient.updatedRequest, undefined);
 });

@@ -94,4 +94,5 @@ export type ReviewDatabaseClient = {
   execute: (input: string | { sql: string; args?: unknown[] }) => Promise<{
     rows: Record<string, unknown>[];
   }>;
+  transaction?: <T>(fn: (txClient: ReviewDatabaseClient) => Promise<T>) => Promise<T>;
 };

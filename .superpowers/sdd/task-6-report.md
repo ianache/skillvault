@@ -55,3 +55,11 @@ Status: DONE_WITH_CONCERNS
 
 - The database abstraction does not expose a transaction-scoped client. Its MySQL implementation uses a singleton connection, so the manual `BEGIN`/`COMMIT` sequence makes these approval writes atomic on that connection, but concurrent operations sharing that client could be interleaved. A future database-layer transaction callback that leases a dedicated connection would remove this risk.
 - The requested `pnpm exec` commands were attempted but the installed pnpm `9.0.0` could not resolve local `tsx`, `eslint`, or `next` binaries. Equivalent direct local-binary commands were used for the passing test, lint, and build verification.
+
+## Transaction Isolation Fix
+
+- Replaced the singleton MySQL connection with a pool. `transaction()` now leases one pooled connection, begins the transaction, runs the callback against its scoped client, commits on success, rolls back on failure, and releases the connection in all cases.
+- Added equivalent scoped LibSQL write-transaction behavior and exported the database transaction callback API.
+- Approval activation now runs its published-skill, file, version, and approved-request writes through the transaction callback client. It retains portable TypeScript Unix timestamp parameters.
+- RED observed: `approval activation uses the transaction-scoped client` failed with `false !== true` before implementation because approval never invoked the callback.
+- GREEN verification: `pnpm exec tsx --test src/lib/review/service.test.ts` passed (13 tests); `pnpm exec tsx --test src/lib/review/*.test.ts` passed (33 tests); changed-file ESLint passed; `pnpm exec next build` passed; `git diff --check` passed.
