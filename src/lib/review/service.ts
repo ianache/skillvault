@@ -127,7 +127,12 @@ async function replaceFiles(id: number, files: ReturnType<typeof validateSubmiss
   }
 }
 
-async function activateApprovedRequest(request: ReviewRequest, client: ReviewDatabaseClient): Promise<void> {
+async function activateApprovedRequest(
+  request: ReviewRequest,
+  actor: ReviewActor,
+  comment: string | null,
+  client: ReviewDatabaseClient
+): Promise<void> {
   const { frontmatter } = validateSubmission(request.rawContent);
   const reviewFiles = await client.execute({
     sql: "SELECT * FROM skill_review_files WHERE review_request_id = ? ORDER BY id",
@@ -207,6 +212,13 @@ async function activateApprovedRequest(request: ReviewRequest, client: ReviewDat
       sql: "INSERT INTO skill_versions (skill_id, version, raw_content) VALUES (?, ?, ?)",
       args: [skillId, request.version, request.rawContent],
     });
+    await client.execute({
+      sql: `UPDATE skill_review_requests
+        SET status = ?, reviewer_id = ?, reviewer_handle = ?, general_comment = ?,
+            reviewed_at = ?, updated_at = ?
+        WHERE id = ?`,
+      args: ["approved", actor.id, actor.handle ?? null, comment, publishedAt, publishedAt, request.id],
+    });
     await client.execute("COMMIT");
   } catch (error) {
     await client.execute("ROLLBACK").catch(() => undefined);
@@ -272,7 +284,7 @@ export async function updateReviewRequest(
     sql: `UPDATE skill_review_requests
       SET slug = ?, name = ?, description = ?, type = ?, version = ?, schema_version = ?, raw_content = ?,
           status = 'pending', reviewer_id = NULL, reviewer_handle = NULL, general_comment = NULL,
-          reviewed_at = NULL, updated_at = unixepoch()
+          reviewed_at = NULL, updated_at = ?
       WHERE id = ?`,
     args: [
       frontmatter.name,
@@ -282,6 +294,7 @@ export async function updateReviewRequest(
       frontmatter.version,
       frontmatter.schema_version,
       input.rawContent,
+      Math.floor(Date.now() / 1000),
       id,
     ],
   });
@@ -384,14 +397,16 @@ export async function decideReviewRequest(
       ? "rejected"
       : "changes_requested";
   if (input.decision === "approve") {
-    await activateApprovedRequest(request, client);
+    await activateApprovedRequest(request, actor, input.comment?.trim() ?? null, client);
+  } else {
+    const decidedAt = Math.floor(Date.now() / 1000);
+    await client.execute({
+      sql: `UPDATE skill_review_requests
+        SET status = ?, reviewer_id = ?, reviewer_handle = ?, general_comment = ?,
+            reviewed_at = ?, updated_at = ?
+        WHERE id = ?`,
+      args: [status, actor.id, actor.handle ?? null, input.comment?.trim() ?? null, decidedAt, decidedAt, id],
+    });
   }
-  await client.execute({
-    sql: `UPDATE skill_review_requests
-      SET status = ?, reviewer_id = ?, reviewer_handle = ?, general_comment = ?,
-          reviewed_at = unixepoch(), updated_at = unixepoch()
-      WHERE id = ?`,
-    args: [status, actor.id, actor.handle ?? null, input.comment?.trim() ?? null, id],
-  });
   return { ...request, status, reviewerId: actor.id, reviewerHandle: actor.handle ?? null, generalComment: input.comment?.trim() ?? null };
 }

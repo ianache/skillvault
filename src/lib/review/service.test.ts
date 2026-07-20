@@ -44,9 +44,15 @@ type FakeClient = ReviewDatabaseClient & {
   insertedVersion?: Record<string, unknown>;
   updatedRequest?: Record<string, unknown>;
   failOnSkillInsert: boolean;
+  failOnVersionInsert: boolean;
+  failOnApprovalUpdate: boolean;
+  commands: string[];
 };
 
-function createFakeClient(files: Array<Record<string, unknown>> = []): FakeClient {
+function createFakeClient(
+  files: Array<Record<string, unknown>> = [],
+  requestOverrides: Partial<Record<string, unknown>> = {}
+): FakeClient {
   const comments: Array<Record<string, unknown>> = [];
   const request = {
     id: 1,
@@ -67,14 +73,19 @@ function createFakeClient(files: Array<Record<string, unknown>> = []): FakeClien
     submitted_at: 1,
     reviewed_at: null,
     updated_at: 1,
+    ...requestOverrides,
   };
 
   const fakeClient: FakeClient = {
     insertedFiles: [],
     failOnSkillInsert: false,
+    failOnVersionInsert: false,
+    failOnApprovalUpdate: false,
+    commands: [],
     async execute(input) {
       const sql = typeof input === "string" ? input : input.sql;
       const args = typeof input === "string" ? [] : input.args ?? [];
+      fakeClient.commands.push(sql);
       if (sql.includes("SELECT * FROM skill_review_requests WHERE id = ?")) {
         return { rows: [request] };
       }
@@ -104,10 +115,12 @@ function createFakeClient(files: Array<Record<string, unknown>> = []): FakeClien
         return { rows: [] };
       }
       if (sql.includes("INSERT INTO skill_versions")) {
+        if (fakeClient.failOnVersionInsert) throw new Error("version insert failed");
         fakeClient.insertedVersion = { skillId: args[0], version: args[1], rawContent: args[2] };
         return { rows: [] };
       }
       if (sql.includes("UPDATE skill_review_requests")) {
+        if (fakeClient.failOnApprovalUpdate && args[0] === "approved") throw new Error("approval update failed");
         fakeClient.updatedRequest = { status: args[0] };
         return { rows: [] };
       }
@@ -236,4 +249,51 @@ test("approval failure leaves request pending", async () => {
   );
 
   assert.notEqual(fakeClient.updatedRequest?.status, "approved");
+});
+
+test("approving an existing skill replaces published content and files", async () => {
+  const fakeClient = createFakeClient([
+    {
+      id: 1,
+      review_request_id: 1,
+      path: "resources/replacement.md",
+      file_type: "resource",
+      content: "Replacement content",
+      change_type: "modified",
+      created_at: 1,
+    },
+  ], { skill_id: 7 });
+
+  await decideReviewRequest(1, { decision: "approve" }, reviewerActor, fakeClient);
+
+  assert.equal(fakeClient.insertedSkill, undefined);
+  assert.deepEqual(fakeClient.insertedFiles, [{ skillId: 7, path: "resources/replacement.md", fileType: "resource", content: "Replacement content" }]);
+  assert.ok(fakeClient.commands.some((sql) => sql.includes("UPDATE skills")));
+  assert.ok(fakeClient.commands.some((sql) => sql.includes("DELETE FROM skill_files")));
+});
+
+test("version insert failure rolls back activation without approving the request", async () => {
+  const fakeClient = createFakeClient();
+  fakeClient.failOnVersionInsert = true;
+
+  await assert.rejects(
+    () => decideReviewRequest(1, { decision: "approve" }, reviewerActor, fakeClient),
+    /version insert failed/
+  );
+
+  assert.notEqual(fakeClient.updatedRequest?.status, "approved");
+  assert.deepEqual(fakeClient.commands.filter((sql) => sql === "BEGIN" || sql === "COMMIT" || sql === "ROLLBACK"), ["BEGIN", "ROLLBACK"]);
+});
+
+test("approval update failure rolls back published writes without approving the request", async () => {
+  const fakeClient = createFakeClient();
+  fakeClient.failOnApprovalUpdate = true;
+
+  await assert.rejects(
+    () => decideReviewRequest(1, { decision: "approve" }, reviewerActor, fakeClient),
+    /approval update failed/
+  );
+
+  assert.notEqual(fakeClient.updatedRequest?.status, "approved");
+  assert.deepEqual(fakeClient.commands.filter((sql) => sql === "BEGIN" || sql === "COMMIT" || sql === "ROLLBACK"), ["BEGIN", "ROLLBACK"]);
 });
