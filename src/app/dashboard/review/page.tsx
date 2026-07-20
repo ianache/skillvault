@@ -1,17 +1,15 @@
 import { AppHeader } from "@/components/AppHeader";
 import { ReviewRequestList } from "@/components/review/ReviewRequestList";
 import { auth } from "@/auth";
-import { client } from "@/lib/db";
-import { listReviewRequests } from "@/lib/review/service";
-import { actorFromSession } from "@/app/api/review-requests/route-utils";
+import { fetchReviewRequests } from "../review-api";
 
 export const dynamic = "force-dynamic";
 
 export default async function ReviewQueuePage() {
   const session = await auth();
-  const actor = session ? actorFromSession(session) : null;
-  const canReview = actor?.roles.includes("reviewer") || actor?.roles.includes("admin");
-  const requests = canReview && actor ? await listReviewRequests({ status: "pending" }, actor, client) : null;
+  const roles = session?.user?.roles ?? [];
+  const canReview = roles.includes("reviewer") || roles.includes("admin");
+  const requests = canReview ? await fetchReviewRequests("?status=pending") : null;
   return <PageShell title="Cola de revision" description="Solicitudes pendientes asignadas al equipo revisor.">{requests ? <ReviewRequestList requests={requests} mode="reviewer" /> : <State message="No tienes permiso para revisar solicitudes." />}</PageShell>;
 }
 function PageShell({ title, description, children }: { title: string; description: string; children: React.ReactNode }) { return <div style={{ minHeight: "100vh", background: "var(--bg)" }}><AppHeader /><main style={{ maxWidth: "1100px", margin: "0 auto", padding: "32px 24px" }}><h1 style={headingStyle}>{title}</h1><p style={descriptionStyle}>{description}</p>{children}</main></div>; }

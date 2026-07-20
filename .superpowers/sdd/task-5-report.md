@@ -37,3 +37,18 @@ Status: DONE
 ## Concerns
 
 - Approval activation remains outside this task as required.
+
+## Review Fixes
+
+- Author resubmission now sends every existing attachment's `path`, `fileType`, `content`, and `changeType`, preventing the update endpoint from replacing files with an empty set.
+- Reviewer decision feedback (`generalComment`) is shown prominently on the request detail page.
+- Comments can target the general discussion, `SKILL.md`, or an individual attachment. File-targeted comments are shown with their file path and beside the relevant content.
+- Dashboard pages now use the review request API endpoints: `?mine=1`, `?status=pending`, and `/:id`. The server-side helper forwards the incoming cookie to preserve API authentication.
+
+## Review Fix Verification
+
+- RED: `pnpm exec tsx --test src/lib/review/ui-smoke.test.ts` failed 3 new checks before implementation: attachment preservation/decision feedback, file-specific comments, and API endpoint use.
+- GREEN: `pnpm exec tsx --test src/lib/review/ui-smoke.test.ts` passed: 5/5 tests.
+- `pnpm exec eslint src/components/review src/app/dashboard/review src/app/dashboard/proposals src/lib/review/ui-smoke.test.ts` passed.
+- `pnpm exec next build` passed.
+- `git diff --check` passed.
