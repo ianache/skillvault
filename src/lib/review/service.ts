@@ -127,6 +127,93 @@ async function replaceFiles(id: number, files: ReturnType<typeof validateSubmiss
   }
 }
 
+async function activateApprovedRequest(request: ReviewRequest, client: ReviewDatabaseClient): Promise<void> {
+  const { frontmatter } = validateSubmission(request.rawContent);
+  const reviewFiles = await client.execute({
+    sql: "SELECT * FROM skill_review_files WHERE review_request_id = ? ORDER BY id",
+    args: [request.id],
+  });
+  const publishedAt = Math.floor(Date.now() / 1000);
+
+  await client.execute("BEGIN");
+  try {
+    let skillId = request.skillId;
+    if (skillId === null) {
+      await client.execute({
+        sql: `INSERT INTO skills
+          (slug, name, description, type, author_id, author_handle, version, schema_version,
+           triggers, tools, compatibility, dependencies, raw_content, status, published_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'published', ?)`,
+        args: [
+          request.slug,
+          request.name,
+          request.description,
+          request.type,
+          request.authorId,
+          request.authorHandle,
+          request.version,
+          request.schemaVersion,
+          JSON.stringify(frontmatter.metadata.triggers),
+          JSON.stringify(frontmatter.metadata.tools),
+          JSON.stringify(frontmatter.compatibility),
+          JSON.stringify(frontmatter.dependencies),
+          request.rawContent,
+          publishedAt,
+        ],
+      });
+      const inserted = await client.execute({
+        sql: "SELECT id FROM skills WHERE slug = ? AND status = 'published' LIMIT 1",
+        args: [request.slug],
+      });
+      if (inserted.rows.length === 0) throw new Error("activation failed: published skill was not created");
+      skillId = asNumber(inserted.rows[0].id);
+    } else {
+      await client.execute({
+        sql: `UPDATE skills
+          SET slug = ?, name = ?, description = ?, type = ?, author_id = ?, author_handle = ?,
+              version = ?, schema_version = ?, triggers = ?, tools = ?, compatibility = ?,
+              dependencies = ?, raw_content = ?, status = 'published', published_at = ?, updated_at = ?
+          WHERE id = ? AND status = 'published'`,
+        args: [
+          request.slug,
+          request.name,
+          request.description,
+          request.type,
+          request.authorId,
+          request.authorHandle,
+          request.version,
+          request.schemaVersion,
+          JSON.stringify(frontmatter.metadata.triggers),
+          JSON.stringify(frontmatter.metadata.tools),
+          JSON.stringify(frontmatter.compatibility),
+          JSON.stringify(frontmatter.dependencies),
+          request.rawContent,
+          publishedAt,
+          publishedAt,
+          skillId,
+        ],
+      });
+    }
+
+    await client.execute({ sql: "DELETE FROM skill_files WHERE skill_id = ?", args: [skillId] });
+    for (const file of reviewFiles.rows.map(toFile)) {
+      if (file.changeType === "deleted") continue;
+      await client.execute({
+        sql: "INSERT INTO skill_files (skill_id, path, file_type, content) VALUES (?, ?, ?, ?)",
+        args: [skillId, file.path, file.fileType, file.content],
+      });
+    }
+    await client.execute({
+      sql: "INSERT INTO skill_versions (skill_id, version, raw_content) VALUES (?, ?, ?)",
+      args: [skillId, request.version, request.rawContent],
+    });
+    await client.execute("COMMIT");
+  } catch (error) {
+    await client.execute("ROLLBACK").catch(() => undefined);
+    throw error;
+  }
+}
+
 export async function createReviewRequest(
   input: CreateReviewRequestInput,
   actor: ReviewActor,
@@ -222,7 +309,11 @@ export async function listReviewRequests(
     sql: `SELECT * FROM skill_review_requests${where} ORDER BY updated_at DESC, id DESC`,
     args,
   });
-  return result.rows.map(toRequest).map(({ rawContent: _rawContent, ...request }) => request);
+  return result.rows.map(toRequest).map((request) => {
+    const { rawContent, ...summary } = request;
+    void rawContent;
+    return summary;
+  });
 }
 
 export async function getReviewRequest(
@@ -292,7 +383,9 @@ export async function decideReviewRequest(
     : input.decision === "reject"
       ? "rejected"
       : "changes_requested";
-  // Task 6 activates skills after approval; this task records only review state.
+  if (input.decision === "approve") {
+    await activateApprovedRequest(request, client);
+  }
   await client.execute({
     sql: `UPDATE skill_review_requests
       SET status = ?, reviewer_id = ?, reviewer_handle = ?, general_comment = ?,

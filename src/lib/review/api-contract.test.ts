@@ -5,6 +5,9 @@ import { createReviewRequestsHandlers } from "../../app/api/review-requests/rout
 import { createReviewDecisionHandlers } from "../../app/api/review-requests/[id]/decision/route";
 import { createSkillHandlers } from "../../app/api/skills/route";
 import { createSkillDetailHandlers } from "../../app/api/skills/[slug]/route";
+import { createSkillDownloadHandlers } from "../../app/api/skills/[slug]/download/route";
+import { createSkillInstallHandlers } from "../../app/api/skills/[slug]/install/route";
+import { createSkillVersionHandlers } from "../../app/api/skills/[slug]/versions/route";
 import { POST as postSkillFiles } from "../../app/api/skills/[slug]/files/route";
 import type { ReviewDatabaseClient, ReviewRequest } from "./types";
 
@@ -177,6 +180,116 @@ test("PATCH /api/skills/:slug preserves published files when files are omitted",
     files: [{ ...publishedFiles[0], changeType: "unchanged" }],
   });
   assert.equal(publishedRawContent, originalRawContent);
+});
+
+test("catalog excludes pending review requests", async () => {
+  let catalogSql = "";
+  const { GET } = createSkillHandlers({
+    database: {
+      async execute(input) {
+        catalogSql = typeof input === "string" ? input : input.sql;
+        return { rows: [] };
+      },
+    },
+  });
+
+  const response = await GET(new NextRequest("http://test/api/skills"));
+
+  assert.equal(response.status, 200);
+  assert.match(catalogSql, /FROM skills WHERE status = 'published'/);
+});
+
+test("detail returns published raw content while a pending version exists", async () => {
+  const publishedRawContent = "published skill content";
+  const { GET } = createSkillDetailHandlers({
+    database: {
+      async execute(input) {
+        const sql = typeof input === "string" ? input : input.sql;
+        assert.match(sql, /FROM skills WHERE slug = \? AND status = 'published'/);
+        return {
+          rows: [{
+            id: 4,
+            slug: "demo-skill",
+            name: "demo-skill",
+            description: "Published skill",
+            type: "code",
+            version: "1.0.0",
+            schema_version: "1.1",
+            triggers: "[]",
+            tools: "[]",
+            compatibility: "[\"claude\"]",
+            dependencies: "[]",
+            raw_content: publishedRawContent,
+            status: "published",
+            install_count: 0,
+          }],
+        };
+      },
+    },
+  });
+
+  const response = await GET(new NextRequest("http://test/api/skills/demo-skill"), { params: Promise.resolve({ slug: "demo-skill" }) });
+
+  assert.equal((await response.json()).rawContent, publishedRawContent);
+});
+
+test("download packages only published skill content and files", async () => {
+  const queries: string[] = [];
+  const { GET } = createSkillDownloadHandlers({
+    database: {
+      async execute(input) {
+        const sql = typeof input === "string" ? input : input.sql;
+        queries.push(sql);
+        if (sql.includes("FROM skills")) return { rows: [{ id: 4, raw_content: "published skill content" }] };
+        return { rows: [{ path: "resources/published.md", file_type: "resource", content: "published file" }] };
+      },
+    },
+  });
+
+  const response = await GET(new NextRequest("http://test/api/skills/demo-skill/download"), { params: Promise.resolve({ slug: "demo-skill" }) });
+
+  assert.equal(response.status, 200);
+  assert.match(queries[0], /status = 'published'/);
+  assert.match(queries[1], /FROM skill_files WHERE skill_id = \?/);
+});
+
+test("install increments only the published skill", async () => {
+  const queries: string[] = [];
+  const { POST } = createSkillInstallHandlers({
+    database: {
+      async execute(input) {
+        const sql = typeof input === "string" ? input : input.sql;
+        queries.push(sql);
+        if (sql.startsWith("SELECT")) return { rows: [{ id: 4, install_count: 2 }] };
+        return { rows: [] };
+      },
+    },
+  });
+
+  const response = await POST(new NextRequest("http://test/api/skills/demo-skill/install", { method: "POST" }), { params: Promise.resolve({ slug: "demo-skill" }) });
+
+  assert.deepEqual(await response.json(), { slug: "demo-skill", installCount: 3 });
+  assert.match(queries[0], /status = 'published'/);
+  assert.match(queries[1], /WHERE id = \? AND status = 'published'/);
+});
+
+test("versions belong to the published skill only", async () => {
+  const queries: string[] = [];
+  const { GET } = createSkillVersionHandlers({
+    database: {
+      async execute(input) {
+        const sql = typeof input === "string" ? input : input.sql;
+        queries.push(sql);
+        if (sql.includes("FROM skills")) return { rows: [{ id: 4 }] };
+        return { rows: [{ version: "1.0.0", created_at: 1 }] };
+      },
+    },
+  });
+
+  const response = await GET(new NextRequest("http://test/api/skills/demo-skill/versions"), { params: Promise.resolve({ slug: "demo-skill" }) });
+
+  assert.deepEqual(await response.json(), { versions: [{ version: "1.0.0", createdAt: 1 }] });
+  assert.match(queries[0], /status = 'published'/);
 });
 
 test("unauthenticated create returns 401", async () => {

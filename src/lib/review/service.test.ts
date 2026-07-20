@@ -38,7 +38,15 @@ const authorActor: ReviewActor = { id: "author-1", handle: "author", roles: ["au
 const reviewerActor: ReviewActor = { id: "reviewer-1", handle: "reviewer", roles: ["reviewer"] };
 const adminActor: ReviewActor = { id: "admin-1", handle: "admin", roles: ["admin"] };
 
-function createFakeClient(files: Array<Record<string, unknown>> = []): ReviewDatabaseClient {
+type FakeClient = ReviewDatabaseClient & {
+  insertedSkill?: Record<string, unknown>;
+  insertedFiles: Array<Record<string, unknown>>;
+  insertedVersion?: Record<string, unknown>;
+  updatedRequest?: Record<string, unknown>;
+  failOnSkillInsert: boolean;
+};
+
+function createFakeClient(files: Array<Record<string, unknown>> = []): FakeClient {
   const comments: Array<Record<string, unknown>> = [];
   const request = {
     id: 1,
@@ -61,7 +69,9 @@ function createFakeClient(files: Array<Record<string, unknown>> = []): ReviewDat
     updated_at: 1,
   };
 
-  return {
+  const fakeClient: FakeClient = {
+    insertedFiles: [],
+    failOnSkillInsert: false,
     async execute(input) {
       const sql = typeof input === "string" ? input : input.sql;
       const args = typeof input === "string" ? [] : input.args ?? [];
@@ -73,6 +83,33 @@ function createFakeClient(files: Array<Record<string, unknown>> = []): ReviewDat
       }
       if (sql.includes("SELECT * FROM skill_review_files WHERE review_request_id = ?")) {
         return { rows: files };
+      }
+      if (sql.includes("INSERT INTO skills")) {
+        if (fakeClient.failOnSkillInsert) throw new Error("activation failed");
+        fakeClient.insertedSkill = {
+          id: 7,
+          slug: args[0],
+          name: args[1],
+        };
+        return { rows: [] };
+      }
+      if (sql.includes("SELECT id FROM skills WHERE slug = ?")) {
+        return { rows: [{ id: 7 }] };
+      }
+      if (sql.includes("DELETE FROM skill_files")) {
+        return { rows: [] };
+      }
+      if (sql.includes("INSERT INTO skill_files")) {
+        fakeClient.insertedFiles.push({ skillId: args[0], path: args[1], fileType: args[2], content: args[3] });
+        return { rows: [] };
+      }
+      if (sql.includes("INSERT INTO skill_versions")) {
+        fakeClient.insertedVersion = { skillId: args[0], version: args[1], rawContent: args[2] };
+        return { rows: [] };
+      }
+      if (sql.includes("UPDATE skill_review_requests")) {
+        fakeClient.updatedRequest = { status: args[0] };
+        return { rows: [] };
       }
       if (sql.includes("INSERT INTO skill_review_comments")) {
         comments.unshift({
@@ -95,6 +132,7 @@ function createFakeClient(files: Array<Record<string, unknown>> = []): ReviewDat
       return { rows: [] };
     },
   };
+  return fakeClient;
 }
 
 test("author creates pending request for a new skill", async () => {
@@ -156,8 +194,46 @@ test("per-file comment accepts SKILL.md and an attached file", async () => {
   assert.equal(attachedFileComment.filePath, "resources/reference.md");
 });
 
-test("approval records approved status without activating the skill until Task 6", async () => {
-  const request = await decideReviewRequest(1, { decision: "approve" }, reviewerActor, createFakeClient());
+test("approving new skill creates published skill, files, and version snapshot", async () => {
+  const files = [
+    {
+      id: 1,
+      review_request_id: 1,
+      path: "resources/reference.md",
+      file_type: "resource",
+      content: "Published reference",
+      change_type: "added",
+      created_at: 1,
+    },
+    {
+      id: 2,
+      review_request_id: 1,
+      path: "resources/removed.md",
+      file_type: "resource",
+      content: "Deleted reference",
+      change_type: "deleted",
+      created_at: 1,
+    },
+  ];
+  const fakeClient = createFakeClient(files);
+
+  const request = await decideReviewRequest(1, { decision: "approve" }, reviewerActor, fakeClient);
 
   assert.equal(request.status, "approved");
+  assert.equal(fakeClient.insertedSkill?.slug, "demo-skill");
+  assert.deepEqual(fakeClient.insertedFiles, [{ skillId: 7, path: "resources/reference.md", fileType: "resource", content: "Published reference" }]);
+  assert.deepEqual(fakeClient.insertedVersion, { skillId: 7, version: "1.0.0", rawContent: validRawContent });
+  assert.equal(fakeClient.updatedRequest?.status, "approved");
+});
+
+test("approval failure leaves request pending", async () => {
+  const fakeClient = createFakeClient();
+  fakeClient.failOnSkillInsert = true;
+
+  await assert.rejects(
+    () => decideReviewRequest(1, { decision: "approve" }, reviewerActor, fakeClient),
+    /activation failed/
+  );
+
+  assert.notEqual(fakeClient.updatedRequest?.status, "approved");
 });
