@@ -74,5 +74,7 @@ test("dashboard pages fetch review request API endpoints", async () => {
   assert.match(reviewDetail, /fetchReviewRequest\(id\)/);
   assert.match(proposalDetail, /fetchReviewRequest\(id\)/);
   assert.match(helper, /\/api\/review-requests/);
+  assert.match(helper, /SKILLVAULT_INTERNAL_URL/);
+  assert.match(helper, /127\.0\.0\.1/);
   assert.match(helper, /cookie/);
 });
