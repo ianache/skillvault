@@ -27,9 +27,21 @@ test("proposal dashboard routes export page components", async () => {
 test("review detail preserves files when an author resubmits and shows decision feedback", async () => {
   const detail = await source("../../components/review/ReviewRequestDetail.tsx");
 
-  assert.match(detail, /files:\s*request\.files\.map/);
+  assert.match(detail, /initialRequest\.files\.map/);
+  assert.match(detail, /files:\s*current\.files/);
+  assert.match(detail, /comments:\s*current\.comments/);
   assert.match(detail, /generalComment/);
   assert.match(detail, /Comentario general del revisor/);
+});
+
+test("author resubmission supports editable attachments and sends their current state", async () => {
+  const detail = await source("../../components/review/ReviewRequestDetail.tsx");
+
+  assert.match(detail, /const \[files, setFiles\] = useState/);
+  assert.match(detail, /files: files\.map/);
+  assert.match(detail, /Agregar adjunto/);
+  assert.match(detail, /Eliminar adjunto/);
+  assert.match(detail, /setFiles\(\(current\) => current\.filter/);
 });
 
 test("review detail supports general and file-specific comments", async () => {

@@ -52,3 +52,16 @@ Status: DONE
 - `pnpm exec eslint src/components/review src/app/dashboard/review src/app/dashboard/proposals src/lib/review/ui-smoke.test.ts` passed.
 - `pnpm exec next build` passed.
 - `git diff --check` passed.
+
+## Re-review Fixes
+
+- The PATCH and reviewer-decision summary responses now merge into the loaded detail DTO while retaining its `files` and `comments`, so the detail view does not dereference missing collections after a successful update.
+- Authors can add, edit, and remove attachments while a request is `changes_requested`. Resubmission sends the complete current attachment payload with paths, types, content, and change types.
+- Smoke coverage verifies both the detail-preserving merge and the editable attachment payload/controls.
+
+## Re-review Verification
+
+- RED: `pnpm exec tsx --test src/lib/review/ui-smoke.test.ts` failed 2 new checks before implementation: the response merge did not retain full detail collections and author attachment editing was absent.
+- GREEN: `pnpm exec tsx --test src/lib/review/ui-smoke.test.ts` passed: 6/6 tests.
+- `pnpm exec eslint src/components/review/ReviewRequestDetail.tsx src/lib/review/ui-smoke.test.ts` passed.
+- `pnpm exec next build` passed.
