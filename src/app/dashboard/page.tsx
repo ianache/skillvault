@@ -86,6 +86,38 @@ export default async function DashboardPage() {
               Categorías
             </Link>
             <Link
+              href="/dashboard/proposals"
+              style={{
+                fontFamily: "var(--font-geist), sans-serif",
+                fontSize: "13px",
+                fontWeight: 600,
+                padding: "8px 18px",
+                borderRadius: "4px",
+                background: "var(--raised)",
+                color: "var(--text)",
+                textDecoration: "none",
+                border: "1px solid var(--border)",
+              }}
+            >
+              Mis propuestas
+            </Link>
+            <Link
+              href="/dashboard/review"
+              style={{
+                fontFamily: "var(--font-geist), sans-serif",
+                fontSize: "13px",
+                fontWeight: 600,
+                padding: "8px 18px",
+                borderRadius: "4px",
+                background: "var(--raised)",
+                color: "var(--text)",
+                textDecoration: "none",
+                border: "1px solid var(--border)",
+              }}
+            >
+              Revision
+            </Link>
+            <Link
               href="/publish"
               style={{
                 fontFamily: "var(--font-geist), sans-serif",

@@ -1,7 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/auth";
 import { client } from "@/lib/db";
-import matter from "gray-matter";
-import { validateSkillFrontmatter } from "@/lib/skill-schema";
+import { createReviewRequest, updateReviewRequest } from "@/lib/review/service";
+import { actorFromSession, errorResponse } from "../../review-requests/route-utils";
+import { skillSubmissionBody } from "../route";
+import type { Session } from "next-auth";
+import type { CreateReviewRequestInput, ReviewActor, ReviewDatabaseClient, ReviewRequest, UpdateReviewRequestInput } from "@/lib/review/types";
+
+type RouteContext = { params: Promise<{ slug: string }> };
+
+type RouteDependencies = {
+  getSession: () => Promise<Session | null>;
+  database: ReviewDatabaseClient;
+  create: (input: CreateReviewRequestInput, actor: ReviewActor, database: ReviewDatabaseClient) => Promise<ReviewRequest>;
+  update: (id: number, input: UpdateReviewRequestInput, actor: ReviewActor, database: ReviewDatabaseClient) => Promise<ReviewRequest>;
+};
 
 function yamlList(arr: string[]) {
   return arr.length ? arr.map((v) => `  - "${v}"`).join("\n") : "  []";
@@ -9,10 +22,10 @@ function yamlList(arr: string[]) {
 
 function buildRawContent(row: Record<string, unknown>): string {
   const triggers = JSON.parse(row.triggers as string ?? "[]") as string[];
-  const tools    = JSON.parse(row.tools    as string ?? "[]") as string[];
-  const compat   = JSON.parse(row.compatibility as string ?? '["claude"]') as string[];
-  const deps     = JSON.parse(row.dependencies  as string ?? "[]") as string[];
-  const author   = row.author_handle ? `\nauthor: "${row.author_handle}"` : "";
+  const tools = JSON.parse(row.tools as string ?? "[]") as string[];
+  const compat = JSON.parse(row.compatibility as string ?? '["claude"]') as string[];
+  const deps = JSON.parse(row.dependencies as string ?? "[]") as string[];
+  const author = row.author_handle ? `\nauthor: "${row.author_handle}"` : "";
 
   return `---
 name: "${row.name}"
@@ -43,10 +56,10 @@ Invoke this skill to use its capabilities.
 
 function parseSkill(row: Record<string, unknown>) {
   const triggers = JSON.parse(row.triggers as string ?? "[]");
-  const tools    = JSON.parse(row.tools    as string ?? "[]");
-  const compat   = JSON.parse(row.compatibility as string ?? '["claude"]');
-  const deps     = JSON.parse(row.dependencies  as string ?? "[]");
-  const raw      = (row.raw_content as string) || buildRawContent(row);
+  const tools = JSON.parse(row.tools as string ?? "[]");
+  const compat = JSON.parse(row.compatibility as string ?? '["claude"]');
+  const deps = JSON.parse(row.dependencies as string ?? "[]");
+  const raw = (row.raw_content as string) || buildRawContent(row);
 
   return {
     id: row.id,
@@ -69,91 +82,77 @@ function parseSkill(row: Record<string, unknown>) {
   };
 }
 
-export async function GET(
-  _req: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
-) {
-  const { slug } = await params;
-  const result = await client.execute({
-    sql: `SELECT * FROM skills WHERE slug = ? AND status = 'published' LIMIT 1`,
-    args: [slug],
-  });
+export function createSkillDetailHandlers(dependencies: Partial<RouteDependencies> = {}) {
+  const getSession = dependencies.getSession ?? auth;
+  const database = dependencies.database ?? client;
+  const create = dependencies.create ?? createReviewRequest;
+  const update = dependencies.update ?? updateReviewRequest;
 
-  if (result.rows.length === 0) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  async function GET(_req: NextRequest, { params }: RouteContext) {
+    const { slug } = await params;
+    const result = await database.execute({
+      sql: `SELECT * FROM skills WHERE slug = ? AND status = 'published' LIMIT 1`,
+      args: [slug],
+    });
+
+    if (result.rows.length === 0) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(parseSkill(result.rows[0] as Record<string, unknown>));
   }
 
-  return NextResponse.json(parseSkill(result.rows[0] as Record<string, unknown>));
+  async function PATCH(req: NextRequest, { params }: RouteContext) {
+    const session = await getSession();
+    const actor = session ? actorFromSession(session) : null;
+    if (!actor) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { slug } = await params;
+    const skill = await database.execute({
+      sql: "SELECT id, raw_content FROM skills WHERE slug = ? AND status = 'published' LIMIT 1",
+      args: [slug],
+    });
+    if (skill.rows.length === 0) {
+      return NextResponse.json({ error: "Skill no encontrado" }, { status: 404 });
+    }
+
+    const input = await skillSubmissionBody(req);
+    if (!input) return NextResponse.json({ error: "rawContent y files[] inválidos" }, { status: 400 });
+
+    try {
+      const skillId = Number(skill.rows[0].id);
+      const files = input.files === undefined
+        ? (await database.execute({
+          sql: "SELECT path, file_type, content FROM skill_files WHERE skill_id = ? ORDER BY file_type, path",
+          args: [skillId],
+        })).rows.map((file) => ({
+          path: String(file.path),
+          fileType: file.file_type as "resource" | "script",
+          content: String(file.content),
+          changeType: "unchanged" as const,
+        }))
+        : input.files;
+      const reviewInput = { ...input, files };
+      const openRequest = await database.execute({
+        sql: `SELECT id FROM skill_review_requests
+          WHERE skill_id = ? AND author_id = ? AND status IN ('pending', 'changes_requested')
+          ORDER BY id DESC LIMIT 1`,
+        args: [skillId, actor.id],
+      });
+      const request = openRequest.rows.length > 0
+        ? await update(Number(openRequest.rows[0].id), reviewInput, actor, database)
+        : await create({ ...reviewInput, skillId }, actor, database);
+
+      return NextResponse.json(
+        { slug: request.slug, reviewRequestId: request.id, status: request.status },
+        { status: 201 }
+      );
+    } catch (error) {
+      return errorResponse(error);
+    }
+  }
+
+  return { GET, PATCH };
 }
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
-) {
-  const { slug } = await params;
-
-  const existing = await client.execute({
-    sql: "SELECT id FROM skills WHERE slug = ?",
-    args: [slug],
-  });
-  if (existing.rows.length === 0) {
-    return NextResponse.json({ error: "Skill no encontrado" }, { status: 404 });
-  }
-
-  const { rawContent } = await req.json();
-  if (!rawContent || typeof rawContent !== "string") {
-    return NextResponse.json({ error: "rawContent requerido" }, { status: 400 });
-  }
-
-  const parsed = matter(rawContent);
-  const fmResult = validateSkillFrontmatter(parsed.data);
-  if (!fmResult.valid) {
-    return NextResponse.json(
-      { error: "Frontmatter inválido", errors: fmResult.errors },
-      { status: 422 }
-    );
-  }
-
-  const fm = fmResult.parsed!;
-  const now = Math.floor(Date.now() / 1000);
-
-  await client.execute({
-    sql: `UPDATE skills SET
-      name = ?, description = ?, type = ?, author_handle = ?,
-      version = ?, schema_version = ?,
-      triggers = ?, tools = ?, compatibility = ?, dependencies = ?,
-      raw_content = ?, updated_at = ?
-      WHERE slug = ?`,
-    args: [
-      fm.name,
-      fm.description,
-      fm.metadata.type,
-      fm.author ?? null,
-      fm.version ?? "1.0.0",
-      fm.schema_version ?? "1.1",
-      JSON.stringify(fm.metadata.triggers),
-      JSON.stringify(fm.metadata.tools ?? []),
-      JSON.stringify(fm.compatibility ?? ["claude"]),
-      JSON.stringify(fm.dependencies ?? []),
-      rawContent,
-      now,
-      slug,
-    ],
-  });
-
-  // Record version snapshot
-  const skillRow = await client.execute({
-    sql: "SELECT id FROM skills WHERE slug = ?",
-    args: [slug],
-  });
-  if (skillRow.rows.length > 0) {
-    const skillId = skillRow.rows[0].id;
-    await client.execute({
-      sql: `INSERT INTO skill_versions (skill_id, version, raw_content, created_at)
-            VALUES (?, ?, ?, ?)`,
-      args: [skillId, fm.version ?? "1.0.0", rawContent, now],
-    }).catch(() => {}); // graceful if table schema differs
-  }
-
-  return NextResponse.json({ slug, updated: now });
-}
+export const { GET, PATCH } = createSkillDetailHandlers();

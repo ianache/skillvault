@@ -1,11 +1,11 @@
 import Link from "next/link";
 
 interface Props {
-  searchParams: Promise<{ slug?: string }>;
+  searchParams: Promise<{ slug?: string; reviewRequestId?: string }>;
 }
 
 export default async function PublishSuccessPage({ searchParams }: Props) {
-  const { slug } = await searchParams;
+  const { slug, reviewRequestId } = await searchParams;
 
   return (
     <div
@@ -52,7 +52,7 @@ export default async function PublishSuccessPage({ searchParams }: Props) {
             marginBottom: "12px",
           }}
         >
-          ¡Skill publicado!
+          Pendiente de revision
         </h1>
 
         {slug && (
@@ -81,14 +81,14 @@ export default async function PublishSuccessPage({ searchParams }: Props) {
             marginBottom: "32px",
           }}
         >
-          Tu skill ya está disponible en el catálogo. Otros desarrolladores pueden
-          descubrirlo, instalarlo y contribuir mejoras.
+          Tu propuesta fue enviada para revision. Estara disponible en el catálogo
+          cuando sea aprobada.
         </p>
 
         <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
-          {slug && (
+          {reviewRequestId && (
             <Link
-              href={`/skills/${slug}`}
+              href={`/dashboard/proposals/${reviewRequestId}`}
               style={{
                 fontFamily: "var(--font-geist), sans-serif",
                 fontSize: "13px",
@@ -100,7 +100,7 @@ export default async function PublishSuccessPage({ searchParams }: Props) {
                 textDecoration: "none",
               }}
             >
-              Ver skill →
+              Ver propuesta →
             </Link>
           )}
           <Link

@@ -39,6 +39,10 @@ compatibility:
 - **Dashboard** — estadísticas, historial de versiones, editor en vivo
 - **CLI** — instalar, buscar, listar y eliminar skills desde la terminal
 
+## Revision y publicacion
+
+`POST /api/skills` ahora envia una propuesta a revision; no publica el skill inmediatamente. Consulte [el flujo de revision](docs/review-workflow.md) para los permisos, el proceso para authors y reviewers, y las migraciones requeridas.
+
 ---
 
 ## Stack
@@ -172,11 +176,11 @@ evita instalar en `~/.codex` cuando el harness está usando otro home efectivo.
 | Método | Ruta | Descripción |
 |---|---|---|
 | `GET` | `/api/skills` | Listar/buscar skills (`?q=`, `?type=`, `?sort=`) |
-| `POST` | `/api/skills` | Publicar nuevo skill |
+| `POST` | `/api/skills` | Enviar propuesta de nuevo skill a revisión |
 | `GET` | `/api/skills/:slug` | Detalle + rawContent |
-| `PATCH` | `/api/skills/:slug` | Editar skill |
+| `PATCH` | `/api/skills/:slug` | Crear o actualizar propuesta de nueva versión sin cambiar el contenido publicado |
 | `GET` | `/api/skills/:slug/files` | Listar archivos adjuntos |
-| `POST` | `/api/skills/:slug/files` | Subir archivos adjuntos |
+| `POST` | `/api/skills/:slug/files` | No soportado; los adjuntos se envían con la propuesta de revisión |
 | `GET` | `/api/skills/:slug/download` | Descargar skill como `.zip` |
 | `POST` | `/api/skills/:slug/install` | Registrar instalación (contador) |
 | `GET` | `/api/skills/:slug/versions` | Historial de versiones |

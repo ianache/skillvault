@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { WizardLayout } from "@/components/wizard/WizardLayout";
 import { Step1Metadata, MetadataFields } from "@/components/wizard/Step1Metadata";
@@ -67,21 +68,12 @@ export default function PublishPage() {
       const res = await fetch("/api/skills", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ rawContent: content }),
+        body: JSON.stringify({ rawContent: content, files: attachedFiles }),
       });
       const data = await res.json();
       if (!res.ok) return { ok: false, error: data.error ?? "Error del servidor" };
 
-      // Upload attached files if any
-      if (attachedFiles.length > 0) {
-        await fetch(`/api/skills/${data.slug}/files`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ files: attachedFiles }),
-        }).catch(() => {}); // non-blocking
-      }
-
-      router.push(`/publish/success?slug=${data.slug}`);
+      router.push(`/publish/success?slug=${data.slug}&reviewRequestId=${data.reviewRequestId}`);
       return { ok: true, slug: data.slug };
     } catch (e) {
       return { ok: false, error: String(e) };
@@ -103,7 +95,7 @@ export default function PublishPage() {
             gap: "12px",
           }}
         >
-          <a href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "8px" }}>
+          <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "8px" }}>
             <span
               style={{
                 width: "24px", height: "24px", background: "var(--accent)", borderRadius: "4px",
@@ -117,7 +109,7 @@ export default function PublishPage() {
             <span style={{ fontFamily: "var(--font-geist), sans-serif", fontWeight: 700, fontSize: "15px", color: "var(--text)" }}>
               SkillVault
             </span>
-          </a>
+          </Link>
           <span style={{ color: "var(--border)" }}>/</span>
           <span style={{ fontSize: "13px", color: "var(--muted)" }}>Publicar Skill</span>
         </div>

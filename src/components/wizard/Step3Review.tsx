@@ -322,7 +322,7 @@ export function Step3Review({ content, attachedFiles = [], onBack, onPublish }: 
             gap: "8px",
           }}
         >
-          {publishing ? "Publicando…" : "Publicar skill →"}
+          {publishing ? "Enviando…" : "Enviar a revision"}
         </button>
       </div>
     </div>

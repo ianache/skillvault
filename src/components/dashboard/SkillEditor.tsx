@@ -223,7 +223,7 @@ export function SkillEditor({ slug, initialContent }: Props) {
             <span style={{ fontSize: "12px", color: "var(--red)", flex: 1 }}>{saveError}</span>
           )}
           {saveOk && (
-            <span style={{ fontSize: "12px", color: "var(--green)", flex: 1 }}>✓ Guardado correctamente</span>
+            <span style={{ fontSize: "12px", color: "var(--green)", flex: 1 }}>✓ Enviado a revision</span>
           )}
           <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "10px", color: "var(--faint)" }}>
             {content.split("\n").length} líneas
@@ -243,7 +243,7 @@ export function SkillEditor({ slug, initialContent }: Props) {
               cursor: valid && dirty && !saving ? "pointer" : "not-allowed",
             }}
           >
-            {saving ? "Guardando…" : "Guardar cambios"}
+            {saving ? "Enviando…" : "Enviar a revision"}
           </button>
         </div>
       </div>

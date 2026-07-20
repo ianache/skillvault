@@ -41,6 +41,47 @@ export const skillFiles = mysqlTable("skill_files", {
   createdAt: bigint("created_at", { mode: "number" }).notNull().default(sql`(UNIX_TIMESTAMP())`),
 });
 
+export const skillReviewRequests = mysqlTable("skill_review_requests", {
+  id: int("id").autoincrement().primaryKey(),
+  skillId: int("skill_id"),
+  slug: varchar("slug", { length: 255 }).notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  type: varchar("type", { length: 50 }).notNull(),
+  version: varchar("version", { length: 50 }).notNull(),
+  schemaVersion: varchar("schema_version", { length: 20 }).notNull().default("1.1"),
+  authorId: varchar("author_id", { length: 255 }).notNull(),
+  authorHandle: varchar("author_handle", { length: 255 }),
+  rawContent: text("raw_content").notNull(),
+  status: varchar("status", { length: 20 }).notNull().default("pending"),
+  reviewerId: varchar("reviewer_id", { length: 255 }),
+  reviewerHandle: varchar("reviewer_handle", { length: 255 }),
+  generalComment: text("general_comment"),
+  submittedAt: bigint("submitted_at", { mode: "number" }).notNull().default(sql`(UNIX_TIMESTAMP())`),
+  reviewedAt: bigint("reviewed_at", { mode: "number" }),
+  updatedAt: bigint("updated_at", { mode: "number" }).notNull().default(sql`(UNIX_TIMESTAMP())`),
+});
+
+export const skillReviewFiles = mysqlTable("skill_review_files", {
+  id: int("id").autoincrement().primaryKey(),
+  reviewRequestId: int("review_request_id").notNull(),
+  path: varchar("path", { length: 500 }).notNull(),
+  fileType: varchar("file_type", { length: 50 }).notNull(),
+  content: text("content").notNull().default(""),
+  changeType: varchar("change_type", { length: 20 }).notNull().default("added"),
+  createdAt: bigint("created_at", { mode: "number" }).notNull().default(sql`(UNIX_TIMESTAMP())`),
+});
+
+export const skillReviewComments = mysqlTable("skill_review_comments", {
+  id: int("id").autoincrement().primaryKey(),
+  reviewRequestId: int("review_request_id").notNull(),
+  filePath: varchar("file_path", { length: 500 }),
+  authorId: varchar("author_id", { length: 255 }).notNull(),
+  authorHandle: varchar("author_handle", { length: 255 }),
+  body: text("body").notNull(),
+  createdAt: bigint("created_at", { mode: "number" }).notNull().default(sql`(UNIX_TIMESTAMP())`),
+});
+
 export const categories = mysqlTable("categories", {
   id: int("id").autoincrement().primaryKey(),
   slug: varchar("slug", { length: 100 }).notNull().unique(),
