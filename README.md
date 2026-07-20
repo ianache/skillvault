@@ -39,6 +39,10 @@ compatibility:
 - **Dashboard** — estadísticas, historial de versiones, editor en vivo
 - **CLI** — instalar, buscar, listar y eliminar skills desde la terminal
 
+## Revision y publicacion
+
+`POST /api/skills` ahora envia una propuesta a revision; no publica el skill inmediatamente. Consulte [el flujo de revision](docs/review-workflow.md) para los permisos, el proceso para authors y reviewers, y las migraciones requeridas.
+
 ---
 
 ## Stack
