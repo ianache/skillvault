@@ -2,9 +2,12 @@
 .github
 .agents
 .next
+.worktrees
 node_modules
 coverage
 dist
+cli/node_modules
+cli/dist
 
 .env
 .env.*

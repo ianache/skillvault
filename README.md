@@ -95,6 +95,12 @@ cd cli
 npm install -g .
 ```
 
+Instalacion de plugins en Claude
+
+```
+/plugin install frontend-design@claude-plugins-official
+```
+
 ### Comandos
 
 ```bash

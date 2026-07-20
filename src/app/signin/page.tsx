@@ -5,26 +5,83 @@ import { auth } from "@/auth";
 
 export const metadata = { title: "Acceder — SkillVault" };
 
+interface RankedRow {
+  rank: string;
+  name: string;
+  value: string;
+  pct: number;
+}
+
+function rankRows(items: { name: string; value: string; raw: number }[]): RankedRow[] {
+  if (items.length === 0) return [];
+  const max = Math.max(...items.map((i) => i.raw));
+  return items.map((it, i) => ({
+    rank: String(i + 1).padStart(2, "0"),
+    name: it.name,
+    value: it.value,
+    pct: max > 0 ? Math.round((it.raw / max) * 100) : 0,
+  }));
+}
+
+function daysAgoLabel(daysAgo: number): string {
+  if (daysAgo <= 0) return "hoy";
+  if (daysAgo === 1) return "hace 1 día";
+  return `hace ${daysAgo} días`;
+}
+
 async function getStats() {
   try {
-    const [skills, installs, authors, recent, categories] = await Promise.all([
+    const [skills, installs, authors, topInstalls, topContributors, topCategories, topRecent] = await Promise.all([
       client.execute({ sql: "SELECT COUNT(*) as n FROM skills WHERE status = 'published'" }),
       client.execute({ sql: "SELECT COALESCE(SUM(install_count), 0) as n FROM skills WHERE status = 'published'" }),
       client.execute({ sql: "SELECT COUNT(DISTINCT author_handle) as n FROM skills WHERE author_handle IS NOT NULL" }),
-      client.execute({ sql: "SELECT COUNT(*) as n FROM skills WHERE status = 'published' AND created_at >= ?", args: [Math.floor(Date.now() / 1000) - 7 * 86400] }),
-      client.execute({ sql: "SELECT COUNT(*) as n FROM categories" }),
+      client.execute({ sql: "SELECT name, install_count FROM skills WHERE status = 'published' ORDER BY install_count DESC LIMIT 5" }),
+      client.execute({ sql: "SELECT author_handle, COUNT(*) as n FROM skills WHERE status = 'published' AND author_handle IS NOT NULL GROUP BY author_handle ORDER BY n DESC LIMIT 5" }),
+      client.execute({
+        sql: `SELECT c.label, COUNT(s.id) as n FROM categories c
+              LEFT JOIN skills s ON s.type = c.slug AND s.status = 'published'
+              GROUP BY c.slug, c.label ORDER BY n DESC LIMIT 5`,
+      }),
+      client.execute({ sql: "SELECT name, created_at FROM skills WHERE status = 'published' ORDER BY created_at DESC LIMIT 5" }),
     ]);
     const row = (r: { rows: Record<string, unknown>[] }) => Number(r.rows[0]?.n ?? 0);
+
+    const nowSec = Math.floor(Date.now() / 1000);
+    const recentWithAge = topRecent.rows.map((r) => ({
+      name: String(r.name),
+      daysAgo: Math.max(0, Math.floor((nowSec - Number(r.created_at)) / 86400)),
+    }));
+    const maxDaysAgo = recentWithAge.length ? Math.max(...recentWithAge.map((r) => r.daysAgo)) : 0;
+
     return {
-      published:    row(skills),
-      installs:     row(installs),
+      published: row(skills),
+      installs: row(installs),
       contributors: row(authors),
-      recentWeek:   row(recent),
-      categories:   row(categories),
-      harnesses:    5,
+      topInstalls: topInstalls.rows.map((r) => ({
+        name: String(r.name),
+        value: fmt(Number(r.install_count)),
+        raw: Number(r.install_count),
+      })),
+      topContributors: topContributors.rows.map((r) => ({
+        name: String(r.author_handle),
+        value: `${r.n} skill${Number(r.n) > 1 ? "s" : ""}`,
+        raw: Number(r.n),
+      })),
+      topCategories: topCategories.rows
+        .filter((r) => Number(r.n) > 0)
+        .map((r) => ({
+          name: String(r.label),
+          value: `${r.n} skill${Number(r.n) > 1 ? "s" : ""}`,
+          raw: Number(r.n),
+        })),
+      topRecent: recentWithAge.map((r) => ({
+        name: r.name,
+        value: daysAgoLabel(r.daysAgo),
+        raw: maxDaysAgo - r.daysAgo + 1,
+      })),
     };
   } catch {
-    return { published: 0, installs: 0, contributors: 0, recentWeek: 0, categories: 0, harnesses: 5 };
+    return { published: 0, installs: 0, contributors: 0, topInstalls: [], topContributors: [], topCategories: [], topRecent: [] };
   }
 }
 
@@ -45,247 +102,178 @@ export default async function SignInPage({
   const callbackUrl = (await searchParams).callbackUrl ?? "/";
 
   const kpis = [
-    { label: "Skills publicados",   value: fmt(stats.published),    color: "#3B6EFF", icon: "⌨",  desc: "listos para instalar"       },
-    { label: "Instalaciones",        value: fmt(stats.installs),     color: "#2ECC8A", icon: "↓",  desc: "realizadas por la comunidad" },
-    { label: "Contribuyentes",       value: fmt(stats.contributors), color: "#C45FD4", icon: "◈",  desc: "autores activos"             },
-    { label: "Skills esta semana",   value: fmt(stats.recentWeek),   color: "#E88B3A", icon: "◷",  desc: "recién publicados"           },
-    { label: "Categorías",           value: fmt(stats.categories),   color: "#4AB8E8", icon: "▦",  desc: "áreas de conocimiento"       },
-    { label: "Harnesses",            value: fmt(stats.harnesses),    color: "#E8503A", icon: "⚡", desc: "agentes compatibles"         },
+    { label: "Skills publicados", value: fmt(stats.published), iconColor: "var(--accent)", iconBg: "var(--accent-muted)", iconPath: "M20 6L9 17l-5-5" },
+    { label: "Instalaciones de skills", value: fmt(stats.installs), iconColor: "var(--green)", iconBg: "rgba(15,148,136,0.12)", iconPath: "M12 3v14M5 12l7 7 7-7M4 21h16" },
+    { label: "Contribuyentes", value: fmt(stats.contributors), iconColor: "var(--accent)", iconBg: "var(--accent-muted)", iconPath: "M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" },
   ];
+
+  const topLists = [
+    { title: "Top 5 Skills · instalaciones", barColor: "var(--green)", rows: rankRows(stats.topInstalls) },
+    { title: "Top 5 Skills · recientes", barColor: "var(--accent)", rows: rankRows(stats.topRecent) },
+    { title: "Top 5 Contribuyentes", barColor: "var(--accent-indigo)", rows: rankRows(stats.topContributors) },
+    { title: "Top 5 Categorías", barColor: "#c46a3f", rows: rankRows(stats.topCategories) },
+  ].filter((l) => l.rows.length > 0);
 
   return (
     <div style={{
       display: "flex",
       minHeight: "100vh",
-      fontFamily: "var(--font-geist), system-ui, sans-serif",
+      width: "100%",
+      fontFamily: "var(--font-geist), sans-serif",
       background: "var(--bg)",
       color: "var(--text)",
     }}>
 
-      {/* ── Panel izquierdo — identidad + login ──────────────────── */}
-      <div style={{
-        flex: "0 0 50%",
+      {/* ── Sidebar ── */}
+      <aside style={{
+        width: "264px",
+        flexShrink: 0,
+        background: "var(--surface)",
+        borderRight: "1px solid var(--border)",
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
         justifyContent: "center",
-        padding: "48px 40px",
-        position: "relative",
-        overflow: "hidden",
-        background: "var(--bg)",
+        padding: "28px 20px",
+        position: "sticky",
+        top: 0,
+        height: "100vh",
       }}>
-        {/* Dot-grid background */}
-        <div aria-hidden style={{
-          position: "absolute", inset: 0, pointerEvents: "none",
-          backgroundImage: "radial-gradient(circle, #252A3D 1px, transparent 1px)",
-          backgroundSize: "28px 28px",
-          opacity: 0.6,
-        }} />
-        {/* Accent glow blob */}
-        <div aria-hidden style={{
-          position: "absolute",
-          width: "340px", height: "340px",
-          borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(59,110,255,0.13) 0%, transparent 70%)",
-          top: "50%", left: "50%",
-          transform: "translate(-50%, -50%)",
-          pointerEvents: "none",
-        }} />
-
-        <div style={{ position: "relative", zIndex: 1, textAlign: "center", maxWidth: "360px" }}>
-
-          {/* Logo lockup: icono + nombre en fila */}
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "40px" }}>
           <div style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "20px",
-            marginBottom: "20px",
+            width: "36px", height: "36px", borderRadius: "9px",
+            background: "linear-gradient(155deg, var(--accent), var(--accent-dim))",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            boxShadow: "0 4px 14px rgba(169,119,46,0.25)", flexShrink: 0,
           }}>
-            {/* Icono SVG */}
-            <svg width="88" height="88" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-              <defs>
-                <filter id="svGlow1" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur stdDeviation="3.5" result="blur"/>
-                  <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-                </filter>
-                <filter id="svGlow2" x="-80%" y="-80%" width="260%" height="260%">
-                  <feGaussianBlur stdDeviation="7" result="blur"/>
-                  <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-                </filter>
-                <radialGradient id="svCoreGrad" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="#3B6EFF" stopOpacity=".9"/>
-                  <stop offset="100%" stopColor="#1A3BAF" stopOpacity=".6"/>
-                </radialGradient>
-                <radialGradient id="svHaloGrad" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="#3B6EFF" stopOpacity=".14"/>
-                  <stop offset="100%" stopColor="#3B6EFF" stopOpacity="0"/>
-                </radialGradient>
-              </defs>
-              <circle cx="80" cy="80" r="72" fill="url(#svHaloGrad)"/>
-              <circle cx="80" cy="80" r="52" stroke="#3B6EFF" strokeWidth=".8" strokeDasharray="2 5" opacity=".3"/>
-              <g transform="translate(80,28)">
-                <circle r="11" fill="#0C0F1A" stroke="#3B6EFF" strokeWidth="1.5" opacity=".9"/>
-                <text x="0" y="4" textAnchor="middle" fontFamily="monospace" fontSize="9" fill="#3B6EFF" fontWeight="700">{"{/}"}</text>
-              </g>
-              <g transform="translate(132,80)">
-                <circle r="11" fill="#0C0F1A" stroke="#2ECC8A" strokeWidth="1.5" opacity=".9"/>
-                <text x="0" y="4" textAnchor="middle" fontFamily="monospace" fontSize="9" fill="#2ECC8A" fontWeight="700">MEM</text>
-              </g>
-              <g transform="translate(80,132)">
-                <circle r="11" fill="#0C0F1A" stroke="#C45FD4" strokeWidth="1.5" opacity=".9"/>
-                <text x="0" y="4" textAnchor="middle" fontFamily="monospace" fontSize="9" fill="#C45FD4" fontWeight="700">WEB</text>
-              </g>
-              <g transform="translate(28,80)">
-                <circle r="11" fill="#0C0F1A" stroke="#E88B3A" strokeWidth="1.5" opacity=".9"/>
-                <text x="0" y="4" textAnchor="middle" fontFamily="monospace" fontSize="9" fill="#E88B3A" fontWeight="700">API</text>
-              </g>
-              <line x1="80" y1="39" x2="80" y2="62" stroke="#3B6EFF" strokeWidth="1" strokeDasharray="3 3" opacity=".5"/>
-              <line x1="121" y1="80" x2="98" y2="80" stroke="#2ECC8A" strokeWidth="1" strokeDasharray="3 3" opacity=".5"/>
-              <line x1="80" y1="121" x2="80" y2="98" stroke="#C45FD4" strokeWidth="1" strokeDasharray="3 3" opacity=".5"/>
-              <line x1="39" y1="80" x2="62" y2="80" stroke="#E88B3A" strokeWidth="1" strokeDasharray="3 3" opacity=".5"/>
-              <circle cx="80" cy="80" r="22" fill="url(#svCoreGrad)" filter="url(#svGlow2)"/>
-              <circle cx="80" cy="80" r="18" fill="none" stroke="rgba(255,255,255,.2)" strokeWidth=".8"/>
-              <path d="M80 69L88 87H72L80 69Z" fill="none" stroke="white" strokeWidth="1.8" strokeLinejoin="round" opacity=".9"/>
-              <circle cx="80" cy="81" r="2.5" fill="white" opacity=".85"/>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2.6L20 7v10l-8 4.4L4 17V7l8-4.4z" fill="var(--bg)" />
+              <path d="M8 9.6v4.8l4 2.2 4-2.2V9.6L12 7.4 8 9.6z" fill="var(--accent)" />
+              <circle cx="12" cy="12" r="1.6" fill="var(--bg)" />
             </svg>
-
-            {/* Nombre + tagline alineados al icono */}
-            <div style={{ textAlign: "left" }}>
-              <h1 style={{ fontSize: "26px", fontWeight: 700, margin: "0 0 6px", letterSpacing: "-0.5px", lineHeight: 1 }}>
-                SkillVault
-              </h1>
-              <p style={{ color: "var(--muted)", fontSize: "13px", lineHeight: 1.5, margin: 0 }}>
-                El catálogo de skills reutilizables<br />para Claude Code y agentes de IA.
-              </p>
+          </div>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: "17px", letterSpacing: "-0.01em", lineHeight: 1 }}>SkillVault</div>
+            <div style={{ fontSize: "11px", color: "var(--muted)", marginTop: "3px", fontFamily: "var(--font-jetbrains-mono), monospace" }}>
+              agent skill catalog
             </div>
           </div>
-
-          {/* Botón Keycloak */}
-          <form action={async () => {
-            "use server";
-            await signIn("keycloak", { redirectTo: callbackUrl });
-          }}>
-            <button
-              type="submit"
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "10px",
-                padding: "13px 24px",
-                background: "#3B6EFF",
-                color: "#fff",
-                border: "none",
-                borderRadius: "8px",
-                fontSize: "15px",
-                fontWeight: 600,
-                cursor: "pointer",
-                letterSpacing: "0.01em",
-                transition: "background 0.15s",
-              }}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
-                <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" strokeWidth="2" fill="rgba(255,255,255,0.15)" />
-                <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-              Acceder con Keycloak
-            </button>
-          </form>
-
-          <p style={{ marginTop: "24px", fontSize: "12px", color: "var(--faint)" }}>
-            Autenticación gestionada por tu organización
-          </p>
         </div>
-      </div>
 
-      {/* Divisor vertical */}
-      <div style={{ width: "1px", background: "var(--border)", flexShrink: 0 }} />
+        <form action={async () => {
+          "use server";
+          await signIn("keycloak", { redirectTo: callbackUrl });
+        }}>
+          <button
+            type="submit"
+            style={{
+              width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "9px",
+              background: "var(--raised)", border: "1px solid var(--border-subtle)", color: "var(--text)",
+              padding: "11px 14px", borderRadius: "8px",
+              fontFamily: "var(--font-geist), sans-serif", fontSize: "13.5px", fontWeight: 600, cursor: "pointer",
+            }}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 7a4 4 0 1 1-4 4" />
+              <path d="M11 11L3 19v2h2l8-8" />
+              <path d="M16 6l2 2" />
+            </svg>
+            Iniciar sesión con Keycloak
+          </button>
+        </form>
 
-      {/* ── Panel derecho — KPIs ──────────────────────────────────── */}
-      <div style={{
-        flex: "1",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        padding: "48px 52px",
-        background: "var(--surface)",
-      }}>
-        <div style={{ maxWidth: "480px" }}>
-          <p style={{
-            fontSize: "11px",
-            fontWeight: 600,
-            letterSpacing: "0.12em",
-            textTransform: "uppercase",
-            color: "var(--muted)",
-            marginBottom: "8px",
-          }}>
-            Plataforma en números
-          </p>
-          <h2 style={{ fontSize: "22px", fontWeight: 700, margin: "0 0 32px", letterSpacing: "-0.3px" }}>
-            La comunidad crece cada día
-          </h2>
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          marginTop: "20px", padding: "12px 14px",
+          background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "8px",
+        }}>
+          <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "11.5px", color: "var(--muted)" }}>
+            v0.1.0
+          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
+            <span style={{ fontSize: "11px", color: "var(--muted)" }}>Status</span>
+            <span style={{
+              position: "relative", width: "9px", height: "9px", borderRadius: "50%",
+              background: "var(--green)", boxShadow: "0 0 0 3px rgba(15,148,136,0.18)", flexShrink: 0,
+            }} />
+          </div>
+        </div>
+      </aside>
 
-          {/* Grid 2×3 */}
+      {/* ── Main ── */}
+      <main style={{ flex: 1, padding: "36px 44px 60px", maxWidth: "1400px" }}>
+
+        {/* KPI grid */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(190px,1fr))",
+          gap: "16px",
+          marginBottom: "40px",
+        }}>
+          {kpis.map((kpi) => (
+            <div key={kpi.label} style={{
+              background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "12px",
+              padding: "20px", boxShadow: "0 1px 2px rgba(20,20,20,0.04)",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", marginBottom: "14px" }}>
+                <div style={{
+                  width: "32px", height: "32px", borderRadius: "8px", background: kpi.iconBg,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={kpi.iconColor} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d={kpi.iconPath} />
+                  </svg>
+                </div>
+              </div>
+              <div style={{ fontSize: "26px", fontWeight: 700, fontFamily: "var(--font-jetbrains-mono), monospace", letterSpacing: "-0.01em" }}>
+                {kpi.value}
+              </div>
+              <div style={{ fontSize: "12.5px", color: "var(--muted)", marginTop: "5px" }}>
+                {kpi.label}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Top lists */}
+        {topLists.length > 0 && (
           <div style={{
             display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "16px",
+            gridTemplateColumns: "repeat(auto-fit, minmax(300px,1fr))",
+            gap: "18px",
           }}>
-            {kpis.map((kpi) => (
-              <div
-                key={kpi.label}
-                style={{
-                  background: "var(--raised)",
-                  borderRadius: "10px",
-                  overflow: "hidden",
-                  border: "1px solid var(--border)",
-                }}
-              >
-                {/* Barra de color superior */}
-                <div style={{ height: "3px", background: kpi.color }} />
-                <div style={{ padding: "18px 20px" }}>
-                  <div style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    marginBottom: "10px",
-                  }}>
-                    <span style={{ fontSize: "16px", lineHeight: 1 }}>{kpi.icon}</span>
-                    <span style={{ fontSize: "11px", color: "var(--muted)", fontWeight: 500, letterSpacing: "0.02em" }}>
-                      {kpi.label}
-                    </span>
-                  </div>
-                  <div style={{
-                    fontSize: "32px",
-                    fontWeight: 700,
-                    color: kpi.color,
-                    lineHeight: 1,
-                    fontFamily: "var(--font-jetbrains-mono), monospace",
-                    marginBottom: "4px",
-                  }}>
-                    {kpi.value}
-                  </div>
-                  <div style={{ fontSize: "11px", color: "var(--faint)" }}>
-                    {kpi.desc}
-                  </div>
+            {topLists.map((col) => (
+              <div key={col.title} style={{
+                background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "12px",
+                padding: "20px", boxShadow: "0 1px 2px rgba(20,20,20,0.04)",
+              }}>
+                <h3 style={{ margin: "0 0 16px", fontSize: "14.5px", fontWeight: 600 }}>{col.title}</h3>
+                <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                  {col.rows.map((row) => (
+                    <div key={row.name} style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                      <div style={{ width: "22px", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "12px", color: "var(--faint)", flexShrink: 0 }}>
+                        {row.rank}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: "8px" }}>
+                          <span style={{ fontSize: "13.5px", fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                            {row.name}
+                          </span>
+                          <span style={{ fontSize: "12px", fontFamily: "var(--font-jetbrains-mono), monospace", color: "var(--muted)", flexShrink: 0 }}>
+                            {row.value}
+                          </span>
+                        </div>
+                        <div style={{ height: "4px", background: "var(--border)", borderRadius: "2px", marginTop: "6px", overflow: "hidden" }}>
+                          <div style={{ height: "100%", width: `${row.pct}%`, background: col.barColor, borderRadius: "2px" }} />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             ))}
           </div>
-
-          <p style={{
-            marginTop: "28px",
-            fontSize: "12px",
-            color: "var(--faint)",
-            borderTop: "1px solid var(--border)",
-            paddingTop: "20px",
-          }}>
-            Skills compatibles con Claude Code · Codex · OpenCode · Agy · Cursor
-          </p>
-        </div>
-      </div>
+        )}
+      </main>
     </div>
   );
 }

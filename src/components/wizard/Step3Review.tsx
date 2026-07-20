@@ -73,9 +73,10 @@ export function Step3Review({ content, attachedFiles = [], onBack, onPublish }: 
           style={{
             background: "var(--surface)",
             border: "1px solid var(--border)",
-            borderRadius: "4px",
-            padding: "18px",
+            borderRadius: "10px",
+            padding: "20px",
             borderTop: `3px solid ${catMeta.color}`,
+            boxShadow: "0 1px 2px rgba(20,20,20,0.04)",
           }}
         >
           <SectionLabel>Identidad</SectionLabel>
@@ -90,8 +91,8 @@ export function Step3Review({ content, attachedFiles = [], onBack, onPublish }: 
               style={{
                 fontFamily: "var(--font-jetbrains-mono), monospace",
                 fontSize: "9px",
-                padding: "1px 6px",
-                borderRadius: "3px",
+                padding: "2px 8px",
+                borderRadius: "6px",
                 border: `1px solid ${catMeta.color}`,
                 color: catMeta.color,
                 background: `${catMeta.color}18`,
@@ -116,8 +117,9 @@ export function Step3Review({ content, attachedFiles = [], onBack, onPublish }: 
             style={{
               background: "var(--surface)",
               border: "1px solid var(--border)",
-              borderRadius: "4px",
-              padding: "14px",
+              borderRadius: "10px",
+              padding: "16px",
+              boxShadow: "0 1px 2px rgba(20,20,20,0.04)",
             }}
           >
             <SectionLabel>Triggers ({triggers.length})</SectionLabel>
@@ -130,9 +132,9 @@ export function Step3Review({ content, attachedFiles = [], onBack, onPublish }: 
                     fontSize: "11px",
                     background: "var(--accent-muted)",
                     color: "var(--accent)",
-                    padding: "2px 7px",
-                    borderRadius: "3px",
-                    border: "1px solid rgba(59,110,255,0.25)",
+                    padding: "3px 9px",
+                    borderRadius: "6px",
+                    border: "1px solid var(--accent)",
                   }}
                 >
                   {t}
@@ -145,8 +147,9 @@ export function Step3Review({ content, attachedFiles = [], onBack, onPublish }: 
             style={{
               background: "var(--surface)",
               border: "1px solid var(--border)",
-              borderRadius: "4px",
-              padding: "14px",
+              borderRadius: "10px",
+              padding: "16px",
+              boxShadow: "0 1px 2px rgba(20,20,20,0.04)",
             }}
           >
             <SectionLabel>Herramientas</SectionLabel>
@@ -157,8 +160,8 @@ export function Step3Review({ content, attachedFiles = [], onBack, onPublish }: 
                   style={{
                     fontFamily: "var(--font-jetbrains-mono), monospace",
                     fontSize: "10px",
-                    padding: "2px 6px",
-                    borderRadius: "3px",
+                    padding: "3px 8px",
+                    borderRadius: "6px",
                     border: "1px solid var(--border)",
                     color: "var(--muted)",
                   }}
@@ -189,11 +192,11 @@ export function Step3Review({ content, attachedFiles = [], onBack, onPublish }: 
               style={{
                 fontFamily: "var(--font-jetbrains-mono), monospace",
                 fontSize: "11px",
-                padding: "3px 9px",
-                borderRadius: "3px",
+                padding: "4px 10px",
+                borderRadius: "6px",
                 border: "1px solid var(--green)",
                 color: "var(--green)",
-                background: "rgba(46,204,138,0.08)",
+                background: "rgba(15,148,136,0.08)",
               }}
             >
               ✓ {h}
@@ -220,8 +223,8 @@ export function Step3Review({ content, attachedFiles = [], onBack, onPublish }: 
             color: "var(--muted)",
             background: "var(--bg)",
             border: "1px solid var(--border)",
-            borderRadius: "4px",
-            padding: "10px 12px",
+            borderRadius: "8px",
+            padding: "14px 16px",
             maxHeight: "160px",
             overflow: "auto",
             whiteSpace: "pre-wrap",
@@ -268,7 +271,7 @@ export function Step3Review({ content, attachedFiles = [], onBack, onPublish }: 
             padding: "10px 14px",
             background: "rgba(232,80,58,0.08)",
             border: "1px solid var(--red)",
-            borderRadius: "4px",
+            borderRadius: "8px",
             fontSize: "13px",
             color: "var(--red)",
             marginBottom: "16px",
@@ -293,12 +296,13 @@ export function Step3Review({ content, attachedFiles = [], onBack, onPublish }: 
           disabled={publishing}
           style={{
             fontFamily: "var(--font-geist), sans-serif",
-            fontSize: "13px",
-            padding: "9px 18px",
-            borderRadius: "4px",
-            border: "1px solid var(--border)",
-            background: "none",
-            color: "var(--muted)",
+            fontSize: "13.5px",
+            fontWeight: 600,
+            padding: "11px 18px",
+            borderRadius: "8px",
+            border: "1px solid var(--border-subtle)",
+            background: "var(--surface)",
+            color: "var(--text)",
             cursor: "pointer",
           }}
         >
@@ -309,10 +313,10 @@ export function Step3Review({ content, attachedFiles = [], onBack, onPublish }: 
           disabled={publishing}
           style={{
             fontFamily: "var(--font-geist), sans-serif",
-            fontSize: "13px",
+            fontSize: "14px",
             fontWeight: 700,
-            padding: "10px 28px",
-            borderRadius: "4px",
+            padding: "12px 28px",
+            borderRadius: "8px",
             border: "none",
             background: publishing ? "var(--faint)" : "var(--accent)",
             color: "#fff",

@@ -1,16 +1,20 @@
 import type { Metadata } from "next";
-import { Geist, IBM_Plex_Sans, JetBrains_Mono } from "next/font/google";
+import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const geist = Geist({
+// Redesign swapped Geist/IBM Plex Sans for Space Grotesk everywhere; variable
+// names kept as --font-geist/--font-ibm-plex-sans so the ~30 files already
+// referencing them via CSS var didn't need to change.
+const geist = Space_Grotesk({
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-geist",
   display: "swap",
 });
 
-const ibmPlexSans = IBM_Plex_Sans({
+const ibmPlexSans = Space_Grotesk({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-ibm-plex-sans",
   display: "swap",
 });
