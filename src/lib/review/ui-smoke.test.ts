@@ -24,12 +24,12 @@ test("proposal dashboard routes export page components", async () => {
   assert.equal(typeof detail.default, "function");
 });
 
-test("review detail preserves files when an author resubmits and shows decision feedback", async () => {
+test("review detail replaces attachments from a successful resubmission while preserving comments", async () => {
   const detail = await source("../../components/review/ReviewRequestDetail.tsx");
 
   assert.match(detail, /initialRequest\.files\.map/);
-  assert.match(detail, /files:\s*current\.files/);
-  assert.match(detail, /comments:\s*current\.comments/);
+  assert.match(detail, /const detailResponse = await fetch\(`\/api\/review-requests\/\$\{request\.id\}`\)/);
+  assert.match(detail, /setRequest\(detailData\.request\)/);
   assert.match(detail, /generalComment/);
   assert.match(detail, /Comentario general del revisor/);
 });

@@ -65,3 +65,16 @@ Status: DONE
 - GREEN: `pnpm exec tsx --test src/lib/review/ui-smoke.test.ts` passed: 6/6 tests.
 - `pnpm exec eslint src/components/review/ReviewRequestDetail.tsx src/lib/review/ui-smoke.test.ts` passed.
 - `pnpm exec next build` passed.
+
+## Final Re-review Fix
+
+- After a successful author PATCH, the detail page now refetches `GET /api/review-requests/:id` and replaces local detail state with the authoritative DTO. The refreshed detail includes the submitted attachment collection and existing comments.
+- Editable attachment state is synchronized from the refreshed files, so a later resubmission uses the newly persisted attachment state.
+- Smoke coverage requires the successful resubmission path to refresh full request detail before replacing local state.
+
+## Final Re-review Verification
+
+- RED: `pnpm exec tsx --test src/lib/review/ui-smoke.test.ts` failed because the resubmission path did not fetch and apply the full detail DTO.
+- GREEN: `pnpm exec tsx --test src/lib/review/ui-smoke.test.ts` passed: 6/6 tests.
+- `pnpm exec eslint src/components/review/ReviewRequestDetail.tsx src/lib/review/ui-smoke.test.ts` passed.
+- `pnpm exec next build` passed.
