@@ -54,6 +54,14 @@ MySQL fullname
 {{- end }}
 
 {{/*
+MySQL FQDN — el Deployment/Service de mysql vive en namespace "database",
+separado del namespace de la app (mismo patrón que templates/database.yaml)
+*/}}
+{{- define "skillvault.mysql.fqdn" -}}
+{{- printf "%s.database.svc.cluster.local" (include "skillvault.mysql.fullname" .) }}
+{{- end }}
+
+{{/*
 DATABASE_URL — resuelve según mysql.enabled
 */}}
 {{- define "skillvault.databaseUrl" -}}
@@ -61,7 +69,7 @@ DATABASE_URL — resuelve según mysql.enabled
 {{- printf "mysql://%s:%s@%s:3306/%s"
     .Values.mysql.auth.username
     .Values.mysql.auth.password
-    (include "skillvault.mysql.fullname" .)
+    (include "skillvault.mysql.fqdn" .)
     .Values.mysql.auth.database }}
 {{- else }}
 {{- required "Cuando mysql.enabled=false debes definir externalDatabaseUrl" .Values.externalDatabaseUrl }}

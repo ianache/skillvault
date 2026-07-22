@@ -3,6 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "skillvault.mysql.fullname" . }}
+  namespace: database
   labels:
     {{- include "skillvault.labels" . | nindent 4 }}
 spec:

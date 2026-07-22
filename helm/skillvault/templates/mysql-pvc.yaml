@@ -3,6 +3,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: {{ include "skillvault.mysql.fullname" . }}-data
+  namespace: database
   labels:
     {{- include "skillvault.labels" . | nindent 4 }}
 spec:

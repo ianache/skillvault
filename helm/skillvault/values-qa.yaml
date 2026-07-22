@@ -5,15 +5,6 @@ image:
   repository: xnet/skillvault
   tag: "0.3.0"
 
-mysql:
-  enabled: false
-  auth:
-    rootPassword: "welcome1"
-    password: "us3rq4159"
-    username: userqa
-  persistence:
-    enabled: false   # emptyDir en dev — no necesita PVC
-
 ingress:
   enabled: true
   className: "nginx"
@@ -21,14 +12,14 @@ ingress:
     cert-manager.io/cluster-issuer: letsencrypt-production
     nginx.ingress.kubernetes.io/proxy-body-size: "50m"
   hosts:
-    - host: skillvault.dev.comsatel.com.pe
+    - host: skillvault.qa.comsatel.com.pe
       paths:
         - path: /
           pathType: Prefix
   tls:
     - secretName: skillvault-tls
       hosts:
-        - skillvault.dev.comsatel.com.pe
+        - skillvault.qa.comsatel.com.pe
 
 
 resources:
@@ -46,11 +37,13 @@ auth:
   keycloak:
     secret: PFYH3MXZlwors0hD45OmefO5NsQoSwmA
 
-externalDatabaseUrl: "mysql://skillvault-db.database.svc.cluster.local:3306/skillvault"
+externalDatabaseUrl: "mysql://userqa:us3rq4159@skillvault-db.database.svc.cluster.local:3306/skillvault"
 mysql:
-  enabled: false
+  enabled: true
   auth:
     rootPassword: welcome1
     database: skillvault
-    username: microservicio
-    password: "secr3t!"
+    username: userqa
+    password: "us3rq4159"
+  persistence:
+    enabled: true

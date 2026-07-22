@@ -36,7 +36,7 @@ spec:
             - sh
             - -c
             - |
-              until nc -z {{ include "skillvault.mysql.fullname" . }} 3306; do
+              until nc -z {{ include "skillvault.mysql.fqdn" . }} 3306; do
                 echo "Waiting for MySQL..."; sleep 3
               done
               echo "MySQL is ready."

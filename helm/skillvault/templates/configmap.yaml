@@ -16,6 +16,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "skillvault.mysql.fullname" . }}-config
+  namespace: database
   labels:
     {{- include "skillvault.labels" . | nindent 4 }}
 data:
