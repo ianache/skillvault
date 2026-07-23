@@ -34,7 +34,7 @@ resources:
     memory: 256Mi
 
 nodeSelector:
-  kubernetes.io/hostname: "10.2.2.130"
+  kubernetes.io/hostname: "10.2.2.52"
 
 tolerations:
   - key: "node.kubernetes.io/disk-pressure"
