@@ -20,7 +20,7 @@ async function run() {
   await client.execute({
     sql: `CREATE TABLE IF NOT EXISTS skills (
       id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-      slug VARCHAR(255) NOT NULL UNIQUE,
+      slug VARCHAR(191) NOT NULL UNIQUE,
       name VARCHAR(255) NOT NULL,
       description TEXT NOT NULL,
       type VARCHAR(50) NOT NULL,

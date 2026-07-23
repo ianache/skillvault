@@ -12,8 +12,8 @@ async function createIndex(sql: string) {
 
 async function migrate() {
   await client.execute(`CREATE TABLE IF NOT EXISTS users (
-    id VARCHAR(255) PRIMARY KEY,
-    username VARCHAR(255) NOT NULL,
+    id VARCHAR(191) PRIMARY KEY,
+    username VARCHAR(191) NOT NULL,
     full_name VARCHAR(255) NOT NULL DEFAULT '',
     email VARCHAR(255) NOT NULL DEFAULT '',
     active INT NOT NULL DEFAULT 1,

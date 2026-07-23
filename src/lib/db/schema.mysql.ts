@@ -3,7 +3,7 @@ import { sql } from "drizzle-orm";
 
 export const skills = mysqlTable("skills", {
   id: int("id").autoincrement().primaryKey(),
-  slug: varchar("slug", { length: 255 }).notNull().unique(),
+  slug: varchar("slug", { length: 191 }).notNull().unique(),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description").notNull(),
   type: varchar("type", { length: 50 }).notNull(),
