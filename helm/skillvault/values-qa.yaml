@@ -39,11 +39,10 @@ affinity:
       nodeSelectorTerms:
         - matchExpressions:
             - key: kubernetes.io/hostname
-              operator: NotIn
+              operator: In
               values:
-                - "10.2.2.20"
                 - "10.2.2.130"
-                - "10.2.2.142"
+                - "10.2.2.70"
 
 auth:
   secret: PFYH3MXZlwors0hD45OmefO5NsQoSwmA
