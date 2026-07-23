@@ -78,3 +78,16 @@ test("dashboard pages fetch review request API endpoints", async () => {
   assert.match(helper, /127\.0\.0\.1/);
   assert.match(helper, /cookie/);
 });
+
+test("exports ReviewStatusBadge and ReviewFilterTabs components", async () => {
+  const [badgeModule, filterModule, listSource] = await Promise.all([
+    import("@/components/review/ReviewStatusBadge"),
+    import("@/components/review/ReviewFilterTabs"),
+    source("../../components/review/ReviewRequestList.tsx"),
+  ]);
+
+  assert.equal(typeof badgeModule.ReviewStatusBadge, "function");
+  assert.equal(typeof filterModule.ReviewFilterTabs, "function");
+  assert.match(listSource, /ReviewStatusBadge/);
+});
+
