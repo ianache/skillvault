@@ -34,7 +34,7 @@ resources:
     memory: 256Mi
 
 nodeSelector:
-  kubernetes.io/hostname: "10.2.2.70"
+  kubernetes.io/hostname: "10.2.2.130"
 
 auth:
   secret: PFYH3MXZlwors0hD45OmefO5NsQoSwmA
