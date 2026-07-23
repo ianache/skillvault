@@ -13,6 +13,7 @@
         "migrate:mysql": "tsx src/lib/db/migrate-mysql-init.ts",
         "migrate:review-workflow": "tsx src/lib/db/migrate-review-workflow.ts",
         "migrate:review-workflow:mysql": "tsx src/lib/db/migrate-review-workflow-mysql.ts",
+        "test": "pnpm run test:review",
         "test:review": "tsx --test src/lib/review/*.test.ts"
     },
     "dependencies": {

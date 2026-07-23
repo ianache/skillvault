@@ -22,8 +22,13 @@ export default auth((req) => {
     return NextResponse.redirect(new URL("/unauthorized", req.url));
   }
 
-  // /dashboard requires admin
-  if (pathname.startsWith("/dashboard") && !roles.includes("admin")) {
+  // /dashboard is available for any authenticated user,
+  // but some sub-routes need stronger roles.
+  if (pathname.startsWith("/dashboard/categories") && !roles.includes("admin")) {
+    return NextResponse.redirect(new URL("/unauthorized", req.url));
+  }
+
+  if (pathname.startsWith("/dashboard/review") && !roles.includes("reviewer") && !roles.includes("admin")) {
     return NextResponse.redirect(new URL("/unauthorized", req.url));
   }
 
