@@ -37,7 +37,7 @@ async function migrate() {
     review_request_id INT NOT NULL,
     path VARCHAR(500) NOT NULL,
     file_type VARCHAR(50) NOT NULL,
-    content LONGTEXT NOT NULL DEFAULT (''),
+    content LONGTEXT NOT NULL,
     change_type VARCHAR(20) NOT NULL DEFAULT 'added',
     created_at BIGINT NOT NULL DEFAULT (UNIX_TIMESTAMP())
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`);
