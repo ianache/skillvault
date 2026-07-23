@@ -4,7 +4,7 @@
 image:
   repository: xnet/skillvault
   tag: "0.3.0"
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 replicaCount: 1
 
