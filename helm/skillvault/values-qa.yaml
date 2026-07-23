@@ -33,6 +33,10 @@ resources:
     cpu: 500m
     memory: 512Mi
 
+tolerations:
+  - key: "node.kubernetes.io/disk-pressure"
+    operator: "Exists"
+
 auth:
   secret: PFYH3MXZlwors0hD45OmefO5NsQoSwmA
   trustHost: "true"
