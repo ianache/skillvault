@@ -27,22 +27,15 @@ ingress:
 
 resources:
   requests:
-    cpu: 10m
-    memory: 128Mi
+    cpu: 1m
+    memory: 64Mi
   limits:
     cpu: 250m
     memory: 256Mi
 
-affinity:
-  nodeAffinity:
-    requiredDuringSchedulingIgnoredDuringExecution:
-      nodeSelectorTerms:
-        - matchExpressions:
-            - key: kubernetes.io/hostname
-              operator: In
-              values:
-                - "10.2.2.130"
-                - "10.2.2.70"
+tolerations:
+  - key: "node.kubernetes.io/disk-pressure"
+    operator: "Exists"
 
 auth:
   secret: PFYH3MXZlwors0hD45OmefO5NsQoSwmA
