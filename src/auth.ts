@@ -1,6 +1,14 @@
 import NextAuth from "next-auth";
 import Keycloak from "next-auth/providers/keycloak";
 
+function extractKeycloakRoles(profile: Record<string, unknown>, clientId?: string): string[] {
+  const realmRoles = (profile.realm_access as { roles?: string[] } | undefined)?.roles ?? [];
+  const clientRoles = clientId
+    ? (profile.resource_access as Record<string, { roles?: string[] }> | undefined)?.[clientId]?.roles ?? []
+    : [];
+  return [...new Set([...realmRoles, ...clientRoles])];
+}
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
   pages: {
@@ -12,30 +20,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       clientSecret: process.env.AUTH_KEYCLOAK_SECRET!,
       issuer: process.env.AUTH_KEYCLOAK_ISSUER!,
       profile(profile) {
-        // Keycloak puts roles in realm_access/resource_access, not a flat
-        // "roles" claim — the default provider profile() drops both.
-        const realmRoles = (profile.realm_access as { roles?: string[] } | undefined)?.roles ?? [];
-        const clientRoles =
-          (profile.resource_access as Record<string, { roles?: string[] }> | undefined)?.[
-            process.env.AUTH_KEYCLOAK_ID!
-          ]?.roles ?? [];
+        const roles = extractKeycloakRoles(profile as Record<string, unknown>, process.env.AUTH_KEYCLOAK_ID);
         return {
           id: profile.sub,
           name: profile.name ?? profile.preferred_username,
           email: profile.email,
           image: profile.picture,
-          roles: [...new Set([...realmRoles, ...clientRoles])],
+          roles,
         };
       },
     }),
   ],
   callbacks: {
-    jwt({ token, account, profile }) {
-      if (account && profile) {
-        // Extract client roles from the Keycloak token claim "roles"
-        const p = profile as Record<string, unknown>;
-        const roles = Array.isArray(p.roles) ? (p.roles as string[]) : [];
-        token.roles = roles;
+    jwt({ token, user, profile }) {
+      if (user && "roles" in user && Array.isArray(user.roles)) {
+        token.roles = user.roles as string[];
+      } else if (profile) {
+        token.roles = extractKeycloakRoles(profile as Record<string, unknown>, process.env.AUTH_KEYCLOAK_ID);
       }
       return token;
     },
