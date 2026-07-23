@@ -19,6 +19,8 @@ function rowToUser(row: Record<string, unknown>): AppUser {
     active: Number(row.active) === 1,
     roles,
     lastLoginAt: Number(row.last_login_at ?? 0),
+    createdAt: Number(row.created_at ?? 0),
+    updatedAt: Number(row.updated_at ?? 0),
   };
 }
 
