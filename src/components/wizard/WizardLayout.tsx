@@ -23,13 +23,12 @@ export function WizardLayout({ currentStep, children }: Props) {
       {/* Header */}
       <header
         style={{
-          height: "56px",
           borderBottom: "1px solid var(--border)",
           display: "flex",
           alignItems: "center",
-          padding: "0 24px",
-          gap: "16px",
-          background: "var(--bg)",
+          padding: "16px 32px",
+          gap: "22px",
+          background: "var(--surface)",
           position: "sticky",
           top: 0,
           zIndex: 40,
@@ -47,20 +46,20 @@ export function WizardLayout({ currentStep, children }: Props) {
         >
           <span
             style={{
-              width: "24px",
-              height: "24px",
-              background: "var(--accent)",
-              borderRadius: "4px",
+              width: "28px",
+              height: "28px",
+              background: "linear-gradient(155deg, var(--accent), var(--accent-dim))",
+              borderRadius: "7px",
               display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: "12px",
-              color: "#fff",
-              fontWeight: 700,
-              fontFamily: "var(--font-jetbrains-mono), monospace",
+              flexShrink: 0,
             }}
           >
-            SV
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2.6L20 7v10l-8 4.4L4 17V7l8-4.4z" fill="var(--text)" />
+              <path d="M8 9.6v4.8l4 2.2 4-2.2V9.6L12 7.4 8 9.6z" fill="var(--accent)" />
+            </svg>
           </span>
           <span
             style={{
@@ -169,9 +168,9 @@ export function WizardLayout({ currentStep, children }: Props) {
       {/* Content */}
       <div
         style={{
-          maxWidth: "860px",
+          maxWidth: "960px",
           margin: "0 auto",
-          padding: "32px 24px",
+          padding: "44px 32px 80px",
         }}
       >
         {children}

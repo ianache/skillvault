@@ -214,7 +214,7 @@ export function Step2Editor({ content, onChange, onNext, onBack }: Props) {
             style={{
               border: "1px solid var(--border)",
               borderTop: "none",
-              borderRadius: "0 0 4px 4px",
+              borderRadius: "0 0 10px 10px",
               overflow: "hidden",
               background: "var(--bg)",
             }}
@@ -243,7 +243,7 @@ export function Step2Editor({ content, onChange, onNext, onBack }: Props) {
                     style={{
                       background: "var(--surface)",
                       border: "1px solid var(--border)",
-                      borderRadius: "4px",
+                      borderRadius: "8px",
                       padding: "12px 14px",
                       marginBottom: "16px",
                       display: "flex",
@@ -281,7 +281,7 @@ export function Step2Editor({ content, onChange, onNext, onBack }: Props) {
             style={{
               background: "var(--surface)",
               border: `1px solid ${validation.errors.length > 0 ? "var(--red)" : validation.warnings.length > 0 ? "var(--amber)" : "var(--green)"}`,
-              borderRadius: "4px",
+              borderRadius: "10px",
               overflow: "hidden",
             }}
           >
@@ -326,7 +326,7 @@ export function Step2Editor({ content, onChange, onNext, onBack }: Props) {
                     fontSize: "11px",
                     padding: "6px 8px",
                     marginBottom: "4px",
-                    borderRadius: "3px",
+                    borderRadius: "6px",
                     background: issue.severity === "error" ? "rgba(232,80,58,0.08)" : "rgba(232,139,58,0.08)",
                     borderLeft: `2px solid ${issue.severity === "error" ? "var(--red)" : "var(--amber)"}`,
                     color: "var(--muted)",
@@ -363,12 +363,13 @@ export function Step2Editor({ content, onChange, onNext, onBack }: Props) {
           onClick={onBack}
           style={{
             fontFamily: "var(--font-geist), sans-serif",
-            fontSize: "13px",
-            padding: "9px 18px",
-            borderRadius: "4px",
-            border: "1px solid var(--border)",
-            background: "none",
-            color: "var(--muted)",
+            fontSize: "13.5px",
+            fontWeight: 600,
+            padding: "11px 18px",
+            borderRadius: "8px",
+            border: "1px solid var(--border-subtle)",
+            background: "var(--surface)",
+            color: "var(--text)",
             cursor: "pointer",
           }}
         >
@@ -379,10 +380,10 @@ export function Step2Editor({ content, onChange, onNext, onBack }: Props) {
           disabled={!validation.valid}
           style={{
             fontFamily: "var(--font-geist), sans-serif",
-            fontSize: "13px",
-            fontWeight: 600,
-            padding: "9px 20px",
-            borderRadius: "4px",
+            fontSize: "14px",
+            fontWeight: 700,
+            padding: "11px 20px",
+            borderRadius: "8px",
             border: "none",
             background: validation.valid ? "var(--accent)" : "var(--faint)",
             color: validation.valid ? "#fff" : "var(--muted)",

@@ -2,19 +2,20 @@
 
 /* ── SkillVault Design Tokens ── */
 :root {
-  --bg:            #0B0D14;
-  --surface:       #131620;
-  --raised:        #1A1E2E;
-  --border:        #252A3D;
-  --border-subtle: #1C2036;
+  --bg:            #0b0d10;
+  --surface:       #14181d;
+  --raised:        #161b24;
+  --border:        #1f242b;
+  --border-subtle: #232830;
 
-  --accent:        #3B6EFF;
-  --accent-dim:    #2960F2;
-  --accent-muted:  rgba(59,110,255,0.12);
+  --accent:        #cfa554;
+  --accent-dim:    #b88f45;
+  --accent-muted:  rgba(207,165,84,0.14);
+  --accent-indigo: #8f94ff;
 
-  --text:          #DDE2EF;
-  --muted:         #8590A8;
-  --faint:         #3A4055;
+  --text:          #f2f0ea;
+  --muted:         #8b9099;
+  --faint:         #5b616b;
 
   --cat-code:   #3B6EFF;
   --cat-docs:   #2ECC8A;
@@ -23,41 +24,51 @@
   --cat-infra:  #E88B3A;
   --cat-ai:     #E8503A;
 
-  --green:  #2ECC8A;
+  --green:  #4fd1c5;
   --amber:  #E88B3A;
   --red:    #E8503A;
   --cyan:   #4AB8E8;
   --purple: #C45FD4;
 
-  --status-published: #2ECC8A;
+  --status-published: #4fd1c5;
   --status-review:    #E88B3A;
-  --status-draft:     #8590A8;
+  --status-draft:     #8b9099;
   --status-rejected:  #E8503A;
 }
 
 [data-theme="light"] {
-  --bg:            #F5F7FF;
-  --surface:       #FFFFFF;
-  --raised:        #EEF1FA;
-  --border:        #D5DAF0;
-  --border-subtle: #E5E9F5;
-  --text:          #0D1629;
-  --muted:         #5A6484;
-  --faint:         #B8C0D8;
-  --accent-muted:  rgba(59,110,255,0.08);
+  --bg:            #f7f5f0;
+  --surface:       #ffffff;
+  --raised:        #f0ede6;
+  --border:        #e6e1d8;
+  --border-subtle: #d8d2c5;
+  --text:          #1a1d21;
+  --muted:         #5c6270;
+  --faint:         #8a8f99;
+  --accent:        #a9772e;
+  --accent-dim:    #946a29;
+  --accent-muted:  rgba(169,119,46,0.12);
+  --accent-indigo: #5a5fd6;
+  --green:         #0f9488;
+  --status-published: #0f9488;
 }
 
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
-    --bg:            #F5F7FF;
-    --surface:       #FFFFFF;
-    --raised:        #EEF1FA;
-    --border:        #D5DAF0;
-    --border-subtle: #E5E9F5;
-    --text:          #0D1629;
-    --muted:         #5A6484;
-    --faint:         #B8C0D8;
-    --accent-muted:  rgba(59,110,255,0.08);
+    --bg:            #f7f5f0;
+    --surface:       #ffffff;
+    --raised:        #f0ede6;
+    --border:        #e6e1d8;
+    --border-subtle: #d8d2c5;
+    --text:          #1a1d21;
+    --muted:         #5c6270;
+    --faint:         #8a8f99;
+    --accent:        #a9772e;
+    --accent-dim:    #946a29;
+    --accent-muted:  rgba(169,119,46,0.12);
+    --accent-indigo: #5a5fd6;
+    --green:         #0f9488;
+    --status-published: #0f9488;
   }
 }
 

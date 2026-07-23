@@ -190,8 +190,8 @@ export function LocalSkillLoader({ onLoaded, onSkip }: Props) {
         style={{
           background: "var(--raised)",
           border: "1px solid var(--border)",
-          borderRadius: "4px",
-          padding: "14px 16px",
+          borderRadius: "10px",
+          padding: "20px 24px",
           marginBottom: "24px",
           fontFamily: "var(--font-jetbrains-mono), monospace",
           fontSize: "12px",
@@ -213,7 +213,11 @@ export function LocalSkillLoader({ onLoaded, onSkip }: Props) {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "24px" }}>
         {/* Folder */}
         <UploadCard
-          icon="📁"
+          icon={
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="#cfa554">
+              <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
+            </svg>
+          }
           label="Seleccionar carpeta"
           hint="Sube toda la carpeta del skill"
           onClick={() => folderRef.current?.click()}
@@ -221,7 +225,11 @@ export function LocalSkillLoader({ onLoaded, onSkip }: Props) {
         />
         {/* ZIP */}
         <UploadCard
-          icon="🗜"
+          icon={
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--text)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 8H3M6 8V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2M4 8v12a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V8M10 12h4" />
+            </svg>
+          }
           label="Subir archivo .zip"
           hint="ZIP con estructura mi-skill/SKILL.md"
           onClick={() => zipRef.current?.click()}
@@ -254,7 +262,7 @@ export function LocalSkillLoader({ onLoaded, onSkip }: Props) {
             padding: "10px 14px",
             background: "rgba(232,80,58,0.08)",
             border: "1px solid var(--red)",
-            borderRadius: "4px",
+            borderRadius: "8px",
             fontSize: "13px",
             color: "var(--red)",
             marginBottom: "16px",
@@ -268,10 +276,10 @@ export function LocalSkillLoader({ onLoaded, onSkip }: Props) {
       {preview && pending && (
         <div
           style={{
-            background: "var(--surface)",
+            background: "rgba(15,148,136,0.06)",
             border: "1px solid var(--green)",
-            borderRadius: "4px",
-            padding: "14px 16px",
+            borderRadius: "10px",
+            padding: "20px 22px",
             marginBottom: "20px",
           }}
         >
@@ -312,10 +320,10 @@ export function LocalSkillLoader({ onLoaded, onSkip }: Props) {
             onClick={confirmLoad}
             style={{
               fontFamily: "var(--font-geist), sans-serif",
-              fontSize: "13px",
-              fontWeight: 600,
-              padding: "8px 20px",
-              borderRadius: "4px",
+              fontSize: "13.5px",
+              fontWeight: 700,
+              padding: "11px 20px",
+              borderRadius: "8px",
               border: "none",
               background: "var(--accent)",
               color: "#fff",
@@ -356,7 +364,7 @@ function UploadCard({
   onClick,
   loading,
 }: {
-  icon: string;
+  icon: React.ReactNode;
   label: string;
   hint: string;
   onClick: () => void;
@@ -368,9 +376,9 @@ function UploadCard({
       disabled={loading}
       style={{
         background: "var(--surface)",
-        border: "2px dashed var(--border)",
-        borderRadius: "6px",
-        padding: "24px 16px",
+        border: "1.5px dashed var(--border)",
+        borderRadius: "10px",
+        padding: "36px 20px",
         textAlign: "center",
         cursor: loading ? "not-allowed" : "pointer",
         transition: "border-color .12s, background .12s",
@@ -390,12 +398,14 @@ function UploadCard({
         el.style.background = "var(--surface)";
       }}
     >
-      <span style={{ fontSize: "28px" }}>{loading ? "⏳" : icon}</span>
+      <div style={{ width: "38px", height: "38px", display: "flex", alignItems: "center", justifyContent: "center", opacity: loading ? 0.4 : 1 }}>
+        {icon}
+      </div>
       <div>
-        <div style={{ fontFamily: "var(--font-geist), sans-serif", fontSize: "13px", fontWeight: 600, color: "var(--text)", marginBottom: "4px" }}>
+        <div style={{ fontFamily: "var(--font-geist), sans-serif", fontSize: "14.5px", fontWeight: 700, color: "var(--text)", marginBottom: "4px" }}>
           {label}
         </div>
-        <div style={{ fontSize: "11px", color: "var(--muted)" }}>{hint}</div>
+        <div style={{ fontSize: "12.5px", color: "var(--muted)" }}>{hint}</div>
       </div>
     </button>
   );

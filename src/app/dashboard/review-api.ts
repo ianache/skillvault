@@ -3,14 +3,21 @@ import type { ReviewRequestDetailDto, ReviewRequestSummary } from "@/lib/review/
 
 type ApiError = { error?: string };
 
-async function reviewApiFetch<T>(path: string): Promise<T> {
-  const requestHeaders = await headers();
+function reviewApiOrigin(requestHeaders: Awaited<ReturnType<typeof headers>>): string {
+  if (process.env.SKILLVAULT_INTERNAL_URL) return process.env.SKILLVAULT_INTERNAL_URL;
+  if (process.env.PORT) return `http://127.0.0.1:${process.env.PORT}`;
+
   const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
   if (!host) throw new Error("No se pudo determinar el origen de la solicitud.");
 
   const protocol = requestHeaders.get("x-forwarded-proto") ?? "http";
+  return `${protocol}://${host}`;
+}
+
+async function reviewApiFetch<T>(path: string): Promise<T> {
+  const requestHeaders = await headers();
   const cookie = requestHeaders.get("cookie");
-  const response = await fetch(`${protocol}://${host}/api/review-requests${path}`, {
+  const response = await fetch(`${reviewApiOrigin(requestHeaders)}/api/review-requests${path}`, {
     cache: "no-store",
     headers: cookie ? { cookie } : undefined,
   });

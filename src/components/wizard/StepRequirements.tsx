@@ -23,15 +23,23 @@ export interface ConfigRequirement {
   secretKey?: string;
 }
 
-const TYPE_META: Record<ReqType, { icon: string; label: string; color: string }> = {
-  env_var:    { icon: "⬡", label: "Variable de entorno", color: "#3B6EFF" },
-  executable: { icon: "⚙", label: "Ejecutable",          color: "#E88B3A" },
-  runtime:    { icon: "▶", label: "Runtime",             color: "#2ECC8A" },
-  service:    { icon: "⇌", label: "Servicio/Endpoint",   color: "#4AB8E8" },
-  directory:  { icon: "📁", label: "Directorio",         color: "#C45FD4" },
-  file:       { icon: "📄", label: "Archivo",            color: "#8590A8" },
-  secret:     { icon: "🔑", label: "Secreto",            color: "#E8503A" },
+const TYPE_META: Record<ReqType, { iconPath: string; label: string; color: string }> = {
+  env_var:    { iconPath: "M4 6h16M4 12h16M4 18h7",                                                              label: "Variable de entorno", color: "#3B6EFF" },
+  executable: { iconPath: "M5 3l14 9-14 9V3z",                                                                   label: "Ejecutable",          color: "#E88B3A" },
+  runtime:    { iconPath: "M13 2L3 14h7l-1 8 10-12h-7l1-8z",                                                     label: "Runtime",             color: "#0f9488" },
+  service:    { iconPath: "M4 12h4l3-9 4 18 3-9h4",                                                              label: "Servicio/Endpoint",   color: "#4AB8E8" },
+  directory:  { iconPath: "M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z",         label: "Directorio",          color: "#a9772e" },
+  file:       { iconPath: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6",                 label: "Archivo",             color: "#5c6270" },
+  secret:     { iconPath: "M12 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM17 9V7a5 5 0 0 0-10 0v2M5 9h14v11H5z",            label: "Secreto",             color: "#c46a3f" },
 };
+
+function TypeIcon({ path, color, size = 13 }: { path: string; color: string; size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d={path} />
+    </svg>
+  );
+}
 
 const RUNTIME_OPTIONS = ["node", "python", "java", "dotnet", "ruby", "go"];
 
@@ -155,8 +163,8 @@ export function StepRequirements({ content, onChange, onNext, onBack }: Props) {
         {(Object.keys(TYPE_META) as ReqType[]).map((t) => {
           const m = TYPE_META[t];
           return (
-            <span key={t} style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "10px", padding: "2px 8px", borderRadius: "3px", border: `1px solid ${m.color}40`, color: m.color, background: `${m.color}10` }}>
-              {m.icon} {m.label}
+            <span key={t} style={{ display: "inline-flex", alignItems: "center", gap: "5px", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "10px", padding: "3px 9px", borderRadius: "6px", border: `1px solid ${m.color}40`, color: m.color, background: `${m.color}10` }}>
+              <TypeIcon path={m.iconPath} color={m.color} size={11} /> {m.label}
             </span>
           );
         })}
@@ -168,8 +176,8 @@ export function StepRequirements({ content, onChange, onNext, onBack }: Props) {
           {requirements.map((req, i) => {
             const m = TYPE_META[req.type];
             return (
-              <div key={req.key} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderLeft: `3px solid ${m.color}`, borderRadius: "4px", padding: "12px 14px", display: "flex", alignItems: "flex-start", gap: "10px" }}>
-                <span style={{ fontSize: "14px", flexShrink: 0, marginTop: "1px" }}>{m.icon}</span>
+              <div key={req.key} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderLeft: `3px solid ${m.color}`, borderRadius: "10px", padding: "14px 16px", display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                <span style={{ flexShrink: 0, marginTop: "1px" }}><TypeIcon path={m.iconPath} color={m.color} size={14} /></span>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
                     <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "12px", fontWeight: 700, color: "var(--text)" }}>{req.key}</span>
@@ -191,7 +199,7 @@ export function StepRequirements({ content, onChange, onNext, onBack }: Props) {
       )}
 
       {requirements.length === 0 && !adding && (
-        <div style={{ textAlign: "center", padding: "32px 16px", background: "var(--surface)", border: "1px dashed var(--border)", borderRadius: "4px", marginBottom: "16px" }}>
+        <div style={{ textAlign: "center", padding: "44px 24px", background: "var(--surface)", border: "1px dashed var(--border-subtle)", borderRadius: "10px", marginBottom: "16px" }}>
           <div style={{ fontSize: "28px", marginBottom: "8px" }}>◷</div>
           <div style={{ fontSize: "13px", color: "var(--muted)", marginBottom: "4px" }}>Sin requisitos declarados</div>
           <div style={{ fontSize: "12px", color: "var(--faint)" }}>Los skills sin requisitos se instalan directamente. Añade uno si tu skill necesita configuración previa.</div>
@@ -200,7 +208,7 @@ export function StepRequirements({ content, onChange, onNext, onBack }: Props) {
 
       {/* Add form */}
       {adding && (
-        <div style={{ background: "var(--surface)", border: "1px solid var(--accent)", borderRadius: "4px", padding: "18px", marginBottom: "16px" }}>
+        <div style={{ background: "var(--surface)", border: "1px solid var(--accent)", borderRadius: "10px", padding: "18px", marginBottom: "16px" }}>
           <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "10px", letterSpacing: "1px", textTransform: "uppercase", color: "var(--muted)", marginBottom: "14px" }}>
             {editIdx !== null ? "Editar requisito" : "Nuevo requisito"}
           </div>
@@ -216,7 +224,7 @@ export function StepRequirements({ content, onChange, onNext, onBack }: Props) {
             <FL label="Tipo" required>
               <select value={form.type} onChange={(e) => setField("type", e.target.value as ReqType)} style={iStyle}>
                 {(Object.keys(TYPE_META) as ReqType[]).map((t) => (
-                  <option key={t} value={t}>{TYPE_META[t].icon} {TYPE_META[t].label}</option>
+                  <option key={t} value={t}>{TYPE_META[t].label}</option>
                 ))}
               </select>
             </FL>
@@ -232,7 +240,7 @@ export function StepRequirements({ content, onChange, onNext, onBack }: Props) {
               <div style={{ display: "flex", gap: "8px", paddingTop: "2px" }}>
                 {([false, true] as const).map((v) => (
                   <button key={String(v)} type="button" onClick={() => setField("optional", v)}
-                    style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "11px", padding: "6px 14px", borderRadius: "3px", border: `1px solid ${form.optional === v ? "var(--accent)" : "var(--border)"}`, background: form.optional === v ? "var(--accent-muted)" : "none", color: form.optional === v ? "var(--accent)" : "var(--muted)", cursor: "pointer" }}>
+                    style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "11px", padding: "7px 15px", borderRadius: "7px", border: `1px solid ${form.optional === v ? "var(--accent)" : "var(--border)"}`, background: form.optional === v ? "var(--accent-muted)" : "none", color: form.optional === v ? "var(--accent)" : "var(--muted)", cursor: "pointer" }}>
                     {v ? "Opcional" : "Obligatorio"}
                   </button>
                 ))}
@@ -260,10 +268,10 @@ export function StepRequirements({ content, onChange, onNext, onBack }: Props) {
           )}
 
           <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", marginTop: "14px" }}>
-            <button onClick={() => setAdding(false)} style={{ fontSize: "12px", padding: "7px 14px", borderRadius: "4px", border: "1px solid var(--border)", background: "none", color: "var(--muted)", cursor: "pointer" }}>
+            <button onClick={() => setAdding(false)} style={{ fontSize: "12.5px", padding: "8px 16px", borderRadius: "7px", border: "1px solid var(--border-subtle)", background: "var(--surface)", color: "var(--text)", cursor: "pointer" }}>
               Cancelar
             </button>
-            <button onClick={saveReq} style={{ fontSize: "12px", fontWeight: 600, padding: "7px 18px", borderRadius: "4px", border: "none", background: "var(--accent)", color: "#fff", cursor: "pointer" }}>
+            <button onClick={saveReq} style={{ fontSize: "12.5px", fontWeight: 700, padding: "8px 20px", borderRadius: "7px", border: "none", background: "var(--accent)", color: "#fff", cursor: "pointer" }}>
               {editIdx !== null ? "Guardar cambios" : "Añadir requisito"}
             </button>
           </div>
@@ -271,14 +279,14 @@ export function StepRequirements({ content, onChange, onNext, onBack }: Props) {
       )}
 
       {!adding && (
-        <button onClick={openAdd} style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "var(--accent)", background: "var(--accent-muted)", border: "1px solid rgba(59,110,255,.3)", borderRadius: "4px", padding: "8px 14px", cursor: "pointer", marginBottom: "24px" }}>
+        <button onClick={openAdd} style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", fontWeight: 600, color: "var(--accent)", background: "var(--accent-muted)", border: "1px solid var(--accent)", borderRadius: "8px", padding: "10px 18px", cursor: "pointer", marginBottom: "24px" }}>
           + Añadir requisito
         </button>
       )}
 
       {/* Actions */}
-      <div style={{ display: "flex", justifyContent: "space-between", paddingTop: "16px", borderTop: "1px solid var(--border)" }}>
-        <button onClick={onBack} style={{ fontFamily: "var(--font-geist), sans-serif", fontSize: "13px", padding: "9px 18px", borderRadius: "4px", border: "1px solid var(--border)", background: "none", color: "var(--muted)", cursor: "pointer" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", paddingTop: "20px", borderTop: "1px solid var(--border)" }}>
+        <button onClick={onBack} style={{ fontFamily: "var(--font-geist), sans-serif", fontSize: "13.5px", fontWeight: 600, padding: "11px 18px", borderRadius: "8px", border: "1px solid var(--border-subtle)", background: "var(--surface)", color: "var(--text)", cursor: "pointer" }}>
           ← Editor
         </button>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
@@ -287,7 +295,7 @@ export function StepRequirements({ content, onChange, onNext, onBack }: Props) {
               {requirements.length} requisito{requirements.length !== 1 ? "s" : ""} · {requirements.filter((r) => !r.optional).length} obligatorio{requirements.filter((r) => !r.optional).length !== 1 ? "s" : ""}
             </span>
           )}
-          <button onClick={handleNext} style={{ fontFamily: "var(--font-geist), sans-serif", fontSize: "13px", fontWeight: 600, padding: "9px 20px", borderRadius: "4px", border: "none", background: "var(--accent)", color: "#fff", cursor: "pointer" }}>
+          <button onClick={handleNext} style={{ fontFamily: "var(--font-geist), sans-serif", fontSize: "14px", fontWeight: 700, padding: "11px 20px", borderRadius: "8px", border: "none", background: "var(--accent)", color: "#fff", cursor: "pointer" }}>
             Siguiente → Revisión
           </button>
         </div>
@@ -408,11 +416,11 @@ function FL({ label, required, hint, children }: { label: string; required?: boo
 
 const iStyle: React.CSSProperties = {
   width: "100%", background: "var(--bg)", border: "1px solid var(--border)",
-  borderRadius: "4px", padding: "7px 10px", fontSize: "12px", color: "var(--text)",
+  borderRadius: "7px", padding: "8px 11px", fontSize: "12.5px", color: "var(--text)",
   outline: "none", fontFamily: "inherit", transition: "border-color .12s",
 };
 const iconBtn: React.CSSProperties = {
-  background: "none", border: "1px solid var(--border)", borderRadius: "3px",
+  background: "none", border: "1px solid var(--border)", borderRadius: "6px",
   padding: "3px 7px", fontSize: "11px", cursor: "pointer", color: "var(--muted)",
 };
 function fo(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) { e.target.style.borderColor = "var(--accent)"; }

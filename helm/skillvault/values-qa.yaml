@@ -1,26 +1,29 @@
-# Override para desarrollo local (kind / minikube)
-# Uso: helm install skillvault ./helm/skillvault -f helm/skillvault/values-dev.yaml --set auth.secret=xxx --set auth.keycloak.secret=xxx
+# Override para entorno QA (Kubernetes + Nginx Ingress + Cert-Manager)
+# Uso: helm install skillvault ./helm/skillvault -f helm/skillvault/values-qa.yaml --set auth.secret=xxx --set auth.keycloak.secret=xxx
 
 image:
   repository: xnet/skillvault
   tag: "0.3.0"
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
 
 ingress:
   enabled: true
   className: "nginx"
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-production
+    cert-manager.io/cluster-issuer: "letsencrypt-qa"
     nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
   hosts:
     - host: skillvault.qa.comsatel.com.pe
       paths:
         - path: /
           pathType: Prefix
   tls:
-    - secretName: skillvault-tls
+    - secretName: skillvault-qa-tls
       hosts:
         - skillvault.qa.comsatel.com.pe
-
 
 resources:
   requests:
@@ -34,8 +37,12 @@ resources:
 
 auth:
   secret: PFYH3MXZlwors0hD45OmefO5NsQoSwmA
+  trustHost: "true"
+  url: "https://skillvault.qa.comsatel.com.pe"
   keycloak:
+    id: "skillvault"
     secret: PFYH3MXZlwors0hD45OmefO5NsQoSwmA
+    issuer: "https://oauth2.qa.comsatel.com.pe/realms/Apps"
 
 externalDatabaseUrl: "mysql://userqa:us3rq4159@skillvault-db.database.svc.cluster.local:3306/skillvault"
 mysql:
@@ -47,6 +54,7 @@ mysql:
     password: "us3rq4159"
   persistence:
     enabled: true
+    size: 5Gi
   resources:
     requests:
       cpu: 250m
