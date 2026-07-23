@@ -1,4 +1,12 @@
 export type ReviewStatus = "pending" | "changes_requested" | "approved" | "rejected";
+
+export type ReviewStatusCounts = {
+  all: number;
+  pending: number;
+  changes_requested: number;
+  approved: number;
+  rejected: number;
+};
 export type ReviewDecision = "approve" | "reject" | "request_changes";
 export type ReviewFileType = "resource" | "script";
 export type ReviewFileChangeType = "added" | "modified" | "deleted" | "unchanged";
@@ -29,7 +37,12 @@ export type UpdateReviewRequestInput = {
 
 export type ListReviewRequestsQuery = {
   mine?: boolean;
-  status?: ReviewStatus;
+  status?: ReviewStatus | "all";
+};
+
+export type ListReviewRequestsResponse = {
+  requests: ReviewRequestSummary[];
+  counts: ReviewStatusCounts;
 };
 
 export type AddReviewCommentInput = {

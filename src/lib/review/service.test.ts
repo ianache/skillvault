@@ -4,6 +4,8 @@ import {
   addReviewComment,
   createReviewRequest,
   decideReviewRequest,
+  getReviewStatusCounts,
+  listReviewRequests,
   updateReviewRequest,
 } from "./service";
 import type { ReviewActor, ReviewDatabaseClient } from "./types";
@@ -52,7 +54,8 @@ type FakeClient = ReviewDatabaseClient & {
 
 function createFakeClient(
   files: Array<Record<string, unknown>> = [],
-  requestOverrides: Partial<Record<string, unknown>> = {}
+  requestOverrides: Partial<Record<string, unknown>> = {},
+  options: { existingSkill?: boolean } = {}
 ): FakeClient {
   const comments: Array<Record<string, unknown>> = [];
   const request = {
@@ -106,8 +109,11 @@ function createFakeClient(
         };
         return { rows: [] };
       }
-      if (sql.includes("SELECT id FROM skills WHERE slug = ?")) {
+      if (sql.includes("SELECT id FROM skills WHERE slug = ? AND status = 'published'")) {
         return { rows: [{ id: 7 }] };
+      }
+      if (sql.includes("SELECT id FROM skills WHERE slug = ?")) {
+        return { rows: options.existingSkill ? [{ id: 7 }] : [] };
       }
       if (sql.includes("DELETE FROM skill_files")) {
         return { rows: [] };
@@ -154,6 +160,17 @@ test("author creates pending request for a new skill", async () => {
   const request = await createReviewRequest({ rawContent: validRawContent, files: [] }, authorActor, createFakeClient());
   assert.equal(request.status, "pending");
   assert.equal(request.slug, "demo-skill");
+});
+
+test("rejects a new-skill submission when a skill with the same slug already exists", async () => {
+  await assert.rejects(
+    () => createReviewRequest(
+      { rawContent: validRawContent, files: [] },
+      authorActor,
+      createFakeClient([], {}, { existingSkill: true })
+    ),
+    /already exists/
+  );
 });
 
 test("author cannot approve own request", async () => {
@@ -344,4 +361,67 @@ test("approval update failure rolls back published writes without approving the 
 
   assert.notEqual(fakeClient.updatedRequest?.status, "approved");
   assert.equal(fakeClient.updatedRequest, undefined);
+});
+
+test("getReviewStatusCounts aggregates status counts correctly", async () => {
+  const executedSql: string[] = [];
+  const executedArgs: unknown[][] = [];
+  const fakeClient: ReviewDatabaseClient = {
+    async execute(input) {
+      const sql = typeof input === "string" ? input : input.sql;
+      const args = typeof input === "string" ? [] : input.args ?? [];
+      executedSql.push(sql);
+      executedArgs.push(args);
+      return {
+        rows: [
+          { status: "pending", count: "3" },
+          { status: "approved", count: 2 },
+          { status: "changes_requested", count: 1 },
+          { status: "rejected", count: 0 },
+        ],
+      };
+    },
+  };
+
+  const authorCounts = await getReviewStatusCounts(authorActor, {}, fakeClient);
+  assert.equal(executedSql[0].includes("WHERE author_id = ?"), true);
+  assert.deepEqual(executedArgs[0], ["author-1"]);
+  assert.deepEqual(authorCounts, {
+    all: 6,
+    pending: 3,
+    approved: 2,
+    changes_requested: 1,
+    rejected: 0,
+  });
+
+  const reviewerCounts = await getReviewStatusCounts(reviewerActor, { mine: false }, fakeClient);
+  assert.equal(executedSql[1].includes("WHERE author_id = ?"), false);
+  assert.deepEqual(reviewerCounts, {
+    all: 6,
+    pending: 3,
+    approved: 2,
+    changes_requested: 1,
+    rejected: 0,
+  });
+});
+
+test("listReviewRequests filters by status when query.status is provided and !== 'all'", async () => {
+  const executedSql: string[] = [];
+  const executedArgs: unknown[][] = [];
+  const fakeClient: ReviewDatabaseClient = {
+    async execute(input) {
+      const sql = typeof input === "string" ? input : input.sql;
+      const args = typeof input === "string" ? [] : input.args ?? [];
+      executedSql.push(sql);
+      executedArgs.push(args);
+      return { rows: [] };
+    },
+  };
+
+  await listReviewRequests({ status: "pending" }, reviewerActor, fakeClient);
+  assert.ok(executedSql[0].includes("status = ?"));
+  assert.deepEqual(executedArgs[0], ["pending"]);
+
+  await listReviewRequests({ status: "all" }, reviewerActor, fakeClient);
+  assert.ok(!executedSql[1].includes("status = ?"));
 });

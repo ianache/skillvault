@@ -16,8 +16,9 @@ export function parseRequestId(value: string): number | null {
   return Number.isInteger(id) && id > 0 ? id : null;
 }
 
-export function parseReviewStatus(value: string | null): ReviewStatus | undefined | null {
+export function parseReviewStatus(value: string | null): ReviewStatus | "all" | undefined | null {
   if (value === null) return undefined;
+  if (value === "all") return "all";
   return reviewStatuses.includes(value as ReviewStatus) ? (value as ReviewStatus) : null;
 }
 

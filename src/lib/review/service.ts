@@ -16,6 +16,7 @@ import type {
   ReviewRequestDetailDto,
   ReviewRequestSummary,
   ReviewStatus,
+  ReviewStatusCounts,
   UpdateReviewRequestInput,
 } from "./types";
 
@@ -225,6 +226,17 @@ export async function createReviewRequest(
   client: ReviewDatabaseClient
 ): Promise<ReviewRequest> {
   const { frontmatter, files } = validateSubmission(input.rawContent, input.files);
+
+  if (!input.skillId) {
+    const existingSkill = await client.execute({
+      sql: "SELECT id FROM skills WHERE slug = ?",
+      args: [frontmatter.name],
+    });
+    if (existingSkill.rows.length > 0) {
+      throw new Error("A skill with this slug already exists — submit a new version instead");
+    }
+  }
+
   const duplicate = await client.execute({
     sql: `SELECT id FROM skill_review_requests
       WHERE slug = ? AND version = ? AND status IN ('pending', 'changes_requested')`,
@@ -295,6 +307,40 @@ export async function updateReviewRequest(
   return getRequestRow(id, client);
 }
 
+export async function getReviewStatusCounts(
+  actor: ReviewActor,
+  options: { mine?: boolean } = {},
+  client: ReviewDatabaseClient
+): Promise<ReviewStatusCounts> {
+  const isMine = options.mine ?? !canReview(actor);
+  const whereClause = isMine ? "WHERE author_id = ?" : "";
+  const args = isMine ? [actor.id] : [];
+
+  const result = await client.execute({
+    sql: `SELECT status, COUNT(*) as count FROM skill_review_requests ${whereClause} GROUP BY status`,
+    args,
+  });
+
+  const counts: ReviewStatusCounts = {
+    all: 0,
+    pending: 0,
+    changes_requested: 0,
+    approved: 0,
+    rejected: 0,
+  };
+
+  for (const row of result.rows) {
+    const status = String(row.status) as ReviewStatus;
+    const count = Number(row.count ?? 0);
+    if (status in counts) {
+      counts[status] = count;
+      counts.all += count;
+    }
+  }
+
+  return counts;
+}
+
 export async function listReviewRequests(
   query: ListReviewRequestsQuery,
   actor: ReviewActor,
@@ -306,7 +352,7 @@ export async function listReviewRequests(
     clauses.push("author_id = ?");
     args.push(actor.id);
   }
-  if (query.status) {
+  if (query.status && query.status !== "all") {
     clauses.push("status = ?");
     args.push(query.status);
   }

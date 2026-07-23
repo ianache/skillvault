@@ -371,3 +371,59 @@ test("POST /api/review-requests/[id]/decision allows admin session", async () =>
   const json = await response.json();
   assert.equal(json.request.status, "approved");
 });
+
+test("GET /api/review-requests returns requests and counts", async () => {
+  let listQuery: unknown;
+  let countsOptions: unknown;
+  const dummyCounts = { all: 5, pending: 2, changes_requested: 1, approved: 1, rejected: 1 };
+  const dummyRequests = [reviewRequest()];
+
+  const { GET } = createReviewRequestsHandlers({
+    getSession: async () => reviewerSession as never,
+    database,
+    list: async (query) => {
+      listQuery = query;
+      return dummyRequests;
+    },
+    getCounts: async (_actor, options) => {
+      countsOptions = options;
+      return dummyCounts;
+    },
+  });
+
+  const response = await GET(new NextRequest("http://test/api/review-requests?status=pending&mine=true"));
+
+  assert.equal(response.status, 200);
+  const json = await response.json();
+  assert.deepEqual(json, { requests: dummyRequests, counts: dummyCounts });
+  assert.deepEqual(listQuery, { mine: true, status: "pending" });
+  assert.deepEqual(countsOptions, { mine: true });
+});
+
+test("GET /api/review-requests allows status=all", async () => {
+  let listQuery: unknown;
+  const { GET } = createReviewRequestsHandlers({
+    getSession: async () => reviewerSession as never,
+    database,
+    list: async (query) => {
+      listQuery = query;
+      return [];
+    },
+    getCounts: async () => ({ all: 0, pending: 0, changes_requested: 0, approved: 0, rejected: 0 }),
+  });
+
+  const response = await GET(new NextRequest("http://test/api/review-requests?status=all"));
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(listQuery, { mine: false, status: "all" });
+});
+
+test("GET /api/review-requests returns 422 for invalid status parameter", async () => {
+  const { GET } = createReviewRequestsHandlers({
+    getSession: async () => reviewerSession as never,
+  });
+
+  const response = await GET(new NextRequest("http://test/api/review-requests?status=invalid_status"));
+
+  assert.equal(response.status, 422);
+});
