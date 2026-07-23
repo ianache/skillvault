@@ -27,9 +27,9 @@ async function migrate() {
     reviewer_id VARCHAR(255),
     reviewer_handle VARCHAR(255),
     general_comment TEXT,
-    submitted_at BIGINT NOT NULL DEFAULT (UNIX_TIMESTAMP()),
+    submitted_at BIGINT NOT NULL DEFAULT 0,
     reviewed_at BIGINT,
-    updated_at BIGINT NOT NULL DEFAULT (UNIX_TIMESTAMP())
+    updated_at BIGINT NOT NULL DEFAULT 0
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`);
 
   await client.execute(`CREATE TABLE IF NOT EXISTS skill_review_files (
@@ -39,7 +39,7 @@ async function migrate() {
     file_type VARCHAR(50) NOT NULL,
     content LONGTEXT NOT NULL,
     change_type VARCHAR(20) NOT NULL DEFAULT 'added',
-    created_at BIGINT NOT NULL DEFAULT (UNIX_TIMESTAMP())
+    created_at BIGINT NOT NULL DEFAULT 0
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`);
 
   await client.execute(`CREATE TABLE IF NOT EXISTS skill_review_comments (
@@ -49,7 +49,7 @@ async function migrate() {
     author_id VARCHAR(255) NOT NULL,
     author_handle VARCHAR(255),
     body TEXT NOT NULL,
-    created_at BIGINT NOT NULL DEFAULT (UNIX_TIMESTAMP())
+    created_at BIGINT NOT NULL DEFAULT 0
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`);
 
   await createIndex("CREATE INDEX idx_skill_review_requests_status ON skill_review_requests(status)");

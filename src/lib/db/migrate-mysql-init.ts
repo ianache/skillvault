@@ -36,8 +36,8 @@ async function run() {
       raw_content LONGTEXT NOT NULL,
       status VARCHAR(20) NOT NULL DEFAULT 'published',
       install_count INT NOT NULL DEFAULT 0,
-      created_at BIGINT NOT NULL DEFAULT (UNIX_TIMESTAMP()),
-      updated_at BIGINT NOT NULL DEFAULT (UNIX_TIMESTAMP()),
+      created_at BIGINT NOT NULL DEFAULT 0,
+      updated_at BIGINT NOT NULL DEFAULT 0,
       published_at BIGINT
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
   });
@@ -49,7 +49,7 @@ async function run() {
       skill_id INT NOT NULL,
       version VARCHAR(50) NOT NULL,
       raw_content LONGTEXT NOT NULL,
-      created_at BIGINT NOT NULL DEFAULT (UNIX_TIMESTAMP())
+      created_at BIGINT NOT NULL DEFAULT 0
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
   });
   console.log("✓ skill_versions");
@@ -61,7 +61,7 @@ async function run() {
       path VARCHAR(500) NOT NULL,
       file_type VARCHAR(50) NOT NULL,
       content LONGTEXT NOT NULL,
-      created_at BIGINT NOT NULL DEFAULT (UNIX_TIMESTAMP())
+      created_at BIGINT NOT NULL DEFAULT 0
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
   });
   console.log("✓ skill_files");
@@ -74,7 +74,7 @@ async function run() {
       harness VARCHAR(50) NOT NULL DEFAULT 'claude',
       scope VARCHAR(20) NOT NULL DEFAULT 'global',
       skill_version VARCHAR(50) NOT NULL,
-      installed_at BIGINT NOT NULL DEFAULT (UNIX_TIMESTAMP())
+      installed_at BIGINT NOT NULL DEFAULT 0
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
   });
   console.log("✓ installs");
@@ -88,7 +88,7 @@ async function run() {
       color VARCHAR(20) NOT NULL DEFAULT '#8590A8',
       description TEXT NOT NULL,
       sort_order INT NOT NULL DEFAULT 0,
-      created_at BIGINT NOT NULL DEFAULT (UNIX_TIMESTAMP())
+      created_at BIGINT NOT NULL DEFAULT 0
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
   });
   console.log("✓ categories");

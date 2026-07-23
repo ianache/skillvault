@@ -102,5 +102,19 @@ export const installs = sqliteTable("installs", {
   installedAt: integer("installed_at").notNull().default(sql`(unixepoch())`),
 });
 
+export const users = sqliteTable("users", {
+  id: text("id").primaryKey(), // Keycloak subject (sub)
+  username: text("username").notNull(),
+  fullName: text("full_name").notNull().default(""),
+  email: text("email").notNull().default(""),
+  active: integer("active").notNull().default(1),
+  roles: text("roles").notNull().default("[]"), // JSON array of app roles (admin | author | reviewer)
+  lastLoginAt: integer("last_login_at").notNull().default(sql`(unixepoch())`),
+  createdAt: integer("created_at").notNull().default(sql`(unixepoch())`),
+  updatedAt: integer("updated_at").notNull().default(sql`(unixepoch())`),
+});
+
 export type Skill = typeof skills.$inferSelect;
 export type NewSkill = typeof skills.$inferInsert;
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;
