@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import type { ReviewRequestDetailDto, ReviewRequestSummary } from "@/lib/review/types";
+import type { ReviewRequestDetailDto, ReviewRequestSummary, ReviewStatusCounts } from "@/lib/review/types";
 
 type ApiError = { error?: string };
 
@@ -21,14 +21,17 @@ async function reviewApiFetch<T>(path: string): Promise<T> {
     cache: "no-store",
     headers: cookie ? { cookie } : undefined,
   });
-  const data = await response.json() as T & ApiError;
+  const data = (await response.json()) as T & ApiError;
   if (!response.ok) throw new Error(data.error ?? "No se pudo cargar la solicitud de revision.");
   return data;
 }
 
-export async function fetchReviewRequests(query: string): Promise<ReviewRequestSummary[]> {
-  const data = await reviewApiFetch<{ requests: ReviewRequestSummary[] }>(query);
-  return data.requests;
+export async function fetchReviewRequests(query: string): Promise<{ requests: ReviewRequestSummary[]; counts: ReviewStatusCounts }> {
+  const data = await reviewApiFetch<{ requests: ReviewRequestSummary[]; counts: ReviewStatusCounts }>(query);
+  return {
+    requests: data.requests ?? [],
+    counts: data.counts ?? { all: 0, pending: 0, changes_requested: 0, approved: 0, rejected: 0 },
+  };
 }
 
 export async function fetchReviewRequest(id: number): Promise<ReviewRequestDetailDto> {

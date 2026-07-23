@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import type { ReviewComment, ReviewDecision, ReviewFileInput, ReviewRequest, ReviewRequestDetailDto } from "@/lib/review/types";
 import { ReviewCommentForm } from "./ReviewCommentForm";
+import { ReviewTimeline } from "./ReviewTimeline";
 
 type Props = { request: ReviewRequestDetailDto; viewerMode: "author" | "reviewer" };
 type Tab = "skill" | "attachments" | "comments" | "metadata";
@@ -29,6 +30,7 @@ export function ReviewRequestDetail({ request: initialRequest, viewerMode }: Pro
       {tab === "comments" && <div><h2 style={sectionHeadingStyle}>Comentarios generales</h2><CommentThread comments={comments} filePath={null} emptyMessage="No hay comentarios generales todavia." /><ReviewCommentForm requestId={request.id} onComment={(comment) => setRequest((current) => ({ ...current, comments: [...current.comments, comment] }))} /><h2 style={sectionHeadingStyle}>Comentarios por archivo</h2>{comments.filter((comment) => comment.filePath).length === 0 ? <p style={emptyCopyStyle}>No hay comentarios por archivo todavia.</p> : comments.filter((comment) => comment.filePath).map((comment) => <Comment key={comment.id} comment={comment} />)}</div>}
       {tab === "metadata" && <dl style={metadataStyle}>{[["Autor", request.authorHandle ?? "Sin nombre"], ["Revisor", request.reviewerHandle ?? "Sin asignar"], ["Tipo", request.type], ["Version de esquema", request.schemaVersion], ["Enviada", formatDate(request.submittedAt)], ["Actualizada", formatDate(request.updatedAt)]].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>}
     </section>
+    <ReviewTimeline request={request} />
   </div>;
 }
 function mergeRequestDetail(current: ReviewRequestDetailDto, update: ReviewRequest): ReviewRequestDetailDto { return { ...current, ...update, files: current.files, comments: current.comments }; }

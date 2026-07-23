@@ -70,7 +70,7 @@ test("dashboard pages fetch review request API endpoints", async () => {
     assert.doesNotMatch(page, /@\/lib\/db|@\/lib\/review\/service/);
   }
   assert.match(proposals, /fetchReviewRequests\("\?mine=1"\)/);
-  assert.match(queue, /fetchReviewRequests\("\?status=pending"\)/);
+  assert.match(queue, /fetchReviewRequests\(""\)/);
   assert.match(reviewDetail, /fetchReviewRequest\(id\)/);
   assert.match(proposalDetail, /fetchReviewRequest\(id\)/);
   assert.match(helper, /\/api\/review-requests/);
@@ -79,15 +79,18 @@ test("dashboard pages fetch review request API endpoints", async () => {
   assert.match(helper, /cookie/);
 });
 
-test("exports ReviewStatusBadge and ReviewFilterTabs components", async () => {
-  const [badgeModule, filterModule, listSource] = await Promise.all([
+test("exports ReviewStatusBadge, ReviewFilterTabs, and ReviewTimeline components", async () => {
+  const [badgeModule, filterModule, timelineModule, listSource, detailSource] = await Promise.all([
     import("@/components/review/ReviewStatusBadge"),
     import("@/components/review/ReviewFilterTabs"),
+    import("@/components/review/ReviewTimeline"),
     source("../../components/review/ReviewRequestList.tsx"),
+    source("../../components/review/ReviewRequestDetail.tsx"),
   ]);
 
   assert.equal(typeof badgeModule.ReviewStatusBadge, "function");
   assert.equal(typeof filterModule.ReviewFilterTabs, "function");
+  assert.equal(typeof timelineModule.ReviewTimeline, "function");
   assert.match(listSource, /ReviewStatusBadge/);
+  assert.match(detailSource, /ReviewTimeline/);
 });
-
