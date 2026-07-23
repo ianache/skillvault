@@ -11,6 +11,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       clientId: process.env.AUTH_KEYCLOAK_ID!,
       clientSecret: process.env.AUTH_KEYCLOAK_SECRET!,
       issuer: process.env.AUTH_KEYCLOAK_ISSUER!,
+      profile(profile) {
+        // Keycloak puts roles in realm_access/resource_access, not a flat
+        // "roles" claim — the default provider profile() drops both.
+        const realmRoles = (profile.realm_access as { roles?: string[] } | undefined)?.roles ?? [];
+        const clientRoles =
+          (profile.resource_access as Record<string, { roles?: string[] }> | undefined)?.[
+            process.env.AUTH_KEYCLOAK_ID!
+          ]?.roles ?? [];
+        return {
+          id: profile.sub,
+          name: profile.name ?? profile.preferred_username,
+          email: profile.email,
+          image: profile.picture,
+          roles: [...new Set([...realmRoles, ...clientRoles])],
+        };
+      },
     }),
   ],
   callbacks: {
