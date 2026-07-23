@@ -36,6 +36,8 @@ ingress:
 auth:
   # AUTH_SECRET: valor aleatorio de 32 bytes, generado con `openssl rand -base64 32`
   secret: ""
+  trustHost: "true"
+  url: ""
   keycloak:
     id: "skillvault"
     # CLIENT SECRET de Keycloak — se almacena en Secret de Kubernetes
