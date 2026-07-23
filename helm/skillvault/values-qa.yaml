@@ -44,19 +44,4 @@ auth:
 
 externalDatabaseUrl: "mysql://userqa:us3rq4159@skillvault-db.database.svc.cluster.local:3306/skillvault"
 mysql:
-  enabled: true
-  auth:
-    rootPassword: welcome1
-    database: skillvault
-    username: userqa
-    password: "us3rq4159"
-  persistence:
-    enabled: true
-    size: 5Gi
-  resources:
-    requests:
-      cpu: 250m
-      memory: 512Mi
-    limits:
-      cpu: 1000m
-      memory: 1Gi
+  enabled: false
