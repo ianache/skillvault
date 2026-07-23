@@ -34,8 +34,8 @@ async function getSkills() {
     triggers: JSON.parse(r.triggers as string ?? "[]") as string[],
     compatibility: JSON.parse(r.compatibility as string ?? '["claude"]') as string[],
     installCount: r.install_count as number,
-    createdAt: r.created_at as string,
-    publishedAt: r.published_at as string | null,
+    createdAt: Number(r.created_at),
+    publishedAt: r.published_at === null || r.published_at === undefined ? null : Number(r.published_at),
     status: r.status as string,
   }));
 }

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 interface Version {
   version: string;
-  createdAt: string;
+  createdAt: number;
 }
 
 interface Props {
@@ -120,7 +120,7 @@ export function VersionHistory({ slug, refreshKey }: Props) {
                 color: "var(--faint)",
               }}
             >
-              {new Date(v.createdAt).toLocaleDateString("es", {
+              {new Date(v.createdAt * 1000).toLocaleDateString("es", {
                 day: "2-digit",
                 month: "short",
                 year: "numeric",

@@ -28,6 +28,10 @@ export default auth((req) => {
     return NextResponse.redirect(new URL("/unauthorized", req.url));
   }
 
+  if (pathname.startsWith("/dashboard/users") && !roles.includes("admin")) {
+    return NextResponse.redirect(new URL("/unauthorized", req.url));
+  }
+
   if (pathname.startsWith("/dashboard/review") && !roles.includes("reviewer") && !roles.includes("admin")) {
     return NextResponse.redirect(new URL("/unauthorized", req.url));
   }

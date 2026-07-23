@@ -1,0 +1,56 @@
+# Override para desarrollo local (kind / minikube)
+# Uso: helm install skillvault ./helm/skillvault -f helm/skillvault/values-dev.yaml --set auth.secret=xxx --set auth.keycloak.secret=xxx
+
+image:
+  repository: xnet/skillvault
+  tag: "0.3.0"
+
+mysql:
+  enabled: false
+  auth:
+    rootPassword: "welcome1"
+    password: "us3rq4159"
+    username: userqa
+  persistence:
+    enabled: false   # emptyDir en dev — no necesita PVC
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+  hosts:
+    - host: skillvault.dev.comsatel.com.pe
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: skillvault-tls
+      hosts:
+        - skillvault.dev.comsatel.com.pe
+
+
+resources:
+  requests:
+    cpu: 10m
+    memory: 128Mi
+    ephemeral-storage: 512Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
+    ephemeral-storage: 512Mi
+
+auth:
+  secret: PFYH3MXZlwors0hD45OmefO5NsQoSwmA
+  keycloak:
+    secret: PFYH3MXZlwors0hD45OmefO5NsQoSwmA
+
+externalDatabaseUrl: "mysql://skillvault-db.database.svc.cluster.local:3306/skillvault"
+mysql:
+  enabled: false
+  auth:
+    rootPassword: welcome1
+    database: skillvault
+    username: microservicio
+    password: "secr3t!"

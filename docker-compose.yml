@@ -17,8 +17,11 @@ services:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "skillvault", "--password=${MYSQL_PASSWORD:-skillvault_secret}"]
       interval: 10s
       timeout: 5s
-      retries: 10
-      start_period: 30s
+      retries: 30
+      # A fully fresh volume (first-ever datadir init) can take several
+      # minutes on some Docker Desktop setups (slow volume I/O) — give it
+      # room before counting failed checks against `retries`.
+      start_period: 300s
 
   # ── SkillVault App ─────────────────────────────────────────────────────────
   app:
@@ -29,7 +32,7 @@ services:
       dockerfile: Dockerfile
       args:
         AUTH_KEYCLOAK_ISSUER: ${AUTH_KEYCLOAK_ISSUER}
-    # restart: unless-stopped
+    restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy

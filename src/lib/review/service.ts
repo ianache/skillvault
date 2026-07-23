@@ -146,8 +146,8 @@ async function activateApprovedRequest(
     await client.execute({
         sql: `INSERT INTO skills
           (slug, name, description, type, author_id, author_handle, version, schema_version,
-           triggers, tools, compatibility, dependencies, raw_content, status, published_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'published', ?)`,
+           triggers, tools, compatibility, dependencies, config_requirements, raw_content, status, published_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'published', ?)`,
         args: [
           request.slug,
           request.name,
@@ -161,6 +161,7 @@ async function activateApprovedRequest(
           JSON.stringify(frontmatter.metadata.tools),
           JSON.stringify(frontmatter.compatibility),
           JSON.stringify(frontmatter.dependencies),
+          JSON.stringify(frontmatter.config_requirements),
           request.rawContent,
           publishedAt,
         ],
@@ -176,7 +177,7 @@ async function activateApprovedRequest(
         sql: `UPDATE skills
           SET slug = ?, name = ?, description = ?, type = ?, author_id = ?, author_handle = ?,
               version = ?, schema_version = ?, triggers = ?, tools = ?, compatibility = ?,
-              dependencies = ?, raw_content = ?, status = 'published', published_at = ?, updated_at = ?
+              dependencies = ?, config_requirements = ?, raw_content = ?, status = 'published', published_at = ?, updated_at = ?
           WHERE id = ? AND status = 'published'`,
         args: [
           request.slug,
@@ -191,6 +192,7 @@ async function activateApprovedRequest(
           JSON.stringify(frontmatter.metadata.tools),
           JSON.stringify(frontmatter.compatibility),
           JSON.stringify(frontmatter.dependencies),
+          JSON.stringify(frontmatter.config_requirements),
           request.rawContent,
           publishedAt,
           publishedAt,
@@ -208,8 +210,8 @@ async function activateApprovedRequest(
     });
   }
   await client.execute({
-      sql: "INSERT INTO skill_versions (skill_id, version, raw_content) VALUES (?, ?, ?)",
-      args: [skillId, request.version, request.rawContent],
+      sql: "INSERT INTO skill_versions (skill_id, version, raw_content, created_at) VALUES (?, ?, ?, ?)",
+      args: [skillId, request.version, request.rawContent, publishedAt],
   });
   await client.execute({
       sql: `UPDATE skill_review_requests
@@ -246,8 +248,8 @@ export async function createReviewRequest(
 
   await client.execute({
     sql: `INSERT INTO skill_review_requests
-      (skill_id, slug, name, description, type, version, schema_version, author_id, author_handle, raw_content, status)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')`,
+      (skill_id, slug, name, description, type, version, schema_version, author_id, author_handle, raw_content, status, submitted_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)`,
     args: [
       input.skillId ?? null,
       frontmatter.name,
@@ -259,6 +261,8 @@ export async function createReviewRequest(
       actor.id,
       actor.handle ?? null,
       input.rawContent,
+      Math.floor(Date.now() / 1000),
+      Math.floor(Date.now() / 1000),
     ],
   });
 

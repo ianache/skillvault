@@ -1,7 +1,5 @@
-Task 1: complete (commits 59b4594..17d16a3, review clean; MySQL execution not available)
-Task 2: complete (commits 17d16a3..28f4376, review clean; activation deferred to Task 6 by human decision)
-Task 3: complete (commits 28f4376..db5249a, review PASS_WITH_NOTES; invalid decision fix applied; low parser-hardening note carried forward; activation deferred to Task 6 by human decision)
-Task 4: complete (commits db5249a..a2c12c0, review PASS_WITH_NOTES; full lint blocked by local pnpm/certificate and existing lint failures)
-Task 5: complete (commits a2c12c0..2949aee, review PASS after fixes; build and focused UI smoke passed)
-Task 6: complete (commits 2949aee..bd38933, review PASS; activation transaction isolation fixed)
-Task 7: complete (commits bd38933..b5599b6, review PASS; manual QA not completed due local auth/package-manager constraints)
+# Feature: Skill Approval Workflow & Status Visualization
+Start Commit: 7cbb2ad
+Task 1: complete (commits 7cbb2ad..d3e0e4d, review clean)
+Task 2: complete (commits d3e0e4d..c13d56e, review clean)
+Task 3: complete (commits c13d56e..59111bd, review clean)

@@ -20,7 +20,7 @@ export function ReviewRequestList({ requests, mode }: Props) {
   </div>;
 }
 
-function formatDate(value: number) { return new Date(value).toLocaleDateString("es", { day: "2-digit", month: "short", year: "2-digit" }); }
+function formatDate(value: number) { return new Date(value * 1000).toLocaleDateString("es", { day: "2-digit", month: "short", year: "2-digit" }); }
 const tableStyle: React.CSSProperties = { background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "4px", overflow: "hidden" };
 const headerStyle: React.CSSProperties = { display: "grid", gridTemplateColumns: "2fr 140px 120px 120px 110px 48px", gap: "12px", padding: "10px 16px", background: "var(--raised)", borderBottom: "1px solid var(--border)" };
 const rowStyle: React.CSSProperties = { display: "grid", gridTemplateColumns: "2fr 140px 120px 120px 110px 48px", gap: "12px", padding: "13px 16px", alignItems: "center" };

@@ -35,7 +35,7 @@ export function createSkillVersionHandlers(dependencies: Partial<RouteDependenci
       return NextResponse.json({
         versions: versions.rows.map((r) => ({
           version: r.version as string,
-          createdAt: r.created_at as string,
+          createdAt: Number(r.created_at),
         })),
       });
     } catch {

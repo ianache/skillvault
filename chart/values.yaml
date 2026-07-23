@@ -1,0 +1,131 @@
+# ── Imagen de la aplicación ────────────────────────────────────────────────────
+image:
+  repository: xnet/skillvault #ghcr.io/ianache/skillvault
+  tag: "0.2.0"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+# ── Réplicas ───────────────────────────────────────────────────────────────────
+replicaCount: 1
+
+# ── Service ────────────────────────────────────────────────────────────────────
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 3000
+
+# ── Ingress ────────────────────────────────────────────────────────────────────
+ingress:
+  enabled: false
+  className: "nginx"
+  annotations: {}
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+    # nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+  hosts:
+    - host: skillvault.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  #  - secretName: skillvault-tls
+  #    hosts:
+  #      - skillvault.example.com
+
+# ── Autenticación (next-auth + Keycloak externo) ───────────────────────────────
+auth:
+  # AUTH_SECRET: valor aleatorio de 32 bytes, generado con `openssl rand -base64 32`
+  secret: ""
+  trustHost: "true"
+  url: ""
+  keycloak:
+    id: "skillvault"
+    # CLIENT SECRET de Keycloak — se almacena en Secret de Kubernetes
+    secret: ""
+    issuer: "https://oauth2.qa.comsatel.com.pe/realms/Apps"
+
+# ── Base de datos ──────────────────────────────────────────────────────────────
+mysql:
+  # enabled: true  → despliega MySQL 8 dentro del cluster (desarrollo / staging)
+  # enabled: false → usa externalUrl para apuntar a una BD externa (producción)
+  enabled: true
+
+  image:
+    repository: mysql
+    tag: "8.0"
+    pullPolicy: IfNotPresent
+
+  auth:
+    rootPassword: "root_secret_change_me"
+    database: "skillvault"
+    username: "skillvault"
+    password: "skillvault_secret_change_me"
+
+  persistence:
+    enabled: true
+    storageClass: ""      # usa el storageClass por defecto del cluster
+    size: 5Gi
+    accessMode: ReadWriteOnce
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+  # Configuración del servidor MySQL
+  config: |
+    [mysqld]
+    character-set-server=utf8mb4
+    collation-server=utf8mb4_unicode_ci
+    default-authentication-plugin=mysql_native_password
+
+# URL a usar cuando mysql.enabled=false
+# Formato: mysql://user:password@host:3306/dbname
+externalDatabaseUrl: ""
+
+# ── Recursos de la app ─────────────────────────────────────────────────────────
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+# ── Health checks ──────────────────────────────────────────────────────────────
+livenessProbe:
+  httpGet:
+    path: /
+    port: 3000
+  initialDelaySeconds: 30
+  periodSeconds: 30
+
+readinessProbe:
+  httpGet:
+    path: /
+    port: 3000
+  initialDelaySeconds: 10
+  periodSeconds: 10
+
+# ── Seguridad ──────────────────────────────────────────────────────────────────
+podSecurityContext:
+  fsGroup: 1001
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  readOnlyRootFilesystem: false
+  allowPrivilegeEscalation: false
+
+# ── Scheduling ─────────────────────────────────────────────────────────────────
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# ── Service Account ────────────────────────────────────────────────────────────
+serviceAccount:
+  create: false
+  name: ""

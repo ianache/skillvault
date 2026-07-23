@@ -72,7 +72,7 @@ pnpm tsx src/lib/db/migrate.ts
 pnpm tsx src/lib/db/seed.ts
 
 # Servidor de desarrollo
-pnpm dev
+pnpm dev --port 3010
 ```
 
 El portal corre en `http://localhost:3000` (o el siguiente puerto libre).

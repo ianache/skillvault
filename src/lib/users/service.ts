@@ -26,7 +26,10 @@ function rowToUser(row: Record<string, unknown>): AppUser {
 
 // Upserts the local profile row for the signed-in Keycloak user. Roles are
 // preserved across logins — only identity fields and last_login_at refresh.
-export async function ensureUser(user: { id: string; username: string; email: string }): Promise<void> {
+// On first creation, roles are seeded from the user's current Keycloak roles
+// (intersected with APP_ROLES) so the "Asignar roles" checkboxes start in a
+// sane state instead of always empty; after that, only this UI changes them.
+export async function ensureUser(user: { id: string; username: string; email: string; keycloakRoles?: string[] }): Promise<void> {
   const existing = await client.execute({
     sql: "SELECT id FROM users WHERE id = ?",
     args: [user.id],
@@ -35,10 +38,11 @@ export async function ensureUser(user: { id: string; username: string; email: st
   const now = Math.floor(Date.now() / 1000);
 
   if (existing.rows.length === 0) {
+    const seedRoles = (user.keycloakRoles ?? []).filter((r): r is AppRole => APP_ROLES.includes(r as AppRole));
     await client.execute({
       sql: `INSERT INTO users (id, username, full_name, email, roles, last_login_at, created_at, updated_at)
-            VALUES (?, ?, ?, ?, '[]', ?, ?, ?)`,
-      args: [user.id, user.username, user.username, user.email, now, now, now],
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      args: [user.id, user.username, user.username, user.email, JSON.stringify(seedRoles), now, now, now],
     });
     return;
   }

@@ -54,7 +54,7 @@ export function ReviewTimeline({ request }: Props) {
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--text)" }}>{event.title}</span>
                 <span style={{ fontSize: "11px", color: "var(--muted)" }}>
-                  {new Date(event.date).toLocaleString("es", { dateStyle: "short", timeStyle: "short" })}
+                  {new Date(event.date * 1000).toLocaleString("es", { dateStyle: "short", timeStyle: "short" })}
                 </span>
               </div>
               <div style={{ fontSize: "12px", color: "var(--muted)", marginTop: "2px" }}>Por {event.author}</div>

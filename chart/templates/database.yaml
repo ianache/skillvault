@@ -1,0 +1,22 @@
+# external-db-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: skillvault-db
+  namespace: database
+spec:
+  ports:
+    - protocol: TCP
+      port: 3306        # puerto que usarán tus pods
+      targetPort: 3306  # puerto real de la BD
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: skillvault-db    # debe coincidir exactamente con el Service
+  namespace: database
+subsets:
+  - addresses:
+      - ip: 192.168.100.191   # IP real de tu BD externa
+    ports:
+      - port: 3306

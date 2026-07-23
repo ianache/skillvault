@@ -6,7 +6,12 @@ function extractKeycloakRoles(profile: Record<string, unknown>, clientId?: strin
   const clientRoles = clientId
     ? (profile.resource_access as Record<string, { roles?: string[] }> | undefined)?.[clientId]?.roles ?? []
     : [];
-  return [...new Set([...realmRoles, ...clientRoles])];
+  // This realm's "roles" client scope mappers (realm_access/resource_access) aren't flagged
+  // "Add to ID token" in Keycloak, so they never reach `profile` here. The `skillvault` client
+  // has its own dedicated mapper that puts client roles into a flat `roles` claim instead —
+  // read that too so authorization works against the ID token Keycloak actually issues.
+  const flatRoles = Array.isArray(profile.roles) ? (profile.roles as string[]) : [];
+  return [...new Set([...realmRoles, ...clientRoles, ...flatRoles])];
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -32,11 +37,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    jwt({ token, user, profile }) {
+    jwt({ token, user, profile, account }) {
       if (user && "roles" in user && Array.isArray(user.roles)) {
         token.roles = user.roles as string[];
       } else if (profile) {
         token.roles = extractKeycloakRoles(profile as Record<string, unknown>, process.env.AUTH_KEYCLOAK_ID);
+      }
+      // Needed for RP-initiated (federated) logout against Keycloak's end_session_endpoint.
+      if (account?.id_token) {
+        token.idToken = account.id_token;
       }
       return token;
     },
@@ -45,6 +54,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       session.user.name = token.name ?? session.user.name;
       session.user.email = token.email ?? session.user.email;
       session.user.roles = (token.roles as string[]) ?? [];
+      session.idToken = token.idToken as string | undefined;
       return session;
     },
   },

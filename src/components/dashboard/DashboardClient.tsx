@@ -23,8 +23,8 @@ interface Skill {
   triggers: string[];
   compatibility: string[];
   installCount: number;
-  createdAt: string;
-  publishedAt: string | null;
+  createdAt: number;
+  publishedAt: number | null;
   status: string;
 }
 
@@ -50,7 +50,7 @@ export function DashboardClient({ initialSkills }: Props) {
     .sort((a, b) => {
       if (sort === "installs") return b.installCount - a.installCount;
       if (sort === "name") return a.name.localeCompare(b.name);
-      if (sort === "date") return (b.publishedAt ?? b.createdAt).localeCompare(a.publishedAt ?? a.createdAt);
+      if (sort === "date") return (b.publishedAt ?? b.createdAt) - (a.publishedAt ?? a.createdAt);
       if (sort === "type") return a.type.localeCompare(b.type);
       return 0;
     });
@@ -201,7 +201,7 @@ export function DashboardClient({ initialSkills }: Props) {
 function SkillRow({ skill, isLast }: { skill: Skill; isLast: boolean }) {
   const color = CATEGORY_COLORS[skill.type] ?? "#8590A8";
   const date = skill.publishedAt
-    ? new Date(skill.publishedAt).toLocaleDateString("es", { day: "2-digit", month: "short", year: "2-digit" })
+    ? new Date(skill.publishedAt * 1000).toLocaleDateString("es", { day: "2-digit", month: "short", year: "2-digit" })
     : "—";
 
   return (
