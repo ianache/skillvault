@@ -4,6 +4,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: {{ include "skillvault.mysql.fullname" . }}-data
   namespace: database
+  annotations:
+    helm.sh/resource-policy: keep
   labels:
     {{- include "skillvault.labels" . | nindent 4 }}
 spec:
