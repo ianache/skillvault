@@ -12,7 +12,7 @@ ingress:
   enabled: true
   className: "nginx"
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-qa"
+    cert-manager.io/cluster-issuer: "letsencrypt-production"
     nginx.ingress.kubernetes.io/proxy-body-size: "50m"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
   hosts:
