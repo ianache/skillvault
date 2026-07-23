@@ -27,9 +27,8 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
 
-      # ── Init container: espera MySQL y corre migraciones ───────────────────
-      {{- if .Values.mysql.enabled }}
       initContainers:
+      {{- if .Values.mysql.enabled }}
         - name: wait-for-mysql
           image: busybox:1.36
           command:
@@ -40,6 +39,7 @@ spec:
                 echo "Waiting for MySQL..."; sleep 3
               done
               echo "MySQL is ready."
+      {{- end }}
         - name: db-migrate
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -50,7 +50,6 @@ spec:
                 secretKeyRef:
                   name: {{ include "skillvault.fullname" . }}
                   key: DATABASE_URL
-      {{- end }}
 
       containers:
         - name: skillvault
