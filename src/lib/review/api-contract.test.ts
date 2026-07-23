@@ -124,15 +124,7 @@ test("POST /api/skills creates a review request instead of a published skill", a
 });
 
 test("POST /api/skills/:slug/files is disabled while files are reviewed", async () => {
-  const response = await postSkillFiles(
-    new NextRequest("http://test/api/skills/demo-skill/files", {
-      method: "POST",
-      body: JSON.stringify({
-        files: [{ path: "resources/replaced.md", fileType: "resource", content: "Replacement" }],
-      }),
-    }),
-    { params: Promise.resolve({ slug: "demo-skill" }) }
-  );
+  const response = await postSkillFiles();
 
   assert.equal(response.status, 405);
 });
@@ -345,4 +337,37 @@ test("request changes decision requires a general comment", async () => {
 
   assert.equal(response.status, 422);
   assert.equal(called, false);
+});
+
+test("POST /api/review-requests/[id]/decision allows admin session", async () => {
+  const adminSession = {
+    user: {
+      id: "admin-1",
+      name: "Admin",
+      email: "admin@test.com",
+      roles: ["admin"],
+    },
+  };
+
+  const { POST } = createReviewDecisionHandlers({
+    getSession: async () => adminSession as never,
+    database,
+    decide: async (id, _input, actor) => {
+      assert.equal(actor.id, "admin-1");
+      assert.deepEqual(actor.roles, ["admin"]);
+      return reviewRequest({ id, status: "approved", reviewerId: actor.id });
+    },
+  });
+
+  const response = await POST(
+    new NextRequest("http://localhost/api/review-requests/9/decision", {
+      method: "POST",
+      body: JSON.stringify({ decision: "approve", comment: "Approved by admin" }),
+    }),
+    { params: Promise.resolve({ id: "9" }) }
+  );
+
+  assert.equal(response.status, 200);
+  const json = await response.json();
+  assert.equal(json.request.status, "approved");
 });

@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { client } from "@/lib/db";
 import { createReviewRequest, listReviewRequests } from "@/lib/review/service";
-import type { CreateReviewRequestInput } from "@/lib/review/types";
+import type { Session } from "next-auth";
+import type { CreateReviewRequestInput, ReviewDatabaseClient } from "@/lib/review/types";
 import { actorFromSession, errorResponse, parseReviewStatus, requestBody } from "./route-utils";
 
 type RouteDependencies = {
-  getSession: typeof auth;
-  database: typeof client;
+  getSession: () => Promise<Session | null>;
+  database: ReviewDatabaseClient;
   create: typeof createReviewRequest;
   list: typeof listReviewRequests;
 };

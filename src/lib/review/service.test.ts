@@ -163,6 +163,34 @@ test("author cannot approve own request", async () => {
   );
 });
 
+test("allows an admin actor to approve a pending review request from another user", async () => {
+  const fakeClient = createFakeClient();
+  const decided = await decideReviewRequest(
+    1,
+    { decision: "approve", comment: "LGTM" },
+    adminActor,
+    fakeClient
+  );
+
+  assert.equal(decided.status, "approved");
+  assert.equal(decided.reviewerId, "admin-1");
+});
+
+test("prevents an admin actor from approving their own review request", async () => {
+  const fakeClient = createFakeClient([], { author_id: "admin-1" });
+
+  await assert.rejects(
+    () =>
+      decideReviewRequest(
+        1,
+        { decision: "approve", comment: "Self approval attempt" },
+        adminActor,
+        fakeClient
+      ),
+    /Author cannot approve own request/
+  );
+});
+
 test("request_changes requires comment", async () => {
   await assert.rejects(
     () => decideReviewRequest(1, { decision: "request_changes" }, reviewerActor, createFakeClient()),

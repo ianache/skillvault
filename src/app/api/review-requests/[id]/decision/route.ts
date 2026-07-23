@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { client } from "@/lib/db";
 import { decideReviewRequest } from "@/lib/review/service";
-import type { DecideReviewRequestInput } from "@/lib/review/types";
+import type { Session } from "next-auth";
+import type { DecideReviewRequestInput, ReviewDatabaseClient } from "@/lib/review/types";
 import { actorFromSession, errorResponse, parseRequestId, requestBody } from "../../route-utils";
 
 type RouteContext = { params: Promise<{ id: string }> };
 type DecisionRouteDeps = {
-  getSession?: typeof auth;
-  database?: typeof client;
+  getSession?: () => Promise<Session | null>;
+  database?: ReviewDatabaseClient;
   decide?: typeof decideReviewRequest;
 };
 
