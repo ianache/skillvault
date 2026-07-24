@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
-import "./globals.css";
 import { auth } from "@/auth";
 import { AppShell } from "@/components/shell/AppShell";
+import "./globals.css";
 
-// Redesign swapped Geist/IBM Plex Sans for Space Grotesk everywhere; variable
-// names kept as --font-geist/--font-ibm-plex-sans so the ~30 files already
-// referencing them via CSS var didn't need to change.
 const geist = Space_Grotesk({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
@@ -57,6 +54,13 @@ export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const session = await auth();
+  const user = session?.user
+    ? {
+        name: session.user.name,
+        email: session.user.email,
+        roles: session.user.roles ?? [],
+      }
+    : null;
 
   return (
     <html lang="es" suppressHydrationWarning>
@@ -66,9 +70,8 @@ export default async function RootLayout({
         }}
         className={`${geist.variable} ${ibmPlexSans.variable} ${jetbrainsMono.variable} min-h-screen`}
       >
-        <AppShell userRoles={session?.user?.roles ?? []}>{children}</AppShell>
+        <AppShell user={user}>{children}</AppShell>
       </body>
     </html>
   );
 }
-

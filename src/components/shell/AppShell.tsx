@@ -4,12 +4,19 @@ import { useEffect, useState } from "react";
 import { AppSidebar } from "./AppSidebar";
 import { AppTopBar } from "./AppTopBar";
 
+type UserProp = {
+  name?: string | null;
+  email?: string | null;
+  roles?: string[];
+} | null;
+
 type Props = {
   children: React.ReactNode;
+  user?: UserProp;
   userRoles?: string[];
 };
 
-export function AppShell({ children, userRoles = [] }: Props) {
+export function AppShell({ children, user, userRoles }: Props) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -26,11 +33,13 @@ export function AppShell({ children, userRoles = [] }: Props) {
     });
   }
 
+  const effectiveRoles = user?.roles ?? userRoles ?? [];
+
   return (
     <div style={{ display: "flex", minHeight: "100vh", background: "var(--bg)" }}>
-      <AppSidebar collapsed={collapsed} onToggleCollapse={toggleCollapse} userRoles={userRoles} />
+      <AppSidebar collapsed={collapsed} onToggleCollapse={toggleCollapse} userRoles={effectiveRoles} />
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
-        <AppTopBar onOpenMobileDrawer={() => setMobileOpen(true)} />
+        <AppTopBar user={user} onOpenMobileDrawer={() => setMobileOpen(true)} />
         <main style={{ flex: 1 }}>{children}</main>
       </div>
     </div>

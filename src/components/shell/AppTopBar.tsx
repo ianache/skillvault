@@ -6,10 +6,14 @@ import { UserMenu } from "../UserMenu";
 import { Breadcrumbs } from "./Breadcrumbs";
 
 type Props = {
+  user?: {
+    name?: string | null;
+    email?: string | null;
+  } | null;
   onOpenMobileDrawer: () => void;
 };
 
-export function AppTopBar({ onOpenMobileDrawer }: Props) {
+export function AppTopBar({ user, onOpenMobileDrawer }: Props) {
   return (
     <header
       style={{
@@ -49,7 +53,7 @@ export function AppTopBar({ onOpenMobileDrawer }: Props) {
 
       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
         <ThemeToggle />
-        <UserMenu />
+        <UserMenu user={user} />
       </div>
     </header>
   );

@@ -1,10 +1,16 @@
-import { auth } from "@/auth";
+"use client";
+
 import { loginAction, logoutAction } from "@/app/actions/auth";
 
-export async function UserMenu() {
-  const session = await auth();
+type Props = {
+  user?: {
+    name?: string | null;
+    email?: string | null;
+  } | null;
+};
 
-  if (!session) {
+export function UserMenu({ user }: Props) {
+  if (!user) {
     return (
       <form action={loginAction}>
         <button
@@ -27,7 +33,7 @@ export async function UserMenu() {
     );
   }
 
-  const name = session.user?.name ?? session.user?.email ?? "Usuario";
+  const name = user.name ?? user.email ?? "Usuario";
   const initials = name
     .split(" ")
     .slice(0, 2)
