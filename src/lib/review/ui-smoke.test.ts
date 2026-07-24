@@ -124,3 +124,18 @@ test("exports ReviewStatusBadge, ReviewFilterTabs, and ReviewTimeline components
   assert.match(listSource, /ReviewStatusBadge/);
   assert.match(detailSource, /ReviewTimeline/);
 });
+
+test("LocalSkillLoader and PublishPage render skill loader layout and breadcrumbs", async () => {
+  const [loaderSource, pageSource] = await Promise.all([
+    source("../../components/wizard/LocalSkillLoader.tsx"),
+    source("../../app/publish/page.tsx"),
+  ]);
+
+  assert.match(loaderSource, /Cargar skill local/);
+  assert.match(loaderSource, /Estructura esperada/);
+  assert.match(loaderSource, /Seleccionar carpeta/);
+  assert.match(loaderSource, /Subir archivo \.zip/);
+  assert.match(loaderSource, /Cargar en el wizard/);
+  assert.match(pageSource, /Cargar Skill local/);
+});
+
