@@ -13,7 +13,8 @@
   "scripts": {
     "test": "node --test",
     "build": "node build.js",
-    "build:exe": "node build.js && node --experimental-sea-config sea-config.json && node build-sea-exe.js"
+    "build:exe": "node build.js && node --experimental-sea-config sea-config.json && node build-sea-exe.js",
+    "build:all": "node build-dist.js"
   },
   "pkg": {
     "targets": [
@@ -21,7 +22,7 @@
       "node22-macos-x64",
       "node22-linux-x64"
     ],
-    "outputPath": "dist"
+    "outputPath": "dist/bin"
   },
   "devDependencies": {
     "@yao-pkg/pkg": "^6.21.0",
