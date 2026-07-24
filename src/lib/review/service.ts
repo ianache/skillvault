@@ -146,8 +146,8 @@ async function activateApprovedRequest(
     await client.execute({
         sql: `INSERT INTO skills
           (slug, name, description, type, author_id, author_handle, version, schema_version,
-           triggers, tools, compatibility, dependencies, config_requirements, raw_content, status, published_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'published', ?)`,
+           triggers, tools, compatibility, dependencies, config_requirements, raw_content, status, created_at, updated_at, published_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'published', ?, ?, ?)`,
         args: [
           request.slug,
           request.name,
@@ -163,6 +163,8 @@ async function activateApprovedRequest(
           JSON.stringify(frontmatter.dependencies),
           JSON.stringify(frontmatter.config_requirements),
           request.rawContent,
+          publishedAt,
+          publishedAt,
           publishedAt,
         ],
     });
@@ -405,9 +407,9 @@ export async function addReviewComment(
   }
   await client.execute({
     sql: `INSERT INTO skill_review_comments
-      (review_request_id, file_path, author_id, author_handle, body)
-      VALUES (?, ?, ?, ?, ?)`,
-    args: [id, filePath, actor.id, actor.handle ?? null, body],
+      (review_request_id, file_path, author_id, author_handle, body, created_at)
+      VALUES (?, ?, ?, ?, ?, ?)`,
+    args: [id, filePath, actor.id, actor.handle ?? null, body, Math.floor(Date.now() / 1000)],
   });
   const result = await client.execute({
     sql: "SELECT * FROM skill_review_comments WHERE review_request_id = ? ORDER BY id DESC LIMIT 1",
