@@ -1,27 +1,12 @@
-import { redirect } from "next/navigation";
-import { auth, signIn, signOut } from "@/auth";
-
-function buildKeycloakLogoutUrl(idToken?: string): string | null {
-  const issuer = process.env.AUTH_KEYCLOAK_ISSUER;
-  if (!issuer || !idToken) return null;
-
-  const logoutUrl = new URL(`${issuer}/protocol/openid-connect/logout`);
-  logoutUrl.searchParams.set("id_token_hint", idToken);
-  logoutUrl.searchParams.set("post_logout_redirect_uri", process.env.AUTH_URL ?? "/");
-  return logoutUrl.toString();
-}
+import { auth } from "@/auth";
+import { loginAction, logoutAction } from "@/app/actions/auth";
 
 export async function UserMenu() {
   const session = await auth();
 
   if (!session) {
     return (
-      <form
-        action={async () => {
-          "use server";
-          await signIn("keycloak");
-        }}
-      >
+      <form action={loginAction}>
         <button
           type="submit"
           style={{
@@ -70,14 +55,7 @@ export async function UserMenu() {
       >
         {initials}
       </div>
-      <form
-        action={async () => {
-          "use server";
-          const keycloakLogoutUrl = buildKeycloakLogoutUrl(session.idToken);
-          await signOut({ redirect: false });
-          redirect(keycloakLogoutUrl ?? "/");
-        }}
-      >
+      <form action={logoutAction}>
         <button
           type="submit"
           style={{
