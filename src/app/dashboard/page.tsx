@@ -1,5 +1,4 @@
 import { client } from "@/lib/db";
-import { AppHeader } from "@/components/AppHeader";
 import Link from "next/link";
 import { DashboardClient } from "@/components/dashboard/DashboardClient";
 
@@ -40,16 +39,14 @@ async function getSkills() {
   }));
 }
 
-export const metadata = { title: "Dashboard" };
+export const metadata = { title: "Mis Skills" };
 
 export default async function DashboardPage() {
   const [stats, skills] = await Promise.all([getStats(), getSkills()]);
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
-      <AppHeader />
       <main style={{ maxWidth: "1100px", margin: "0 auto", padding: "32px 24px" }}>
-
         {/* Page header */}
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "28px" }}>
           <div>
@@ -62,75 +59,28 @@ export default async function DashboardPage() {
                 margin: 0,
               }}
             >
-              Dashboard
+              Mis Skills
             </h1>
             <p style={{ fontSize: "13px", color: "var(--muted)", marginTop: "4px" }}>
-              Gestiona y monitorea todos los skills del catálogo.
+              Gestiona, edita y monitorea tus skills creados y reutilizables en SkillVault.
             </p>
           </div>
           <div style={{ display: "flex", gap: "8px" }}>
-            <Link
-              href="/dashboard/categories"
-              style={{
-                fontFamily: "var(--font-geist), sans-serif",
-                fontSize: "13px",
-                fontWeight: 600,
-                padding: "8px 18px",
-                borderRadius: "4px",
-                background: "var(--raised)",
-                color: "var(--text)",
-                textDecoration: "none",
-                border: "1px solid var(--border)",
-              }}
-            >
-              Categorías
-            </Link>
-            <Link
-              href="/dashboard/proposals"
-              style={{
-                fontFamily: "var(--font-geist), sans-serif",
-                fontSize: "13px",
-                fontWeight: 600,
-                padding: "8px 18px",
-                borderRadius: "4px",
-                background: "var(--raised)",
-                color: "var(--text)",
-                textDecoration: "none",
-                border: "1px solid var(--border)",
-              }}
-            >
-              Mis propuestas
-            </Link>
-            <Link
-              href="/dashboard/review"
-              style={{
-                fontFamily: "var(--font-geist), sans-serif",
-                fontSize: "13px",
-                fontWeight: 600,
-                padding: "8px 18px",
-                borderRadius: "4px",
-                background: "var(--raised)",
-                color: "var(--text)",
-                textDecoration: "none",
-                border: "1px solid var(--border)",
-              }}
-            >
-              Revision
-            </Link>
             <Link
               href="/publish"
               style={{
                 fontFamily: "var(--font-geist), sans-serif",
                 fontSize: "13px",
                 fontWeight: 600,
-                padding: "8px 18px",
-                borderRadius: "4px",
+                padding: "9px 20px",
+                borderRadius: "8px",
                 background: "var(--accent)",
                 color: "#fff",
                 textDecoration: "none",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
               }}
             >
-              + Publicar skill
+              + Publicar nuevo skill
             </Link>
           </div>
         </div>
@@ -154,61 +104,6 @@ export default async function DashboardPage() {
             mono
           />
         </div>
-
-        {/* Type breakdown */}
-        {stats.byType.length > 0 && (
-          <div
-            style={{
-              background: "var(--surface)",
-              border: "1px solid var(--border)",
-              borderRadius: "4px",
-              padding: "16px 20px",
-              marginBottom: "24px",
-              display: "flex",
-              gap: "20px",
-              flexWrap: "wrap",
-              alignItems: "center",
-            }}
-          >
-            <span
-              style={{
-                fontFamily: "var(--font-jetbrains-mono), monospace",
-                fontSize: "9px",
-                letterSpacing: "1px",
-                textTransform: "uppercase",
-                color: "var(--muted)",
-                flexShrink: 0,
-              }}
-            >
-              Por categoría
-            </span>
-            {stats.byType.map((t) => (
-              <div key={t.type} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <span
-                  style={{
-                    fontFamily: "var(--font-jetbrains-mono), monospace",
-                    fontSize: "11px",
-                    color: "var(--text)",
-                  }}
-                >
-                  {t.type}
-                </span>
-                <span
-                  style={{
-                    fontFamily: "var(--font-jetbrains-mono), monospace",
-                    fontSize: "11px",
-                    padding: "1px 7px",
-                    borderRadius: "9px",
-                    background: "var(--raised)",
-                    color: "var(--muted)",
-                  }}
-                >
-                  {t.count}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
 
         {/* Skills table */}
         <DashboardClient initialSkills={skills} />
