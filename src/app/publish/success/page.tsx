@@ -88,7 +88,7 @@ export default async function PublishSuccessPage({ searchParams }: Props) {
         <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
           {reviewRequestId && (
             <Link
-              href={`/dashboard/proposals/${reviewRequestId}`}
+              href={`/proposals/${reviewRequestId}`}
               style={{
                 fontFamily: "var(--font-geist), sans-serif",
                 fontSize: "13px",

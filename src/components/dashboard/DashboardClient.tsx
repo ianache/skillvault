@@ -322,7 +322,7 @@ function SkillRow({ skill, isLast }: { skill: Skill; isLast: boolean }) {
           ↗
         </Link>
         <Link
-          href={`/dashboard/skills/${skill.slug}/edit`}
+          href={`/skills/${skill.slug}/edit`}
           style={{ ...actionBtnStyle, color: "var(--accent)", borderColor: "rgba(59,110,255,0.3)" }}
           title="Editar skill"
         >

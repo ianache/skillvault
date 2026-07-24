@@ -7,7 +7,7 @@ import { ReviewStatusBadge } from "./ReviewStatusBadge";
 type Props = { requests: ReviewRequestSummary[]; mode: "author" | "reviewer" };
 
 export function ReviewRequestList({ requests, mode }: Props) {
-  const basePath = mode === "author" ? "/dashboard/proposals" : "/dashboard/review";
+  const basePath = mode === "author" ? "/proposals" : "/review";
   if (!requests.length) return <div style={emptyStyle}>{mode === "author" ? "Aun no tienes propuestas para revisar." : "No hay solicitudes pendientes de revision."}</div>;
   return <div style={tableStyle}>
     <div style={headerStyle}>{["Solicitud", "Estado", "Autor", "Revisor", "Actualizada", ""].map((label) => <span key={label} style={labelStyle}>{label}</span>)}</div>

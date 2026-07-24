@@ -26,7 +26,7 @@ export function AppSidebar({ collapsed, onToggleCollapse, userRoles = [] }: Prop
       title: "Mi Contenido",
       items: [
         { label: "Mis Skills", href: "/dashboard", icon: "📦" },
-        { label: "Mis propuestas", href: "/dashboard/proposals", icon: "📝" },
+        { label: "Mis propuestas", href: "/proposals", icon: "📝" },
       ],
     },
     ...(isReviewer
@@ -34,8 +34,8 @@ export function AppSidebar({ collapsed, onToggleCollapse, userRoles = [] }: Prop
           {
             title: "Revisión",
             items: [
-              { label: "Cola de revisión", href: "/dashboard/review", icon: "🛡️" },
-              { label: "Categorías", href: "/dashboard/categories", icon: "🏷️" },
+              { label: "Cola de revisión", href: "/review", icon: "🛡️" },
+              { label: "Categorías", href: "/categories", icon: "🏷️" },
             ],
           },
         ]
@@ -44,7 +44,7 @@ export function AppSidebar({ collapsed, onToggleCollapse, userRoles = [] }: Prop
       ? [
           {
             title: "Administración",
-            items: [{ label: "Usuarios y roles", href: "/dashboard/users", icon: "👥" }],
+            items: [{ label: "Usuarios y roles", href: "/users", icon: "👥" }],
           },
         ]
       : []),

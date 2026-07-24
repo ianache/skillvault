@@ -11,6 +11,7 @@ const ROUTE_LABELS: Record<string, string> = {
   users: "Usuarios y roles",
   publish: "Publicar skill",
   skills: "Skills",
+  edit: "Editar",
 };
 
 export function Breadcrumbs() {
