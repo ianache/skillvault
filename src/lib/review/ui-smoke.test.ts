@@ -19,6 +19,19 @@ describe("App Shell Components Smoke Test", () => {
     expect(typeof AppTopBar).toBe("function");
     expect(typeof Breadcrumbs).toBe("function");
   });
+
+  test("Breadcrumbs component maps dashboard route to Mis Skills and includes Home icon", async () => {
+    const breadcrumbsSource = await source("../../components/shell/Breadcrumbs.tsx");
+    assert.match(breadcrumbsSource, /dashboard:\s*"Mis Skills"/);
+    assert.match(breadcrumbsSource, /🏠/);
+    assert.match(breadcrumbsSource, /Inicio/);
+  });
+
+  test("AppTopBar component contains Home icon link", async () => {
+    const topBarSource = await source("../../components/shell/AppTopBar.tsx");
+    assert.match(topBarSource, /href="\/"/);
+    assert.match(topBarSource, /🏠/);
+  });
 });
 
 test("review dashboard routes export page components", async () => {
