@@ -30,11 +30,10 @@ function classifyExt(filename: string): "resource" | "script" | null {
 }
 
 function relativePath(file: File, rootName: string): string {
-  // webkitRelativePath = "root/resources/file.md" — strip the root prefix
   const wp = (file as File & { webkitRelativePath?: string }).webkitRelativePath;
   if (wp) {
     const parts = wp.split("/");
-    return parts.slice(1).join("/"); // drop root folder name
+    return parts.slice(1).join("/");
   }
   return file.name;
 }
@@ -51,7 +50,6 @@ async function readText(file: File): Promise<string> {
 async function processFiles(fileList: FileList | File[]): Promise<LoadedSkill | null> {
   const files = Array.from(fileList);
 
-  // Find SKILL.md (case-insensitive, at any depth but prefer root)
   const skillFile =
     files.find((f) => {
       const rel = relativePath(f, "");
@@ -80,7 +78,6 @@ async function processFiles(fileList: FileList | File[]): Promise<LoadedSkill | 
 }
 
 async function processZip(zipFile: File): Promise<LoadedSkill | null> {
-  // Dynamically import JSZip only when needed
   let JSZip: typeof import("jszip");
   try {
     JSZip = (await import("jszip")) as unknown as typeof import("jszip");
@@ -115,6 +112,7 @@ export function LocalSkillLoader({ onLoaded, onSkip }: Props) {
   const folderRef = useRef<HTMLInputElement>(null);
   const zipRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<{ label: string; fileCount: number } | null>(null);
   const [pending, setPending] = useState<LoadedSkill | null>(null);
@@ -161,17 +159,66 @@ export function LocalSkillLoader({ onLoaded, onSkip }: Props) {
     }
   }
 
+  async function handleDrop(e: React.DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    setIsDragging(false);
+    const files = e.dataTransfer.files;
+    if (!files || files.length === 0) return;
+
+    setLoading(true);
+    setError(null);
+    try {
+      let result: LoadedSkill | null = null;
+      if (files.length === 1 && files[0].name.toLowerCase().endsWith(".zip")) {
+        result = await processZip(files[0]);
+        if (!result) {
+          setError("No se encontró SKILL.md dentro del ZIP.");
+          return;
+        }
+      } else {
+        result = await processFiles(files);
+        if (!result) {
+          setError("No se encontró SKILL.md en los archivos arrastrados.");
+          return;
+        }
+      }
+      setPending(result);
+      setPreview({ label: result.sourceLabel, fileCount: result.files.length });
+    } catch (err) {
+      setError(String(err));
+    } finally {
+      setLoading(false);
+    }
+  }
+
   function confirmLoad() {
     if (pending) onLoaded(pending);
   }
 
   return (
-    <div>
+    <div
+      onDragOver={(e) => {
+        e.preventDefault();
+        setIsDragging(true);
+      }}
+      onDragLeave={(e) => {
+        e.preventDefault();
+        setIsDragging(false);
+      }}
+      onDrop={handleDrop}
+      style={{
+        border: isDragging ? "2px dashed var(--accent)" : "1px solid transparent",
+        borderRadius: "12px",
+        padding: "8px",
+        transition: "all 0.2s ease",
+        background: isDragging ? "rgba(232, 139, 58, 0.03)" : "transparent",
+      }}
+    >
       <div style={{ marginBottom: "28px" }}>
         <h1
           style={{
             fontFamily: "var(--font-geist), sans-serif",
-            fontSize: "22px",
+            fontSize: "24px",
             fontWeight: 700,
             color: "var(--text)",
             marginBottom: "6px",
@@ -180,12 +227,11 @@ export function LocalSkillLoader({ onLoaded, onSkip }: Props) {
           Cargar skill local
         </h1>
         <p style={{ fontSize: "13px", color: "var(--muted)", lineHeight: 1.6 }}>
-          Selecciona una carpeta con tu SKILL.md o un archivo <code style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "12px", color: "var(--accent)" }}>.zip</code> con la estructura del skill.
-          Los archivos en <code style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "12px", color: "var(--accent)" }}>resources/</code> y <code style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "12px", color: "var(--accent)" }}>scripts/</code> se suben junto con el skill.
+          Selecciona o arrastra una carpeta con tu <code style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "12px", color: "var(--accent)" }}>SKILL.md</code> o un archivo <code style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "12px", color: "var(--accent)" }}>.zip</code> con la estructura del skill.
         </p>
       </div>
 
-      {/* Estructura esperada */}
+      {/* Terminal Structure Card */}
       <div
         style={{
           background: "var(--raised)",
@@ -199,19 +245,19 @@ export function LocalSkillLoader({ onLoaded, onSkip }: Props) {
           lineHeight: 1.8,
         }}
       >
-        <div style={{ color: "var(--faint)", marginBottom: "4px", fontSize: "10px", letterSpacing: "1px", textTransform: "uppercase" }}>Estructura esperada</div>
+        <div style={{ color: "var(--faint)", marginBottom: "6px", fontSize: "10px", letterSpacing: "1px", textTransform: "uppercase" }}>
+          Estructura esperada
+        </div>
         <div><span style={{ color: "var(--accent)" }}>mi-skill/</span></div>
-        <div>&nbsp;&nbsp;<span style={{ color: "var(--green)" }}>SKILL.md</span> <span style={{ color: "var(--faint)" }}>← requerido</span></div>
+        <div>&nbsp;&nbsp;<span style={{ color: "var(--green)", fontWeight: 600 }}>SKILL.md</span> <span style={{ color: "var(--faint)" }}>← requerido</span></div>
         <div>&nbsp;&nbsp;resources/</div>
         <div>&nbsp;&nbsp;&nbsp;&nbsp;reference.md</div>
         <div>&nbsp;&nbsp;scripts/</div>
         <div>&nbsp;&nbsp;&nbsp;&nbsp;process.py</div>
-        <div>&nbsp;&nbsp;&nbsp;&nbsp;transform.ts</div>
       </div>
 
-      {/* Upload options */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "24px" }}>
-        {/* Folder */}
+      {/* Upload Cards Grid */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px", marginBottom: "24px" }}>
         <UploadCard
           icon={
             <svg width="30" height="30" viewBox="0 0 24 24" fill="#cfa554">
@@ -223,7 +269,6 @@ export function LocalSkillLoader({ onLoaded, onSkip }: Props) {
           onClick={() => folderRef.current?.click()}
           loading={loading}
         />
-        {/* ZIP */}
         <UploadCard
           icon={
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--text)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -272,11 +317,12 @@ export function LocalSkillLoader({ onLoaded, onSkip }: Props) {
         </div>
       )}
 
-      {/* Preview of loaded skill */}
+      {/* Preview Card */}
       {preview && pending && (
         <div
           style={{
-            background: "rgba(15,148,136,0.06)",
+            background: "rgba(16,185,129,0.08)",
+            backdropFilter: "blur(8px)",
             border: "1px solid var(--green)",
             borderRadius: "10px",
             padding: "20px 22px",
@@ -284,8 +330,8 @@ export function LocalSkillLoader({ onLoaded, onSkip }: Props) {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
-            <span style={{ fontSize: "16px" }}>✓</span>
-            <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "12px", color: "var(--green)" }}>
+            <span style={{ fontSize: "16px", color: "var(--green)" }}>✓</span>
+            <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "12.5px", fontWeight: 600, color: "var(--green)" }}>
               {preview.label}
             </span>
           </div>
@@ -317,12 +363,13 @@ export function LocalSkillLoader({ onLoaded, onSkip }: Props) {
             </div>
           )}
           <button
+            type="button"
             onClick={confirmLoad}
             style={{
               fontFamily: "var(--font-geist), sans-serif",
               fontSize: "13.5px",
               fontWeight: 700,
-              padding: "11px 20px",
+              padding: "11px 22px",
               borderRadius: "8px",
               border: "none",
               background: "var(--accent)",
@@ -335,9 +382,10 @@ export function LocalSkillLoader({ onLoaded, onSkip }: Props) {
         </div>
       )}
 
-      {/* Skip */}
+      {/* Skip button */}
       <div style={{ textAlign: "center", paddingTop: "8px" }}>
         <button
+          type="button"
           onClick={onSkip}
           style={{
             fontFamily: "var(--font-geist), sans-serif",
@@ -372,6 +420,7 @@ function UploadCard({
 }) {
   return (
     <button
+      type="button"
       onClick={onClick}
       disabled={loading}
       style={{
@@ -381,21 +430,27 @@ function UploadCard({
         padding: "36px 20px",
         textAlign: "center",
         cursor: loading ? "not-allowed" : "pointer",
-        transition: "border-color .12s, background .12s",
+        transition: "border-color 0.15s ease, background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         gap: "10px",
       }}
       onMouseEnter={(e) => {
+        if (loading) return;
         const el = e.currentTarget;
         el.style.borderColor = "var(--accent)";
         el.style.background = "var(--raised)";
+        el.style.transform = "translateY(-2px)";
+        el.style.boxShadow = "0 4px 12px rgba(0,0,0,0.15)";
       }}
       onMouseLeave={(e) => {
+        if (loading) return;
         const el = e.currentTarget;
         el.style.borderColor = "var(--border)";
         el.style.background = "var(--surface)";
+        el.style.transform = "none";
+        el.style.boxShadow = "none";
       }}
     >
       <div style={{ width: "38px", height: "38px", display: "flex", alignItems: "center", justifyContent: "center", opacity: loading ? 0.4 : 1 }}>
