@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { SearchBar } from "../SearchBar";
 import { ThemeToggle } from "../ThemeToggle";
 import { UserMenu } from "../UserMenu";
@@ -47,23 +46,6 @@ export function AppTopBar({ user, onOpenMobileDrawer }: Props) {
       >
         ☰
       </button>
-
-      <Link
-        href="/"
-        title="Inicio"
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: "16px",
-          textDecoration: "none",
-          padding: "4px 6px",
-          borderRadius: "4px",
-          color: "var(--text)",
-        }}
-      >
-        🏠
-      </Link>
 
       <Breadcrumbs />
 

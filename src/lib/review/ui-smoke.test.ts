@@ -27,10 +27,10 @@ describe("App Shell Components Smoke Test", () => {
     assert.match(breadcrumbsSource, /Inicio/);
   });
 
-  test("AppTopBar component contains Home icon link", async () => {
+  test("AppTopBar component includes Breadcrumbs and mobile menu button", async () => {
     const topBarSource = await source("../../components/shell/AppTopBar.tsx");
-    assert.match(topBarSource, /href="\/"/);
-    assert.match(topBarSource, /🏠/);
+    assert.match(topBarSource, /Breadcrumbs/);
+    assert.match(topBarSource, /mobile-menu-btn/);
   });
 });
 
