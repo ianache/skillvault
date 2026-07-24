@@ -1,7 +1,7 @@
 import { AppHeader } from "@/components/AppHeader";
 import { ReviewFilterableList } from "@/components/review/ReviewFilterableList";
 import { auth } from "@/auth";
-import { fetchReviewRequests } from "../review-api";
+import { fetchReviewRequests } from "@/app/review-api";
 
 export const dynamic = "force-dynamic";
 

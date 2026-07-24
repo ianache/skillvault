@@ -36,8 +36,8 @@ describe("App Shell Components Smoke Test", () => {
 
 test("review dashboard routes export page components", async () => {
   const [queue, detail] = await Promise.all([
-    import("@/app/dashboard/review/page"),
-    import("@/app/dashboard/review/[id]/page"),
+    import("@/app/review/page"),
+    import("@/app/review/[id]/page"),
   ]);
 
   assert.equal(typeof queue.default, "function");
@@ -46,8 +46,8 @@ test("review dashboard routes export page components", async () => {
 
 test("proposal dashboard routes export page components", async () => {
   const [list, detail] = await Promise.all([
-    import("@/app/dashboard/proposals/page"),
-    import("@/app/dashboard/proposals/[id]/page"),
+    import("@/app/proposals/page"),
+    import("@/app/proposals/[id]/page"),
   ]);
 
   assert.equal(typeof list.default, "function");
@@ -89,11 +89,11 @@ test("review detail supports general and file-specific comments", async () => {
 
 test("dashboard pages fetch review request API endpoints", async () => {
   const [queue, reviewDetail, proposals, proposalDetail, helper] = await Promise.all([
-    source("../../app/dashboard/review/page.tsx"),
-    source("../../app/dashboard/review/[id]/page.tsx"),
-    source("../../app/dashboard/proposals/page.tsx"),
-    source("../../app/dashboard/proposals/[id]/page.tsx"),
-    source("../../app/dashboard/review-api.ts"),
+    source("../../app/review/page.tsx"),
+    source("../../app/review/[id]/page.tsx"),
+    source("../../app/proposals/page.tsx"),
+    source("../../app/proposals/[id]/page.tsx"),
+    source("../../app/review-api.ts"),
   ]);
 
   for (const page of [queue, reviewDetail, proposals, proposalDetail]) {
