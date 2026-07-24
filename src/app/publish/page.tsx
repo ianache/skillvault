@@ -84,37 +84,54 @@ export default function PublishPage() {
   if (step === 0) {
     return (
       <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
-        {/* Minimal header */}
-        <div
+        {/* Header navigation bar styled like AppTopBar */}
+        <header
           style={{
             height: "56px",
             borderBottom: "1px solid var(--border)",
             display: "flex",
             alignItems: "center",
             padding: "0 24px",
-            gap: "12px",
+            gap: "14px",
+            position: "sticky",
+            top: 0,
+            background: "var(--bg)",
+            zIndex: 20,
           }}
         >
-          <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "8px" }}>
-            <span
+          <nav style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12.5px" }}>
+            <Link
+              href="/"
+              title="Inicio"
               style={{
-                width: "24px", height: "24px", background: "var(--accent)", borderRadius: "4px",
-                display: "inline-flex", alignItems: "center", justifyContent: "center",
-                fontSize: "12px", color: "#fff", fontWeight: 700,
-                fontFamily: "var(--font-jetbrains-mono), monospace",
+                color: "var(--muted)",
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+                fontWeight: 500,
               }}
             >
-              SV
+              <span>🏠</span>
+              <span>Inicio</span>
+            </Link>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+              <span style={{ color: "var(--faint)" }}>/</span>
+              <Link
+                href="/publish"
+                style={{ color: "var(--muted)", textDecoration: "none", fontWeight: 500 }}
+              >
+                Publicar skill
+              </Link>
             </span>
-            <span style={{ fontFamily: "var(--font-geist), sans-serif", fontWeight: 700, fontSize: "15px", color: "var(--text)" }}>
-              SkillVault
+            <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+              <span style={{ color: "var(--faint)" }}>/</span>
+              <span style={{ fontWeight: 600, color: "var(--text)" }}>Cargar Skill local</span>
             </span>
-          </Link>
-          <span style={{ color: "var(--border)" }}>/</span>
-          <span style={{ fontSize: "13px", color: "var(--muted)" }}>Publicar Skill</span>
-        </div>
+          </nav>
+        </header>
 
-        <div style={{ maxWidth: "640px", margin: "48px auto", padding: "0 24px" }}>
+        <div style={{ maxWidth: "680px", margin: "40px auto", padding: "0 24px" }}>
           <LocalSkillLoader
             onLoaded={handleLoaded}
             onSkip={() => setStep(1)}
