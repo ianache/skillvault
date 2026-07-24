@@ -1,8 +1,25 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import test from "node:test";
+import test, { describe } from "node:test";
+import { AppShell } from "@/components/shell/AppShell";
+import { AppSidebar } from "@/components/shell/AppSidebar";
+import { AppTopBar } from "@/components/shell/AppTopBar";
+import { Breadcrumbs } from "@/components/shell/Breadcrumbs";
+
+const expect = (actual: unknown) => ({
+  toBe: (expected: unknown) => assert.equal(actual, expected),
+});
 
 const source = (path: string) => readFile(new URL(path, import.meta.url), "utf8");
+
+describe("App Shell Components Smoke Test", () => {
+  test("exports AppShell, AppSidebar, AppTopBar, and Breadcrumbs functions", () => {
+    expect(typeof AppShell).toBe("function");
+    expect(typeof AppSidebar).toBe("function");
+    expect(typeof AppTopBar).toBe("function");
+    expect(typeof Breadcrumbs).toBe("function");
+  });
+});
 
 test("review dashboard routes export page components", async () => {
   const [queue, detail] = await Promise.all([
