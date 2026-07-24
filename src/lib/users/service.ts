@@ -30,9 +30,16 @@ function rowToUser(row: Record<string, unknown>): AppUser {
 // (intersected with APP_ROLES) so the "Asignar roles" checkboxes start in a
 // sane state instead of always empty; after that, only this UI changes them.
 export async function ensureUser(user: { id: string; username: string; email: string; keycloakRoles?: string[] }): Promise<void> {
+  const whereClauses = ["id = ?", "username = ?"];
+  const args: unknown[] = [user.id, user.username];
+  if (user.email && user.email.trim() !== "") {
+    whereClauses.push("email = ?");
+    args.push(user.email);
+  }
+
   const existing = await client.execute({
-    sql: "SELECT id FROM users WHERE id = ?",
-    args: [user.id],
+    sql: `SELECT * FROM users WHERE ${whereClauses.join(" OR ")} ORDER BY last_login_at DESC`,
+    args,
   });
 
   const now = Math.floor(Date.now() / 1000);
@@ -47,16 +54,42 @@ export async function ensureUser(user: { id: string; username: string; email: st
     return;
   }
 
+  const primary = existing.rows[0] as Record<string, unknown>;
+  const primaryId = String(primary.id);
+
   await client.execute({
-    sql: `UPDATE users SET username = ?, full_name = ?, email = ?, last_login_at = ?, updated_at = ?
+    sql: `UPDATE users SET id = ?, username = ?, full_name = ?, email = ?, last_login_at = ?, updated_at = ?
           WHERE id = ?`,
-    args: [user.username, user.username, user.email, now, now, user.id],
+    args: [user.id, user.username, user.username, user.email, now, now, primaryId],
   });
+
+  if (existing.rows.length > 1) {
+    const duplicateIds = existing.rows.slice(1).map((r) => String(r.id)).filter((id) => id !== user.id);
+    if (duplicateIds.length > 0) {
+      const placeholders = duplicateIds.map(() => "?").join(",");
+      await client.execute({
+        sql: `DELETE FROM users WHERE id IN (${placeholders})`,
+        args: duplicateIds,
+      });
+    }
+  }
 }
 
 export async function listUsers(): Promise<AppUser[]> {
-  const result = await client.execute("SELECT * FROM users ORDER BY username ASC");
-  return result.rows.map((r) => rowToUser(r as Record<string, unknown>));
+  const result = await client.execute("SELECT * FROM users ORDER BY last_login_at DESC, username ASC");
+  const seen = new Set<string>();
+  const uniqueUsers: AppUser[] = [];
+
+  for (const row of result.rows) {
+    const user = rowToUser(row as Record<string, unknown>);
+    const key = (user.username || user.email || user.id).toLowerCase();
+    if (!seen.has(key)) {
+      seen.add(key);
+      uniqueUsers.push(user);
+    }
+  }
+
+  return uniqueUsers;
 }
 
 export async function setUserRoles(id: string, roles: AppRole[]): Promise<AppUser> {
