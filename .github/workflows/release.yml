@@ -1,66 +1,43 @@
-name: Release CLI
+name: Release Artifacts
 
 on:
-  push:
-    tags:
-      - "v*"
-
-permissions:
-  contents: write
+  release:
+    types: [created]
 
 jobs:
   build-and-release:
-    runs-on: windows-latest
-
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 22
 
-      - name: Build bundle
-        working-directory: cli
-        run: node build.js
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
 
-      - name: Install pkg
-        run: npm install -g @yao-pkg/pkg
+      - name: Install Node Dependencies
+        run: |
+          cd cli
+          npm install
 
-      - name: Build Windows exe
-        working-directory: cli
-        run: pkg dist/skillvault.bundle.cjs --target node22-win-x64 --output dist/skillvault-win-x64.exe
+      - name: Install Python Packaging Tools
+        run: pip install build
 
-      - name: Build macOS binary
-        working-directory: cli
-        run: pkg dist/skillvault.bundle.cjs --target node22-macos-x64 --output dist/skillvault-macos-x64
-        continue-on-error: true
+      - name: Run Build and Packaging Script
+        run: |
+          cd cli
+          node build-dist.js
 
-      - name: Build Linux binary
-        working-directory: cli
-        run: pkg dist/skillvault.bundle.cjs --target node22-linux-x64 --output dist/skillvault-linux-x64
-        continue-on-error: true
-
-      - name: Create GitHub Release
+      - name: Upload Artifacts to Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            cli/dist/skillvault-win-x64.exe
-            cli/dist/skillvault-macos-x64
-            cli/dist/skillvault-linux-x64
-          generate_release_notes: true
-          body: |
-            ## Instalación
-
-            ### Windows
-            Descarga `skillvault-win-x64.exe`, renómbralo a `skillvault.exe` y agrégalo a tu PATH.
-
-            ### macOS / Linux
-            ```bash
-            chmod +x skillvault-macos-x64
-            sudo mv skillvault-macos-x64 /usr/local/bin/skillvault
-            ```
-
-            ### Alternativa — Node.js
-            ```bash
-            cd cli && npm install -g .
-            ```
+            cli/dist/bin/*
+            cli/dist/wheels/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
