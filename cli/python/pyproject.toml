@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "skillvault"
+version = "0.2.2"
+description = "CLI to install and manage SKILL.md skills from SkillVault"
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+[project.scripts]
+skillvault = "skillvault.cli:main"
+
+[tool.setuptools.package-data]
+skillvault = ["skillvault.bundle.cjs", "skillvault-bin", "skillvault-bin.exe"]
