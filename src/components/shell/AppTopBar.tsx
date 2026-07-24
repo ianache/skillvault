@@ -29,7 +29,6 @@ export function AppTopBar({ onOpenMobileDrawer }: Props) {
         type="button"
         onClick={onOpenMobileDrawer}
         style={{
-          display: "none",
           background: "transparent",
           border: "none",
           fontSize: "18px",
