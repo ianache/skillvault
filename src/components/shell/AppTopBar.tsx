@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { SearchBar } from "../SearchBar";
 import { ThemeToggle } from "../ThemeToggle";
 import { UserMenu } from "../UserMenu";
@@ -22,7 +23,7 @@ export function AppTopBar({ user, onOpenMobileDrawer }: Props) {
         display: "flex",
         alignItems: "center",
         padding: "0 24px",
-        gap: "16px",
+        gap: "14px",
         position: "sticky",
         top: 0,
         background: "var(--bg)",
@@ -38,12 +39,31 @@ export function AppTopBar({ user, onOpenMobileDrawer }: Props) {
           fontSize: "18px",
           color: "var(--text)",
           cursor: "pointer",
-          padding: "4px",
+          padding: "4px 8px",
+          borderRadius: "4px",
         }}
         className="mobile-menu-btn"
+        title="Menú / Opciones"
       >
         ☰
       </button>
+
+      <Link
+        href="/"
+        title="Inicio"
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: "16px",
+          textDecoration: "none",
+          padding: "4px 6px",
+          borderRadius: "4px",
+          color: "var(--text)",
+        }}
+      >
+        🏠
+      </Link>
 
       <Breadcrumbs />
 
