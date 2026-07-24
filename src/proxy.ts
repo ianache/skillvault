@@ -6,7 +6,7 @@ export default auth((req) => {
   const session = req.auth;
 
   // All protected routes require authentication
-  const protectedPaths = ["/publish", "/dashboard"];
+  const protectedPaths = ["/publish", "/dashboard", "/proposals", "/review", "/categories", "/users", "/skills"];
   const isProtected = protectedPaths.some((p) => pathname.startsWith(p));
 
   if (isProtected && !session) {
@@ -22,17 +22,18 @@ export default auth((req) => {
     return NextResponse.redirect(new URL("/unauthorized", req.url));
   }
 
-  // /dashboard is available for any authenticated user,
-  // but some sub-routes need stronger roles.
-  if (pathname.startsWith("/dashboard/categories") && !roles.includes("admin")) {
+  // /categories requires admin
+  if (pathname.startsWith("/categories") && !roles.includes("admin")) {
     return NextResponse.redirect(new URL("/unauthorized", req.url));
   }
 
-  if (pathname.startsWith("/dashboard/users") && !roles.includes("admin")) {
+  // /users requires admin
+  if (pathname.startsWith("/users") && !roles.includes("admin")) {
     return NextResponse.redirect(new URL("/unauthorized", req.url));
   }
 
-  if (pathname.startsWith("/dashboard/review") && !roles.includes("reviewer") && !roles.includes("admin")) {
+  // /review requires reviewer or admin
+  if (pathname.startsWith("/review") && !roles.includes("reviewer") && !roles.includes("admin")) {
     return NextResponse.redirect(new URL("/unauthorized", req.url));
   }
 
@@ -40,5 +41,13 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/publish/:path*", "/dashboard/:path*"],
+  matcher: [
+    "/publish/:path*",
+    "/dashboard/:path*",
+    "/proposals/:path*",
+    "/review/:path*",
+    "/categories/:path*",
+    "/users/:path*",
+    "/skills/:path*",
+  ],
 };
