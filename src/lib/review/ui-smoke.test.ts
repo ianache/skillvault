@@ -32,6 +32,13 @@ describe("App Shell Components Smoke Test", () => {
     assert.match(topBarSource, /Breadcrumbs/);
     assert.match(topBarSource, /mobile-menu-btn/);
   });
+
+  test("AppShell renders signin outside the shell chrome", async () => {
+    const shellSource = await source("../../components/shell/AppShell.tsx");
+    assert.match(shellSource, /usePathname/);
+    assert.match(shellSource, /pathname === "\/signin"/);
+    assert.match(shellSource, /return <>\{children\}<\/>/);
+  });
 });
 
 test("review dashboard routes export page components", async () => {

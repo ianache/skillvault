@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { AppSidebar } from "./AppSidebar";
 import { AppTopBar } from "./AppTopBar";
 
@@ -17,6 +18,7 @@ type Props = {
 };
 
 export function AppShell({ children, user, userRoles }: Props) {
+  const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -34,6 +36,10 @@ export function AppShell({ children, user, userRoles }: Props) {
   }
 
   const effectiveRoles = user?.roles ?? userRoles ?? [];
+
+  if (pathname === "/signin") {
+    return <>{children}</>;
+  }
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", background: "var(--bg)" }}>
