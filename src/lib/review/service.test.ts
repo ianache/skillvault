@@ -36,6 +36,12 @@ Use this demo.
 
 Follow these instructions.`;
 
+const relaxedRawContent = `# Draft Skill
+
+This draft intentionally omits strict frontmatter metadata and required body sections.`;
+
+const overLineLimitRawContent = Array.from({ length: 301 }, (_, index) => `line ${index + 1}`).join("\n");
+
 const authorActor: ReviewActor = { id: "author-1", handle: "author", roles: ["author"] };
 const reviewerActor: ReviewActor = { id: "reviewer-1", handle: "reviewer", roles: ["reviewer"] };
 const adminActor: ReviewActor = { id: "admin-1", handle: "admin", roles: ["admin"] };
@@ -43,6 +49,7 @@ const adminActor: ReviewActor = { id: "admin-1", handle: "admin", roles: ["admin
 type FakeClient = ReviewDatabaseClient & {
   transaction: <T>(fn: (txClient: ReviewDatabaseClient) => Promise<T>) => Promise<T>;
   insertedSkill?: Record<string, unknown>;
+  insertedReviewRequest?: Record<string, unknown>;
   insertedFiles: Array<Record<string, unknown>>;
   insertedVersion?: Record<string, unknown>;
   updatedRequest?: Record<string, unknown>;
@@ -115,6 +122,21 @@ function createFakeClient(
       if (sql.includes("SELECT id FROM skills WHERE slug = ?")) {
         return { rows: options.existingSkill ? [{ id: 7 }] : [] };
       }
+      if (sql.includes("INSERT INTO skill_review_requests")) {
+        fakeClient.insertedReviewRequest = {
+          skillId: args[0],
+          slug: args[1],
+          name: args[2],
+          description: args[3],
+          type: args[4],
+          version: args[5],
+          schemaVersion: args[6],
+          authorId: args[7],
+          authorHandle: args[8],
+          rawContent: args[9],
+        };
+        return { rows: [] };
+      }
       if (sql.includes("DELETE FROM skill_files")) {
         return { rows: [] };
       }
@@ -157,7 +179,11 @@ function createFakeClient(
 }
 
 test("author creates pending request for a new skill", async () => {
-  const request = await createReviewRequest({ rawContent: validRawContent, files: [] }, authorActor, createFakeClient());
+  const request = await createReviewRequest(
+    { rawContent: validRawContent, files: [], acceptedResponsibility: true },
+    authorActor,
+    createFakeClient()
+  );
   assert.equal(request.status, "pending");
   assert.equal(request.slug, "demo-skill");
 });
@@ -165,11 +191,57 @@ test("author creates pending request for a new skill", async () => {
 test("rejects a new-skill submission when a skill with the same slug already exists", async () => {
   await assert.rejects(
     () => createReviewRequest(
-      { rawContent: validRawContent, files: [] },
+      { rawContent: validRawContent, files: [], acceptedResponsibility: true },
       authorActor,
       createFakeClient([], {}, { existingSkill: true })
     ),
     /already exists/
+  );
+});
+
+test("createReviewRequest stores relaxed draft metadata when responsibility is accepted", async () => {
+  const fakeClient = createFakeClient([], {
+    slug: "draft-skill",
+    name: "draft-skill",
+    description: "Skill enviado a revision sin descripcion validada.",
+    raw_content: relaxedRawContent,
+  });
+
+  await createReviewRequest(
+    { rawContent: relaxedRawContent, files: [], acceptedResponsibility: true },
+    authorActor,
+    fakeClient
+  );
+
+  assert.equal(fakeClient.insertedReviewRequest?.slug, "draft-skill");
+  assert.equal(fakeClient.insertedReviewRequest?.description, "Skill enviado a revision sin descripcion validada.");
+});
+
+test("createReviewRequest rejects relaxed drafts over 300 lines", async () => {
+  await assert.rejects(
+    () => createReviewRequest(
+      { rawContent: overLineLimitRawContent, files: [], acceptedResponsibility: true },
+      authorActor,
+      createFakeClient()
+    ),
+    /Maximo 300 lineas/
+  );
+});
+
+test("approval still rejects malformed relaxed draft content", async () => {
+  await assert.rejects(
+    () => decideReviewRequest(
+      1,
+      { decision: "approve" },
+      reviewerActor,
+      createFakeClient([], {
+        slug: "draft-skill",
+        name: "draft-skill",
+        description: "Skill enviado a revision sin descripcion validada.",
+        raw_content: relaxedRawContent,
+      })
+    ),
+    /required|metadata|frontmatter|Descripcion|Cuando usar|Instrucciones/i
   );
 });
 

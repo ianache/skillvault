@@ -20,6 +20,9 @@ import type {
   UpdateReviewRequestInput,
 } from "./types";
 
+const MAX_SKILL_LINES = 300;
+const DEFAULT_RELAXED_DESCRIPTION = "Skill enviado a revision sin descripcion validada.";
+
 function asNumber(value: unknown): number {
   return typeof value === "number" ? value : Number(value);
 }
@@ -79,6 +82,44 @@ function toComment(row: Record<string, unknown>): ReviewComment {
   };
 }
 
+function countLines(value: string): number {
+  return value.split(/\r\n|\r|\n/).length;
+}
+
+function slugifyDraftName(value: string): string {
+  const slug = value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 64);
+  return slug || "draft-skill";
+}
+
+function firstHeading(content: string): string | null {
+  const match = content.match(/^#\s+(.+)$/m);
+  return match?.[1]?.trim() || null;
+}
+
+function stringArray(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string" && item.trim().length > 0) : [];
+}
+
+function semverOrDefault(value: unknown): string {
+  return typeof value === "string" && /^\d+\.\d+\.\d+$/.test(value) ? value : "1.0.0";
+}
+
+function normalizeReviewFiles(files: ReviewFileInput[] = []) {
+  const paths = new Set<string>();
+  return files.map((file) => {
+    const path = validateReviewFilePath(file.path);
+    if (paths.has(path)) throw new Error("Review file paths must be unique");
+    paths.add(path);
+    return { ...file, path, content: file.content ?? "", changeType: file.changeType ?? "added" };
+  });
+}
+
 function validateSubmission(rawContent: string, files: ReviewFileInput[] = []) {
   if (!rawContent.trim()) throw new Error("SKILL.md content is required");
 
@@ -90,15 +131,55 @@ function validateSubmission(rawContent: string, files: ReviewFileInput[] = []) {
     throw new Error(errors.map((error) => error.message).join("; "));
   }
 
-  const paths = new Set<string>();
-  const normalizedFiles = files.map((file) => {
-    const path = validateReviewFilePath(file.path);
-    if (paths.has(path)) throw new Error("Review file paths must be unique");
-    paths.add(path);
-    return { ...file, path, content: file.content ?? "", changeType: file.changeType ?? "added" };
-  });
+  const normalizedFiles = normalizeReviewFiles(files);
 
   return { frontmatter: frontmatter.parsed!, files: normalizedFiles };
+}
+
+function relaxedSubmission(rawContent: string, files: ReviewFileInput[] = []) {
+  if (!rawContent.trim()) throw new Error("SKILL.md content is required");
+  if (countLines(rawContent) > MAX_SKILL_LINES) throw new Error("Maximo 300 lineas");
+
+  const parsed = matter(rawContent);
+  const data = parsed.data as Record<string, unknown>;
+  const metadata = typeof data.metadata === "object" && data.metadata !== null
+    ? data.metadata as Record<string, unknown>
+    : {};
+
+  const validName = typeof data.name === "string" && /^[a-z0-9-]{3,64}$/.test(data.name)
+    ? data.name
+    : null;
+  const name = validName ?? slugifyDraftName(firstHeading(parsed.content) ?? "");
+  const description = typeof data.description === "string"
+    && data.description.trim().length > 0
+    && data.description.length <= 280
+    ? data.description
+    : DEFAULT_RELAXED_DESCRIPTION;
+  const triggers = stringArray(metadata.triggers);
+
+  return {
+    frontmatter: {
+      name,
+      description,
+      version: semverOrDefault(data.version),
+      schema_version: typeof data.schema_version === "string" && data.schema_version.trim().length > 0
+        ? data.schema_version
+        : "1.1",
+      author: typeof data.author === "string" ? data.author : undefined,
+      metadata: {
+        type: typeof metadata.type === "string" && metadata.type.trim().length > 0 ? metadata.type : "code",
+        triggers: triggers.length > 0 ? triggers : [name],
+        tools: stringArray(metadata.tools),
+        subagent_type: typeof metadata.subagent_type === "string" ? metadata.subagent_type : undefined,
+      },
+      compatibility: stringArray(data.compatibility).length > 0 ? stringArray(data.compatibility) : ["claude"],
+      dependencies: stringArray(data.dependencies),
+      resources: stringArray(data.resources),
+      scripts: stringArray(data.scripts),
+      config_requirements: Array.isArray(data.config_requirements) ? data.config_requirements : [],
+    },
+    files: normalizeReviewFiles(files),
+  };
 }
 
 function assertValidDecision(input: DecideReviewRequestInput): void {
@@ -229,7 +310,8 @@ export async function createReviewRequest(
   actor: ReviewActor,
   client: ReviewDatabaseClient
 ): Promise<ReviewRequest> {
-  const { frontmatter, files } = validateSubmission(input.rawContent, input.files);
+  if (input.acceptedResponsibility !== true) throw new Error("Debes aceptar continuar con la publicacion");
+  const { frontmatter, files } = relaxedSubmission(input.rawContent, input.files);
 
   if (!input.skillId) {
     const existingSkill = await client.execute({
