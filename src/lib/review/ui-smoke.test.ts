@@ -166,7 +166,10 @@ test("publish wizard forwards responsibility acceptance to final submission", as
   assert.match(editorSource, /onAcceptanceChange\?\.\(\s*nextAccepted\s*\)/);
 
   assert.match(pageSource, /const\s+\[\s*acceptedResponsibility\s*,\s*setAcceptedResponsibility\s*\]\s*=\s*useState\(\s*false\s*\)/);
-  assert.match(pageSource, /JSON\.stringify\(\s*\{[\s\S]*rawContent:\s*content[\s\S]*files:\s*attachedFiles[\s\S]*acceptedResponsibility[\s\S]*\}\s*\)/);
+  const publishPayload = pageSource.match(/body:\s*JSON\.stringify\(\s*\{([\s\S]*?)\}\s*\)/)?.[1] ?? "";
+  assert.match(publishPayload, /rawContent:\s*content/);
+  assert.match(publishPayload, /files:\s*attachedFiles/);
+  assert.match(publishPayload, /acceptedResponsibility/);
   assert.match(pageSource, /onAcceptanceChange=\{setAcceptedResponsibility\}/);
   assert.match(pageSource, /acceptedResponsibility=\{acceptedResponsibility\}/);
 
