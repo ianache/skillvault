@@ -63,6 +63,12 @@ Use this demo.
 
 Follow these instructions.`;
 
+const relaxedRawContent = `# Draft Skill
+
+This draft intentionally omits strict frontmatter metadata and required body sections.`;
+
+const overLineLimitRawContent = Array.from({ length: 301 }, (_, index) => `line ${index + 1}`).join("\n");
+
 const updatedRawContent = validRawContent.replace("Follow these instructions.", "Follow the updated instructions.");
 
 function reviewRequest(overrides: Partial<ReviewRequest> = {}): ReviewRequest {
@@ -121,6 +127,86 @@ test("POST /api/skills creates a review request instead of a published skill", a
     files: [{ path: "resources/reference.md", fileType: "resource", content: "Reference" }],
   });
   assert.equal(executedSql.some((sql) => sql.includes("INSERT INTO skills")), false);
+});
+
+test("POST /api/skills accepts relaxed draft submissions with responsibility consent", async () => {
+  let createInput: unknown;
+  const { POST } = createSkillHandlers({
+    getSession: async () => authorSession as never,
+    database,
+    create: async (input) => {
+      createInput = input;
+      return reviewRequest({
+        slug: "draft-skill",
+        name: "draft-skill",
+        description: "Skill enviado a revision sin descripcion validada.",
+        rawContent: relaxedRawContent,
+      });
+    },
+  });
+
+  const response = await POST(new NextRequest("http://test/api/skills", {
+    method: "POST",
+    body: JSON.stringify({
+      rawContent: relaxedRawContent,
+      files: [],
+      acceptedResponsibility: true,
+    }),
+  }));
+
+  assert.equal(response.status, 201);
+  assert.deepEqual(await response.json(), { slug: "draft-skill", reviewRequestId: 9, status: "pending" });
+  assert.deepEqual(createInput, {
+    rawContent: relaxedRawContent,
+    files: [],
+    acceptedResponsibility: true,
+  });
+});
+
+test("POST /api/skills rejects relaxed submissions without responsibility consent", async () => {
+  let called = false;
+  const { POST } = createSkillHandlers({
+    getSession: async () => authorSession as never,
+    database,
+    create: async () => {
+      called = true;
+      return reviewRequest();
+    },
+  });
+
+  const response = await POST(new NextRequest("http://test/api/skills", {
+    method: "POST",
+    body: JSON.stringify({ rawContent: relaxedRawContent, files: [] }),
+  }));
+
+  assert.equal(response.status, 400);
+  assert.deepEqual(await response.json(), { error: "Debes aceptar continuar con la publicacion" });
+  assert.equal(called, false);
+});
+
+test("POST /api/skills rejects submissions over 300 lines", async () => {
+  let called = false;
+  const { POST } = createSkillHandlers({
+    getSession: async () => authorSession as never,
+    database,
+    create: async () => {
+      called = true;
+      return reviewRequest();
+    },
+  });
+
+  const response = await POST(new NextRequest("http://test/api/skills", {
+    method: "POST",
+    body: JSON.stringify({
+      rawContent: overLineLimitRawContent,
+      files: [],
+      acceptedResponsibility: true,
+    }),
+  }));
+
+  assert.equal(response.status, 400);
+  assert.deepEqual(await response.json(), { error: "Maximo 300 lineas" });
+  assert.equal(called, false);
 });
 
 test("POST /api/skills/:slug/files is disabled while files are reviewed", async () => {
