@@ -295,6 +295,51 @@ test("PATCH /api/skills/:slug preserves published files when files are omitted",
   assert.equal(publishedRawContent, originalRawContent);
 });
 
+test("PATCH /api/skills/:slug creates a review request without requiring responsibility consent in the payload", async () => {
+  const publishedRawContent = validRawContent;
+  const publishedFiles = [{ path: "resources/reference.md", fileType: "resource", content: "Reference" }];
+  let createInput: unknown;
+  const { PATCH } = createSkillDetailHandlers({
+    getSession: async () => authorSession as never,
+    database: {
+      async execute(input) {
+        const sql = typeof input === "string" ? input : input.sql;
+        if (sql.includes("SELECT id, raw_content FROM skills")) {
+          return { rows: [{ id: 4, raw_content: publishedRawContent }] };
+        }
+        if (sql.includes("SELECT path, file_type, content FROM skill_files")) {
+          return { rows: [{ path: "resources/reference.md", file_type: "resource", content: "Reference" }] };
+        }
+        if (sql.includes("SELECT id FROM skill_review_requests")) {
+          return { rows: [] };
+        }
+        throw new Error(`Unexpected query: ${sql}`);
+      },
+    },
+    create: async (input) => {
+      createInput = input;
+      return reviewRequest({ id: 10, skillId: 4, rawContent: updatedRawContent });
+    },
+  });
+
+  const response = await PATCH(
+    new NextRequest("http://test/api/skills/demo-skill", {
+      method: "PATCH",
+      body: JSON.stringify({ rawContent: updatedRawContent }),
+    }),
+    { params: Promise.resolve({ slug: "demo-skill" }) }
+  );
+
+  assert.equal(response.status, 201);
+  assert.deepEqual(await response.json(), { slug: "demo-skill", reviewRequestId: 10, status: "pending" });
+  assert.deepEqual(createInput, {
+    rawContent: updatedRawContent,
+    files: [{ ...publishedFiles[0], changeType: "unchanged" }],
+    skillId: 4,
+    acceptedResponsibility: true,
+  });
+});
+
 test("catalog excludes pending review requests", async () => {
   let catalogSql = "";
   const { GET } = createSkillHandlers({

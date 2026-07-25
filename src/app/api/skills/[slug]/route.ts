@@ -141,7 +141,7 @@ export function createSkillDetailHandlers(dependencies: Partial<RouteDependencie
       });
       const request = openRequest.rows.length > 0
         ? await update(Number(openRequest.rows[0].id), reviewInput, actor, database)
-        : await create({ ...reviewInput, skillId }, actor, database);
+        : await create({ ...reviewInput, skillId, acceptedResponsibility: true }, actor, database);
 
       return NextResponse.json(
         { slug: request.slug, reviewRequestId: request.id, status: request.status },

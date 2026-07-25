@@ -50,6 +50,13 @@ description: Too short.
 
 Draft body.`;
 
+const malformedFrontmatterRawContent = `---
+name: [broken
+---
+# Broken YAML Draft
+
+Draft body.`;
+
 const authorActor: ReviewActor = { id: "author-1", handle: "author", roles: ["author"] };
 const reviewerActor: ReviewActor = { id: "reviewer-1", handle: "reviewer", roles: ["reviewer"] };
 const adminActor: ReviewActor = { id: "admin-1", handle: "admin", roles: ["admin"] };
@@ -263,6 +270,24 @@ test("createReviewRequest falls back to default description for short frontmatte
   );
 
   assert.equal(fakeClient.insertedReviewRequest?.slug, "short-desc-skill");
+  assert.equal(fakeClient.insertedReviewRequest?.description, "Skill enviado a revision sin descripcion validada.");
+});
+
+test("createReviewRequest accepts malformed YAML frontmatter as relaxed draft content", async () => {
+  const fakeClient = createFakeClient([], {
+    slug: "broken-yaml-draft",
+    name: "broken-yaml-draft",
+    description: "Skill enviado a revision sin descripcion validada.",
+    raw_content: malformedFrontmatterRawContent,
+  });
+
+  await createReviewRequest(
+    { rawContent: malformedFrontmatterRawContent, files: [], acceptedResponsibility: true },
+    authorActor,
+    fakeClient
+  );
+
+  assert.equal(fakeClient.insertedReviewRequest?.slug, "broken-yaml-draft");
   assert.equal(fakeClient.insertedReviewRequest?.description, "Skill enviado a revision sin descripcion validada.");
 });
 

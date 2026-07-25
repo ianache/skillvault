@@ -137,12 +137,21 @@ function validateSubmission(rawContent: string, files: ReviewFileInput[] = []) {
   return { frontmatter: frontmatter.parsed!, files: normalizedFiles };
 }
 
+function parseRelaxedMatter(rawContent: string): { data: Record<string, unknown>; content: string } {
+  try {
+    const parsed = matter(rawContent);
+    return { data: parsed.data as Record<string, unknown>, content: parsed.content };
+  } catch {
+    return { data: {}, content: rawContent };
+  }
+}
+
 function relaxedSubmission(rawContent: string, files: ReviewFileInput[] = []) {
   if (!rawContent.trim()) throw new Error("SKILL.md content is required");
   if (countLines(rawContent) > MAX_SKILL_LINES) throw new Error("Maximo 300 lineas");
 
-  const parsed = matter(rawContent);
-  const data = parsed.data as Record<string, unknown>;
+  const parsed = parseRelaxedMatter(rawContent);
+  const data = parsed.data;
   const metadata = typeof data.metadata === "object" && data.metadata !== null
     ? data.metadata as Record<string, unknown>
     : {};
