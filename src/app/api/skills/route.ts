@@ -37,7 +37,16 @@ function parseFiles(value: unknown): ReviewFileInput[] | null | undefined {
   return files;
 }
 
-export async function skillSubmissionBody(request: Request): Promise<CreateReviewRequestInput | null> {
+const MAX_SKILL_LINES = 300;
+
+function countLines(value: string): number {
+  return value.split(/\r\n|\r|\n/).length;
+}
+
+export async function skillSubmissionBody(
+  request: Request,
+  options: { requireAcceptedResponsibility?: boolean } = {}
+): Promise<CreateReviewRequestInput | null> {
   let body: unknown;
   try {
     body = await request.json();
@@ -45,11 +54,18 @@ export async function skillSubmissionBody(request: Request): Promise<CreateRevie
     return null;
   }
   if (!body || typeof body !== "object") return null;
-  const { rawContent, files } = body as Record<string, unknown>;
+  const { rawContent, files, acceptedResponsibility } = body as Record<string, unknown>;
   const parsedFiles = parseFiles(files);
-  if (typeof rawContent !== "string" || !rawContent || parsedFiles === null) return null;
+  if (typeof rawContent !== "string" || !rawContent.trim() || parsedFiles === null) return null;
+  if (countLines(rawContent) > MAX_SKILL_LINES) {
+    throw new Error("Maximo 300 lineas");
+  }
+  if (options.requireAcceptedResponsibility && acceptedResponsibility !== true) {
+    throw new Error("Debes aceptar continuar con la publicacion");
+  }
   return {
     rawContent,
+    ...(acceptedResponsibility === true ? { acceptedResponsibility: true } : {}),
     ...(parsedFiles === undefined ? {} : { files: parsedFiles }),
   };
 }
@@ -115,8 +131,14 @@ export function createSkillHandlers(dependencies: Partial<RouteDependencies> = {
     const actor = session ? actorFromSession(session) : null;
     if (!actor) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const input = await skillSubmissionBody(req);
-    if (!input) return NextResponse.json({ error: "rawContent y files[] inválidos" }, { status: 400 });
+    let input: CreateReviewRequestInput | null;
+    try {
+      input = await skillSubmissionBody(req, { requireAcceptedResponsibility: true });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "rawContent y files[] invalidos";
+      return NextResponse.json({ error: message }, { status: 400 });
+    }
+    if (!input) return NextResponse.json({ error: "rawContent y files[] invalidos" }, { status: 400 });
 
     try {
       const request = await create(input, actor, database);

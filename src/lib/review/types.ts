@@ -28,6 +28,7 @@ export type CreateReviewRequestInput = {
   rawContent: string;
   files?: ReviewFileInput[];
   skillId?: number | null;
+  acceptedResponsibility?: boolean;
 };
 
 export type UpdateReviewRequestInput = {
