@@ -117,6 +117,7 @@ test("POST /api/skills creates a review request instead of a published skill", a
     body: JSON.stringify({
       rawContent: validRawContent,
       files: [{ path: "resources/reference.md", fileType: "resource", content: "Reference" }],
+      acceptedResponsibility: true,
     }),
   }));
 
@@ -125,6 +126,7 @@ test("POST /api/skills creates a review request instead of a published skill", a
   assert.deepEqual(createInput, {
     rawContent: validRawContent,
     files: [{ path: "resources/reference.md", fileType: "resource", content: "Reference" }],
+    acceptedResponsibility: true,
   });
   assert.equal(executedSql.some((sql) => sql.includes("INSERT INTO skills")), false);
 });

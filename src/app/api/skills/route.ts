@@ -57,7 +57,7 @@ export async function skillSubmissionBody(
   const { rawContent, files, acceptedResponsibility } = body as Record<string, unknown>;
   const parsedFiles = parseFiles(files);
   if (typeof rawContent !== "string" || !rawContent.trim() || parsedFiles === null) return null;
-  if (countLines(rawContent) > MAX_SKILL_LINES) {
+  if (options.requireAcceptedResponsibility && countLines(rawContent) > MAX_SKILL_LINES) {
     throw new Error("Maximo 300 lineas");
   }
   if (options.requireAcceptedResponsibility && acceptedResponsibility !== true) {
