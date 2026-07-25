@@ -88,11 +88,86 @@ DATABASE_URL=./skills-vault.db
 
 ## CLI
 
-### Instalación global
+### Construir artefactos locales
+
+Para generar ejecutables nativos y wheels de Python desde el repositorio:
+
+```bash
+cd cli
+npm install
+python -m pip install build wheel
+npm run build:all
+```
+
+Los artefactos quedan en:
+
+- `cli/dist/bin/`: ejecutables nativos para Windows, macOS y Linux.
+- `cli/dist/wheels/`: wheels Python para instalacion local.
+
+### Instalacion global con npm
 
 ```bash
 cd cli
 npm install -g .
+```
+
+### Instalacion local desde wheel
+
+Despues de ejecutar `npm run build:all`, instale el CLI con `pip` usando los
+wheels generados localmente:
+
+```bash
+# Desde la raiz del repositorio
+python -m pip install --force-reinstall --find-links cli/dist/wheels skillvault==0.2.2
+```
+
+`pip` selecciona automaticamente el wheel nativo compatible con su plataforma
+cuando existe, por ejemplo `skillvault-0.2.2-py3-none-win_amd64.whl` en
+Windows. Ese wheel incluye el binario y no requiere Node.js en tiempo de uso.
+
+Para forzar el wheel universal, instale el archivo `any` por ruta explicita:
+
+```bash
+python -m pip install --force-reinstall cli/dist/wheels/skillvault-0.2.2-py3-none-any.whl
+```
+
+El wheel universal incluye `skillvault.bundle.cjs` y requiere tener `node` en
+el `PATH` del sistema. Use Node.js 18 o superior.
+
+Verifique la instalacion:
+
+```bash
+skillvault --help
+```
+
+### Instalar skills con el CLI
+
+Primero asegurese de que el portal este corriendo y tenga skills publicados:
+
+```bash
+pnpm dev --port 3010
+```
+
+Luego instale un skill por su `slug`:
+
+```bash
+# Instala en Claude Code global
+skillvault install db-migrate --harness claude --scope global
+
+# Instala en Codex global
+skillvault install graphify --harness codex --scope global
+
+# Usa un portal remoto o un puerto distinto
+skillvault install graphify --harness codex --scope global --server http://localhost:3010
+
+# Reinstala sobrescribiendo una instalacion existente
+skillvault install graphify --harness codex --scope global --force
+```
+
+Puede encontrar slugs disponibles con:
+
+```bash
+skillvault search "database migration" --server http://localhost:3010
 ```
 
 Instalacion de plugins en Claude
