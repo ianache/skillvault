@@ -146,3 +146,12 @@ test("LocalSkillLoader and PublishPage render skill loader layout and breadcrumb
   assert.match(pageSource, /Cargar Skill local/);
 });
 
+test("Step2 editor only gates continuation by line count and responsibility acceptance", async () => {
+  const editorSource = await source("../../components/wizard/Step2Editor.tsx");
+
+  assert.match(editorSource, /MAX_SKILL_LINES = 300/);
+  assert.match(editorSource, /Acepto continuar con la publicacion/);
+  assert.match(editorSource, /const canContinue = !lineLimitExceeded && acceptedResponsibility/);
+  assert.doesNotMatch(editorSource, /validateSkillFrontmatter|validateBodySections|setValidation/);
+});
+

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { validateSkillFrontmatter, validateBodySections, ValidationError, ValidationWarning } from "@/lib/skill-schema";
 import matter from "gray-matter";
 
 interface Props {
@@ -11,34 +10,17 @@ interface Props {
   onBack: () => void;
 }
 
-interface ValidationState {
-  errors: (ValidationError | ValidationWarning)[];
-  warnings: (ValidationError | ValidationWarning)[];
-  valid: boolean;
-}
+const MAX_SKILL_LINES = 300;
 
 export function Step2Editor({ content, onChange, onNext, onBack }: Props) {
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<unknown>(null);
-  const [validation, setValidation] = useState<ValidationState>({ errors: [], warnings: [], valid: false });
+  const [lineCount, setLineCount] = useState(() => countLines(content));
+  const [acceptedResponsibility, setAcceptedResponsibility] = useState(false);
   const [activeTab, setActiveTab] = useState<"editor" | "preview">("editor");
 
-  // Validate on content change
   const validate = useCallback((text: string) => {
-    try {
-      const parsed = matter(text);
-      const fmResult = validateSkillFrontmatter(parsed.data);
-      const bodyResult = validateBodySections(parsed.content);
-      const errors = [...fmResult.errors, ...bodyResult.errors];
-      const warnings = [...fmResult.warnings, ...bodyResult.warnings];
-      setValidation({ errors, warnings, valid: errors.length === 0 });
-    } catch {
-      setValidation({
-        errors: [{ field: "frontmatter", message: "YAML inválido en el frontmatter", severity: "error" }],
-        warnings: [],
-        valid: false,
-      });
-    }
+    setLineCount(countLines(text));
   }, []);
 
   useEffect(() => {
@@ -162,6 +144,8 @@ export function Step2Editor({ content, onChange, onNext, onBack }: Props) {
   };
 
   const { fm, body } = renderPreview(content);
+  const lineLimitExceeded = lineCount > MAX_SKILL_LINES;
+  const canContinue = !lineLimitExceeded && acceptedResponsibility;
 
   return (
     <div>
@@ -178,7 +162,7 @@ export function Step2Editor({ content, onChange, onNext, onBack }: Props) {
           Paso 2 — Editor SKILL.md
         </h1>
         <p style={{ fontSize: "13px", color: "var(--muted)" }}>
-          Edita el contenido completo. Los errores se muestran en tiempo real.
+          Edita el contenido completo. El unico bloqueo para continuar es superar 300 lineas.
         </p>
       </div>
 
@@ -275,12 +259,12 @@ export function Step2Editor({ content, onChange, onNext, onBack }: Props) {
           </div>
         </div>
 
-        {/* Validation panel */}
+        {/* Publication responsibility panel */}
         <div style={{ position: "sticky", top: "72px" }}>
           <div
             style={{
               background: "var(--surface)",
-              border: `1px solid ${validation.errors.length > 0 ? "var(--red)" : validation.warnings.length > 0 ? "var(--amber)" : "var(--green)"}`,
+              border: `1px solid ${lineLimitExceeded ? "var(--red)" : "var(--green)"}`,
               borderRadius: "10px",
               overflow: "hidden",
             }}
@@ -296,55 +280,72 @@ export function Step2Editor({ content, onChange, onNext, onBack }: Props) {
               }}
             >
               <span style={{ fontSize: "13px" }}>
-                {validation.errors.length > 0 ? "⚠" : validation.warnings.length > 0 ? "△" : "✓"}
+                {lineLimitExceeded ? "!" : "OK"}
               </span>
               <span
                 style={{
                   fontFamily: "var(--font-jetbrains-mono), monospace",
                   fontSize: "11px",
-                  color: validation.errors.length > 0 ? "var(--red)" : validation.warnings.length > 0 ? "var(--amber)" : "var(--green)",
+                  color: lineLimitExceeded ? "var(--red)" : "var(--green)",
                 }}
               >
-                {validation.errors.length > 0
-                  ? `${validation.errors.length} error${validation.errors.length > 1 ? "es" : ""}`
-                  : validation.warnings.length > 0
-                  ? `${validation.warnings.length} aviso${validation.warnings.length > 1 ? "s" : ""}`
-                  : "Listo para publicar"}
+                {lineLimitExceeded ? "Limite superado" : "Dentro del limite"}
               </span>
             </div>
 
             <div style={{ padding: "10px" }}>
-              {validation.errors.length === 0 && validation.warnings.length === 0 && (
-                <div style={{ fontSize: "12px", color: "var(--muted)", padding: "4px" }}>
-                  Todas las validaciones pasaron ✓
-                </div>
-              )}
-              {[...validation.errors, ...validation.warnings].map((issue, i) => (
+              <div
+                style={{
+                  fontSize: "12px",
+                  padding: "8px",
+                  borderRadius: "6px",
+                  background: lineLimitExceeded ? "rgba(232,80,58,0.08)" : "rgba(46,204,138,0.08)",
+                  borderLeft: `2px solid ${lineLimitExceeded ? "var(--red)" : "var(--green)"}`,
+                  color: "var(--muted)",
+                  lineHeight: 1.45,
+                }}
+              >
                 <div
-                  key={i}
                   style={{
-                    fontSize: "11px",
-                    padding: "6px 8px",
+                    fontFamily: "var(--font-jetbrains-mono), monospace",
+                    fontSize: "9px",
+                    color: lineLimitExceeded ? "var(--red)" : "var(--green)",
                     marginBottom: "4px",
-                    borderRadius: "6px",
-                    background: issue.severity === "error" ? "rgba(232,80,58,0.08)" : "rgba(232,139,58,0.08)",
-                    borderLeft: `2px solid ${issue.severity === "error" ? "var(--red)" : "var(--amber)"}`,
-                    color: "var(--muted)",
-                    lineHeight: 1.4,
                   }}
                 >
-                  <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "9px", color: issue.severity === "error" ? "var(--red)" : "var(--amber)", marginBottom: "2px" }}>
-                    {issue.field}
-                  </div>
-                  {issue.message}
+                  lineas
                 </div>
-              ))}
+                {lineCount} de {MAX_SKILL_LINES} lineas permitidas.
+                {lineLimitExceeded && " Reduzca el contenido para continuar."}
+              </div>
+
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: "8px",
+                  marginTop: "12px",
+                  fontSize: "12px",
+                  color: "var(--text)",
+                  lineHeight: 1.45,
+                  cursor: lineLimitExceeded ? "not-allowed" : "pointer",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={acceptedResponsibility}
+                  disabled={lineLimitExceeded}
+                  onChange={(event) => setAcceptedResponsibility(event.target.checked)}
+                  style={{ marginTop: "2px", accentColor: "var(--accent)" }}
+                />
+                <span>Acepto continuar con la publicacion</span>
+              </label>
             </div>
           </div>
 
           {/* Char count */}
           <div style={{ marginTop: "10px", fontSize: "11px", color: "var(--faint)", textAlign: "right", fontFamily: "var(--font-jetbrains-mono), monospace" }}>
-            {content.length} chars · {content.split("\n").length} líneas
+            {content.length} chars · {lineCount} lineas
           </div>
         </div>
       </div>
@@ -377,7 +378,7 @@ export function Step2Editor({ content, onChange, onNext, onBack }: Props) {
         </button>
         <button
           onClick={onNext}
-          disabled={!validation.valid}
+          disabled={!canContinue}
           style={{
             fontFamily: "var(--font-geist), sans-serif",
             fontSize: "14px",
@@ -385,14 +386,18 @@ export function Step2Editor({ content, onChange, onNext, onBack }: Props) {
             padding: "11px 20px",
             borderRadius: "8px",
             border: "none",
-            background: validation.valid ? "var(--accent)" : "var(--faint)",
-            color: validation.valid ? "#fff" : "var(--muted)",
-            cursor: validation.valid ? "pointer" : "not-allowed",
+            background: canContinue ? "var(--accent)" : "var(--faint)",
+            color: canContinue ? "#fff" : "var(--muted)",
+            cursor: canContinue ? "pointer" : "not-allowed",
           }}
         >
-          Siguiente → Revisión
+          Siguiente → Requisitos
         </button>
       </div>
     </div>
   );
+}
+
+function countLines(text: string) {
+  return text.length === 0 ? 0 : text.split("\n").length;
 }
