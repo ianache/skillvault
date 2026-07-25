@@ -40,7 +40,8 @@ function parseFiles(value: unknown): ReviewFileInput[] | null | undefined {
 const MAX_SKILL_LINES = 300;
 
 function countLines(value: string): number {
-  return value.split(/\r\n|\r|\n/).length;
+  const normalized = value.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+  return normalized.endsWith("\n") ? normalized.slice(0, -1).split("\n").length : normalized.split("\n").length;
 }
 
 export async function skillSubmissionBody(

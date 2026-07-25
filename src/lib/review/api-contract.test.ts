@@ -68,6 +68,7 @@ const relaxedRawContent = `# Draft Skill
 This draft intentionally omits strict frontmatter metadata and required body sections.`;
 
 const overLineLimitRawContent = Array.from({ length: 301 }, (_, index) => `line ${index + 1}`).join("\n");
+const maxLineLimitWithTerminalNewlineRawContent = `${Array.from({ length: 300 }, (_, index) => `line ${index + 1}`).join("\n")}\n`;
 
 const updatedRawContent = validRawContent.replace("Follow these instructions.", "Follow the updated instructions.");
 
@@ -209,6 +210,38 @@ test("POST /api/skills rejects submissions over 300 lines", async () => {
   assert.equal(response.status, 400);
   assert.deepEqual(await response.json(), { error: "Maximo 300 lineas" });
   assert.equal(called, false);
+});
+
+test("POST /api/skills accepts 300 content lines with a final newline", async () => {
+  let createInput: unknown;
+  const { POST } = createSkillHandlers({
+    getSession: async () => authorSession as never,
+    database,
+    create: async (input) => {
+      createInput = input;
+      return reviewRequest({
+        slug: "draft-skill",
+        name: "draft-skill",
+        rawContent: maxLineLimitWithTerminalNewlineRawContent,
+      });
+    },
+  });
+
+  const response = await POST(new NextRequest("http://test/api/skills", {
+    method: "POST",
+    body: JSON.stringify({
+      rawContent: maxLineLimitWithTerminalNewlineRawContent,
+      files: [],
+      acceptedResponsibility: true,
+    }),
+  }));
+
+  assert.equal(response.status, 201);
+  assert.deepEqual(createInput, {
+    rawContent: maxLineLimitWithTerminalNewlineRawContent,
+    files: [],
+    acceptedResponsibility: true,
+  });
 });
 
 test("POST /api/skills/:slug/files is disabled while files are reviewed", async () => {

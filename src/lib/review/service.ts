@@ -83,7 +83,8 @@ function toComment(row: Record<string, unknown>): ReviewComment {
 }
 
 function countLines(value: string): number {
-  return value.split(/\r\n|\r|\n/).length;
+  const normalized = value.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+  return normalized.endsWith("\n") ? normalized.slice(0, -1).split("\n").length : normalized.split("\n").length;
 }
 
 function slugifyDraftName(value: string): string {
@@ -151,7 +152,7 @@ function relaxedSubmission(rawContent: string, files: ReviewFileInput[] = []) {
     : null;
   const name = validName ?? slugifyDraftName(firstHeading(parsed.content) ?? "");
   const description = typeof data.description === "string"
-    && data.description.trim().length > 0
+    && data.description.length >= 20
     && data.description.length <= 280
     ? data.description
     : DEFAULT_RELAXED_DESCRIPTION;

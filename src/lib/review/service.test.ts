@@ -41,6 +41,14 @@ const relaxedRawContent = `# Draft Skill
 This draft intentionally omits strict frontmatter metadata and required body sections.`;
 
 const overLineLimitRawContent = Array.from({ length: 301 }, (_, index) => `line ${index + 1}`).join("\n");
+const maxLineLimitWithTerminalNewlineRawContent = `${Array.from({ length: 300 }, (_, index) => `line ${index + 1}`).join("\n")}\n`;
+const shortDescriptionRawContent = `---
+name: short-desc-skill
+description: Too short.
+---
+# Short Description Skill
+
+Draft body.`;
 
 const authorActor: ReviewActor = { id: "author-1", handle: "author", roles: ["author"] };
 const reviewerActor: ReviewActor = { id: "reviewer-1", handle: "reviewer", roles: ["reviewer"] };
@@ -226,6 +234,36 @@ test("createReviewRequest rejects relaxed drafts over 300 lines", async () => {
     ),
     /Maximo 300 lineas/
   );
+});
+
+test("createReviewRequest accepts 300 content lines with a final newline", async () => {
+  await createReviewRequest(
+    { rawContent: maxLineLimitWithTerminalNewlineRawContent, files: [], acceptedResponsibility: true },
+    authorActor,
+    createFakeClient([], {
+      slug: "draft-skill",
+      name: "draft-skill",
+      raw_content: maxLineLimitWithTerminalNewlineRawContent,
+    })
+  );
+});
+
+test("createReviewRequest falls back to default description for short frontmatter descriptions", async () => {
+  const fakeClient = createFakeClient([], {
+    slug: "short-desc-skill",
+    name: "short-desc-skill",
+    description: "Skill enviado a revision sin descripcion validada.",
+    raw_content: shortDescriptionRawContent,
+  });
+
+  await createReviewRequest(
+    { rawContent: shortDescriptionRawContent, files: [], acceptedResponsibility: true },
+    authorActor,
+    fakeClient
+  );
+
+  assert.equal(fakeClient.insertedReviewRequest?.slug, "short-desc-skill");
+  assert.equal(fakeClient.insertedReviewRequest?.description, "Skill enviado a revision sin descripcion validada.");
 });
 
 test("approval still rejects malformed relaxed draft content", async () => {
