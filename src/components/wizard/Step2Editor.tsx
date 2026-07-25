@@ -8,11 +8,12 @@ interface Props {
   onChange: (content: string) => void;
   onNext: () => void;
   onBack: () => void;
+  onAcceptanceChange?: (accepted: boolean) => void;
 }
 
 const MAX_SKILL_LINES = 300;
 
-export function Step2Editor({ content, onChange, onNext, onBack }: Props) {
+export function Step2Editor({ content, onChange, onNext, onBack, onAcceptanceChange }: Props) {
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<unknown>(null);
   const [lineCount, setLineCount] = useState(() => countLines(content));
@@ -146,6 +147,11 @@ export function Step2Editor({ content, onChange, onNext, onBack }: Props) {
   const { fm, body } = renderPreview(content);
   const lineLimitExceeded = lineCount > MAX_SKILL_LINES;
   const canContinue = !lineLimitExceeded && acceptedResponsibility;
+
+  function handleAcceptanceChange(nextAccepted: boolean) {
+    setAcceptedResponsibility(nextAccepted);
+    onAcceptanceChange?.(nextAccepted);
+  }
 
   return (
     <div>
@@ -335,7 +341,7 @@ export function Step2Editor({ content, onChange, onNext, onBack }: Props) {
                   type="checkbox"
                   checked={acceptedResponsibility}
                   disabled={lineLimitExceeded}
-                  onChange={(event) => setAcceptedResponsibility(event.target.checked)}
+                  onChange={(event) => handleAcceptanceChange(event.target.checked)}
                   style={{ marginTop: "2px", accentColor: "var(--accent)" }}
                 />
                 <span>Acepto continuar con la publicacion</span>

@@ -155,3 +155,22 @@ test("Step2 editor only gates continuation by line count and responsibility acce
   assert.doesNotMatch(editorSource, /validateSkillFrontmatter|validateBodySections|setValidation/);
 });
 
+test("publish wizard forwards responsibility acceptance to final submission", async () => {
+  const [editorSource, reviewSource, pageSource] = await Promise.all([
+    source("../../components/wizard/Step2Editor.tsx"),
+    source("../../components/wizard/Step3Review.tsx"),
+    source("../../app/publish/page.tsx"),
+  ]);
+
+  assert.match(editorSource, /onAcceptanceChange\?:\s*\(\s*accepted:\s*boolean\s*\)\s*=>\s*void/);
+  assert.match(editorSource, /onAcceptanceChange\?\.\(\s*nextAccepted\s*\)/);
+
+  assert.match(pageSource, /const\s+\[\s*acceptedResponsibility\s*,\s*setAcceptedResponsibility\s*\]\s*=\s*useState\(\s*false\s*\)/);
+  assert.match(pageSource, /JSON\.stringify\(\s*\{[\s\S]*rawContent:\s*content[\s\S]*files:\s*attachedFiles[\s\S]*acceptedResponsibility[\s\S]*\}\s*\)/);
+  assert.match(pageSource, /onAcceptanceChange=\{setAcceptedResponsibility\}/);
+  assert.match(pageSource, /acceptedResponsibility=\{acceptedResponsibility\}/);
+
+  assert.match(reviewSource, /acceptedResponsibility:\s*boolean/);
+  assert.match(reviewSource, /disabled=\{publishing\s*\|\|\s*!acceptedResponsibility\}/);
+  assert.match(reviewSource, /cursor:\s*publishing\s*\|\|\s*!acceptedResponsibility\s*\?\s*"not-allowed"\s*:\s*"pointer"/);
+});

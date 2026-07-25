@@ -51,15 +51,18 @@ export default function PublishPage() {
   const [meta, setMeta] = useState<MetadataFields>(DEFAULT_META);
   const [content, setContent] = useState(getSkillTemplate());
   const [attachedFiles, setAttachedFiles] = useState<LoadedFile[]>([]);
+  const [acceptedResponsibility, setAcceptedResponsibility] = useState(false);
 
   function handleLoaded(skill: import("@/components/wizard/LocalSkillLoader").LoadedSkill) {
     setContent(skill.skillMd);
     setAttachedFiles(skill.files);
+    setAcceptedResponsibility(false);
     setStep(2); // Go straight to editor since SKILL.md is already loaded
   }
 
   function handleMetaNext() {
     setContent(buildContent(meta));
+    setAcceptedResponsibility(false);
     setStep(2);
   }
 
@@ -68,7 +71,7 @@ export default function PublishPage() {
       const res = await fetch("/api/skills", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ rawContent: content, files: attachedFiles }),
+        body: JSON.stringify({ rawContent: content, files: attachedFiles, acceptedResponsibility }),
       });
       const data = await res.json();
       if (!res.ok) return { ok: false, error: data.error ?? "Error del servidor" };
@@ -155,6 +158,7 @@ export default function PublishPage() {
           <Step2Editor
             content={content}
             onChange={setContent}
+            onAcceptanceChange={setAcceptedResponsibility}
             onNext={() => setStep(3)}
             onBack={() => setStep(attachedFiles.length > 0 ? 0 : 1)}
           />
@@ -175,6 +179,7 @@ export default function PublishPage() {
         <Step3Review
           content={content}
           attachedFiles={attachedFiles}
+          acceptedResponsibility={acceptedResponsibility}
           onBack={() => setStep(3)}
           onPublish={handlePublish}
         />

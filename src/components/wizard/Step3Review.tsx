@@ -13,11 +13,12 @@ interface AttachedFile {
 interface Props {
   content: string;
   attachedFiles?: AttachedFile[];
+  acceptedResponsibility: boolean;
   onBack: () => void;
   onPublish: () => Promise<{ ok: boolean; slug?: string; error?: string }>;
 }
 
-export function Step3Review({ content, attachedFiles = [], onBack, onPublish }: Props) {
+export function Step3Review({ content, attachedFiles = [], acceptedResponsibility, onBack, onPublish }: Props) {
   const [publishing, setPublishing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -310,7 +311,7 @@ export function Step3Review({ content, attachedFiles = [], onBack, onPublish }: 
         </button>
         <button
           onClick={handlePublish}
-          disabled={publishing}
+          disabled={publishing || !acceptedResponsibility}
           style={{
             fontFamily: "var(--font-geist), sans-serif",
             fontSize: "14px",
@@ -318,9 +319,9 @@ export function Step3Review({ content, attachedFiles = [], onBack, onPublish }: 
             padding: "12px 28px",
             borderRadius: "8px",
             border: "none",
-            background: publishing ? "var(--faint)" : "var(--accent)",
+            background: publishing || !acceptedResponsibility ? "var(--faint)" : "var(--accent)",
             color: "#fff",
-            cursor: publishing ? "not-allowed" : "pointer",
+            cursor: publishing || !acceptedResponsibility ? "not-allowed" : "pointer",
             display: "flex",
             alignItems: "center",
             gap: "8px",
