@@ -112,7 +112,7 @@ export function createSkillHandlers(dependencies: Partial<RouteDependencies> = {
                FROM skills s
                LEFT JOIN skill_ratings r ON r.skill_id = s.id AND r.user_id = ?
                WHERE s.status = 'published'`;
-    const args: (string | number)[] = [userId ?? "__no_user__"];
+    const args: (string | number | null)[] = [userId];
 
     if (q) {
       sql += ` AND (s.name LIKE ? OR s.description LIKE ? OR s.triggers LIKE ?)`;

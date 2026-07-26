@@ -29,7 +29,7 @@ async function getPublishedSkills(userId: string | null): Promise<SkillRow[]> {
           LEFT JOIN skill_ratings r ON r.skill_id = s.id AND r.user_id = ?
           WHERE s.status = 'published'
           ORDER BY s.install_count DESC`,
-    args: [userId ?? "__no_user__"],
+    args: [userId],
   });
   return result.rows.map((r) => {
     const row = r as Record<string, unknown>;
