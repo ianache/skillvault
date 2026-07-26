@@ -3,6 +3,7 @@ import { client } from "@/lib/db";
 import { CATEGORY_META, SkillRow, SkillType } from "@/lib/types";
 import type { Metadata } from "next";
 import { FileTree } from "@/components/FileTree";
+import { PageHeader } from "@/components/PageHeader";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -88,66 +89,41 @@ export default async function SkillDetailPage({ params }: PageProps) {
       </div>
 
       <div style={{ maxWidth: "860px", margin: "0 auto", padding: "32px 24px" }}>
-        {/* Header */}
-        <div
-          style={{
-            background: "var(--surface)",
-            border: "1px solid var(--border)",
-            borderRadius: "6px",
-            padding: "24px",
-            marginBottom: "20px",
-            borderTop: `3px solid ${meta.color}`,
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px", flexWrap: "wrap" }}>
-                <h1
-                  style={{
-                    fontFamily: "var(--font-jetbrains-mono), monospace",
-                    fontSize: "22px",
-                    fontWeight: 700,
-                    color: "var(--text)",
-                    margin: 0,
-                  }}
-                >
-                  {skill.name}
-                </h1>
-                <span
-                  style={{
-                    fontFamily: "var(--font-jetbrains-mono), monospace",
-                    fontSize: "12px",
-                    color: "var(--muted)",
-                    padding: "2px 8px",
-                    border: "1px solid var(--border)",
-                    borderRadius: "3px",
-                  }}
-                >
-                  v{skill.version}
-                </span>
-              </div>
-              <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
-                <span
-                  style={{
-                    fontFamily: "var(--font-jetbrains-mono), monospace",
-                    fontSize: "9px",
-                    letterSpacing: "0.8px",
-                    textTransform: "uppercase",
-                    padding: "2px 7px",
-                    borderRadius: "3px",
-                    border: `1px solid ${meta.color}`,
-                    color: meta.color,
-                    background: `${meta.color}18`,
-                  }}
-                >
-                  {meta.icon} {meta.label}
-                </span>
-                {skill.authorHandle && (
-                  <span style={{ fontSize: "12px", color: "var(--muted)" }}>{skill.authorHandle}</span>
-                )}
-              </div>
-            </div>
-            <div style={{ display: "flex", gap: "16px" }}>
+        <PageHeader
+          title={skill.name}
+          description={skill.description}
+          actions={
+            <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
+              <span
+                style={{
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                  fontSize: "12px",
+                  color: "var(--muted)",
+                  padding: "2px 8px",
+                  border: "1px solid var(--border)",
+                  borderRadius: "3px",
+                }}
+              >
+                v{skill.version}
+              </span>
+              <span
+                style={{
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                  fontSize: "9px",
+                  letterSpacing: "0.8px",
+                  textTransform: "uppercase",
+                  padding: "2px 7px",
+                  borderRadius: "3px",
+                  border: `1px solid ${meta.color}`,
+                  color: meta.color,
+                  background: `${meta.color}18`,
+                }}
+              >
+                {meta.icon} {meta.label}
+              </span>
+              {skill.authorHandle && (
+                <span style={{ fontSize: "12px", color: "var(--muted)" }}>{skill.authorHandle}</span>
+              )}
               <StatBox label="instalaciones" value={skill.installCount.toLocaleString()} />
               {skill.publishedAt && !isNaN(skill.publishedAt) && (() => {
                 const d = new Date(skill.publishedAt! * 1000);
@@ -156,12 +132,8 @@ export default async function SkillDetailPage({ params }: PageProps) {
                 );
               })()}
             </div>
-          </div>
-
-          <p style={{ fontSize: "14px", color: "var(--muted)", lineHeight: 1.6, marginTop: "16px", marginBottom: 0 }}>
-            {skill.description}
-          </p>
-        </div>
+          }
+        />
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: "16px" }}>
           {/* Left column */}

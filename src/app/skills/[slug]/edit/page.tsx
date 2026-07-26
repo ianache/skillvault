@@ -1,8 +1,8 @@
 import { client } from "@/lib/db";
-import { AppHeader } from "@/components/AppHeader";
 import { notFound } from "next/navigation";
 import { SkillEditor } from "@/components/dashboard/SkillEditor";
 import { VersionHistory } from "@/components/dashboard/VersionHistory";
+import { PageHeader } from "@/components/PageHeader";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -94,7 +94,6 @@ export default async function EditPage({ params }: Props) {
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
-      <AppHeader />
       <main style={{ maxWidth: "1000px", margin: "0 auto", padding: "28px 24px" }}>
 
         {/* Breadcrumb */}
@@ -106,28 +105,11 @@ export default async function EditPage({ params }: Props) {
           <span style={{ color: "var(--text)" }}>Editar</span>
         </nav>
 
-        {/* Header */}
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "24px" }}>
-          <div>
-            <h1
-              style={{
-                fontFamily: "var(--font-geist), sans-serif",
-                fontSize: "22px",
-                fontWeight: 700,
-                color: "var(--text)",
-                margin: 0,
-              }}
-            >
-              Editar skill
-            </h1>
-            <div style={{ display: "flex", gap: "12px", marginTop: "6px", alignItems: "center" }}>
-              <span
-                style={{
-                  fontFamily: "var(--font-jetbrains-mono), monospace",
-                  fontSize: "13px",
-                  color: "var(--accent)",
-                }}
-              >
+        <PageHeader
+          title="Editar skill"
+          description={
+            <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+              <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "13px", color: "var(--accent)" }}>
                 {skill.name}
               </span>
               <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "11px", color: "var(--faint)" }}>
@@ -137,21 +119,23 @@ export default async function EditPage({ params }: Props) {
                 {skill.installCount} installs
               </span>
             </div>
-          </div>
-          <Link
-            href={`/skills/${skill.slug}`}
-            style={{
-              fontSize: "12px",
-              color: "var(--muted)",
-              textDecoration: "none",
-              padding: "6px 12px",
-              border: "1px solid var(--border)",
-              borderRadius: "4px",
-            }}
-          >
-            ↗ Ver en catálogo
-          </Link>
-        </div>
+          }
+          actions={
+            <Link
+              href={`/skills/${skill.slug}`}
+              style={{
+                fontSize: "12px",
+                color: "var(--muted)",
+                textDecoration: "none",
+                padding: "6px 12px",
+                border: "1px solid var(--border)",
+                borderRadius: "4px",
+              }}
+            >
+              ↗ Ver en catálogo
+            </Link>
+          }
+        />
 
         <SkillEditor slug={skill.slug} initialContent={skill.rawContent} />
         <VersionHistory slug={skill.slug} />
