@@ -65,6 +65,7 @@ spec:
               node_modules/.bin/tsx src/lib/db/migrate-mysql-init.ts
               node_modules/.bin/tsx src/lib/db/migrate-review-workflow-mysql.ts
               node_modules/.bin/tsx src/lib/db/migrate-users-mysql.ts
+              node_modules/.bin/tsx src/lib/db/migrate-skill-ratings-mysql.ts
           env:
             - name: DATABASE_URL
               valueFrom:

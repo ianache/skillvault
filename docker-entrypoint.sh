@@ -8,6 +8,7 @@ MYSQL_MIGRATIONS="
 src/lib/db/migrate-mysql-init.ts
 src/lib/db/migrate-review-workflow-mysql.ts
 src/lib/db/migrate-users-mysql.ts
+src/lib/db/migrate-skill-ratings-mysql.ts
 "
 
 run_mysql_migrations() {
