@@ -1,7 +1,7 @@
 # ── Imagen de la aplicación ────────────────────────────────────────────────────
 image:
   repository: comsatel/skillvault #ghcr.io/ianache/skillvault
-  tag: "0.3.4"
+  tag: "0.4.0"
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
