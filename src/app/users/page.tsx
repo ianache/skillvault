@@ -29,7 +29,11 @@ export default async function UsersPage() {
     <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
       <PageHeader
         title="Gestión de roles"
-        description="Los usuarios provienen de Keycloak y ya existen en el sistema. Aquí solo se asignan o revocan sus roles dentro de SkillVault."
+        description={
+          <span style={{ display: "block", maxWidth: "62ch" }}>
+            Los usuarios provienen de Keycloak y ya existen en el sistema. Aquí solo se asignan o revocan sus roles dentro de SkillVault.
+          </span>
+        }
       />
       <div style={{ padding: "32px 24px" }}>
         <UsersManager initialUsers={users} />

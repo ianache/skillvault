@@ -1,4 +1,4 @@
-interface PageHeaderProps {
+export interface PageHeaderProps {
   title: string;
   description?: React.ReactNode;
   actions?: React.ReactNode;
