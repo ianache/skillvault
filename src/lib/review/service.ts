@@ -381,7 +381,7 @@ export async function updateReviewRequest(
 ): Promise<ReviewRequest> {
   const request = await getRequestRow(id, client);
   assertCanEditRequest(actor, request);
-  const { frontmatter, files } = validateSubmission(input.rawContent, input.files);
+  const { frontmatter, files } = relaxedSubmission(input.rawContent, input.files);
 
   await client.execute({
     sql: `UPDATE skill_review_requests

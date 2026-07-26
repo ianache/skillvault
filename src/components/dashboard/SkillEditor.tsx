@@ -31,13 +31,30 @@ export function SkillEditor({ slug, initialContent }: Props) {
   const [dirty, setDirty] = useState(false);
 
   const validate = useCallback((text: string) => {
+    const lineCount = text.length === 0 ? 0 : text.split("\n").length;
+    const lineLimitExceeded = lineCount > 300;
+
+    if (lineLimitExceeded) {
+      setErrors([{ field: "lineas", message: "Máximo 300 líneas", severity: "error" }]);
+      setWarnings([]);
+      setValid(false);
+      return;
+    }
+
     try {
       const parsed = matter(text);
       const fmResult = validateSkillFrontmatter(parsed.data);
       const bodyResult = validateBodySections(parsed.content);
-      setErrors([...fmResult.errors, ...bodyResult.errors] as Issue[]);
-      setWarnings([...fmResult.warnings, ...bodyResult.warnings] as Issue[]);
-      setValid(fmResult.valid && bodyResult.errors.length === 0);
+      
+      const approvalIssues = [...fmResult.errors, ...bodyResult.errors].map((issue) => ({
+        ...issue,
+        severity: "warning" as const,
+        message: `${issue.message} (Requerido para aprobación)`,
+      }));
+
+      setErrors([]);
+      setWarnings([...approvalIssues, ...fmResult.warnings, ...bodyResult.warnings] as Issue[]);
+      setValid(true);
     } catch {
       setErrors([{ field: "frontmatter", message: "YAML inválido", severity: "error" }]);
       setWarnings([]);
