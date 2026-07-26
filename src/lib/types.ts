@@ -24,6 +24,9 @@ export interface SkillRow {
   configRequirements: Record<string, unknown>[];
   status: SkillStatus;
   installCount: number;
+  avgRating: number;
+  ratingCount: number;
+  userRating: number | null;
   createdAt: number;
   publishedAt: number | null;
 }

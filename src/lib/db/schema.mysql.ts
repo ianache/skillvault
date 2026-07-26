@@ -1,4 +1,4 @@
-import { mysqlTable, varchar, text, int, bigint } from "drizzle-orm/mysql-core";
+import { mysqlTable, varchar, text, int, bigint, double } from "drizzle-orm/mysql-core";
 import { sql } from "drizzle-orm";
 
 export const skills = mysqlTable("skills", {
@@ -19,6 +19,8 @@ export const skills = mysqlTable("skills", {
   rawContent: text("raw_content").notNull().default(""),
   status: varchar("status", { length: 20 }).notNull().default("published"),
   installCount: int("install_count").notNull().default(0),
+  avgRating: double("avg_rating").notNull().default(0),
+  ratingCount: int("rating_count").notNull().default(0),
   createdAt: bigint("created_at", { mode: "number" }).notNull().default(0),
   updatedAt: bigint("updated_at", { mode: "number" }).notNull().default(0),
   publishedAt: bigint("published_at", { mode: "number" }),
@@ -103,6 +105,15 @@ export const installs = mysqlTable("installs", {
   installedAt: bigint("installed_at", { mode: "number" }).notNull().default(0),
 });
 
+export const skillRatings = mysqlTable("skill_ratings", {
+  id: int("id").autoincrement().primaryKey(),
+  skillId: int("skill_id").notNull(),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  rating: int("rating").notNull(),
+  createdAt: bigint("created_at", { mode: "number" }).notNull().default(0),
+  updatedAt: bigint("updated_at", { mode: "number" }).notNull().default(0),
+});
+
 export const users = mysqlTable("users", {
   id: varchar("id", { length: 255 }).primaryKey(),
   username: varchar("username", { length: 255 }).notNull(),
@@ -119,3 +130,5 @@ export type Skill = typeof skills.$inferSelect;
 export type NewSkill = typeof skills.$inferInsert;
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
+export type SkillRating = typeof skillRatings.$inferSelect;
+export type NewSkillRating = typeof skillRatings.$inferInsert;

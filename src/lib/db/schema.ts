@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
 
 export const skills = sqliteTable("skills", {
@@ -18,6 +18,8 @@ export const skills = sqliteTable("skills", {
   rawContent: text("raw_content").notNull().default(""),
   status: text("status").notNull().default("published"),
   installCount: integer("install_count").notNull().default(0),
+  avgRating: real("avg_rating").notNull().default(0),
+  ratingCount: integer("rating_count").notNull().default(0),
   createdAt: integer("created_at").notNull().default(sql`(unixepoch())`),
   updatedAt: integer("updated_at").notNull().default(sql`(unixepoch())`),
   publishedAt: integer("published_at"),
@@ -102,6 +104,15 @@ export const installs = sqliteTable("installs", {
   installedAt: integer("installed_at").notNull().default(sql`(unixepoch())`),
 });
 
+export const skillRatings = sqliteTable("skill_ratings", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  skillId: integer("skill_id").notNull(),
+  userId: text("user_id").notNull(),
+  rating: integer("rating").notNull(),
+  createdAt: integer("created_at").notNull().default(sql`(unixepoch())`),
+  updatedAt: integer("updated_at").notNull().default(sql`(unixepoch())`),
+});
+
 export const users = sqliteTable("users", {
   id: text("id").primaryKey(), // Keycloak subject (sub)
   username: text("username").notNull(),
@@ -118,3 +129,5 @@ export type Skill = typeof skills.$inferSelect;
 export type NewSkill = typeof skills.$inferInsert;
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
+export type SkillRating = typeof skillRatings.$inferSelect;
+export type NewSkillRating = typeof skillRatings.$inferInsert;
