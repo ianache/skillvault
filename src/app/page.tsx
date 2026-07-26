@@ -1,4 +1,5 @@
 import { client } from "@/lib/db";
+import { auth } from "@/auth";
 import { CatalogClient } from "@/components/CatalogClient";
 import { AppHeader } from "@/components/AppHeader";
 import { PageHeader } from "@/components/PageHeader";
@@ -21,10 +22,15 @@ async function getCategories(): Promise<Category[]> {
   });
 }
 
-async function getPublishedSkills(): Promise<SkillRow[]> {
-  const result = await client.execute(
-    `SELECT * FROM skills WHERE status = 'published' ORDER BY install_count DESC`
-  );
+async function getPublishedSkills(userId: string | null): Promise<SkillRow[]> {
+  const result = await client.execute({
+    sql: `SELECT s.*, r.rating AS user_rating
+          FROM skills s
+          LEFT JOIN skill_ratings r ON r.skill_id = s.id AND r.user_id = ?
+          WHERE s.status = 'published'
+          ORDER BY s.install_count DESC`,
+    args: [userId ?? "__no_user__"],
+  });
   return result.rows.map((r) => {
     const row = r as Record<string, unknown>;
     return {
@@ -41,6 +47,9 @@ async function getPublishedSkills(): Promise<SkillRow[]> {
       configRequirements: JSON.parse(String(row.config_requirements ?? "[]")),
       status: String(row.status) as SkillRow["status"],
       installCount: Number(row.install_count),
+      avgRating: Number(row.avg_rating ?? 0),
+      ratingCount: Number(row.rating_count ?? 0),
+      userRating: row.user_rating != null ? Number(row.user_rating) : null,
       createdAt: Number(row.created_at),
       publishedAt: row.published_at ? Number(row.published_at) : null,
     };
@@ -53,7 +62,11 @@ interface HomeProps {
 
 export default async function HomePage({ searchParams }: HomeProps) {
   const { q, type } = await searchParams;
-  const [skills, categories] = await Promise.all([getPublishedSkills(), getCategories()]);
+  const session = await auth();
+  const [skills, categories] = await Promise.all([
+    getPublishedSkills(session?.user?.id ?? null),
+    getCategories(),
+  ]);
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)" }}>

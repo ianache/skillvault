@@ -1,6 +1,7 @@
 "use client";
 
 import { CATEGORY_META, SkillRow } from "@/lib/types";
+import { SkillRating } from "./SkillRating";
 
 interface Props {
   skill: SkillRow;
@@ -18,8 +19,16 @@ export function SkillCard({ skill, selected, onClick }: Props) {
   const stripeClass = `stripe-${skill.type}`;
 
   return (
-    <button
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick();
+        }
+      }}
       aria-pressed={selected}
       style={{
         background: selected ? "var(--raised)" : "var(--surface)",
@@ -31,6 +40,7 @@ export function SkillCard({ skill, selected, onClick }: Props) {
         width: "100%",
         transition: "border-color .12s, background .12s",
         display: "block",
+        boxSizing: "border-box",
       }}
       className={stripeClass}
       onMouseEnter={(e) => {
@@ -120,6 +130,14 @@ export function SkillCard({ skill, selected, onClick }: Props) {
         </div>
       )}
 
+      {/* Rating */}
+      <SkillRating
+        skillSlug={skill.slug}
+        avgRating={skill.avgRating}
+        ratingCount={skill.ratingCount}
+        userRating={skill.userRating}
+      />
+
       {/* Stats */}
       <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
         <span style={{ fontSize: "11px", color: "var(--faint)" }}>
@@ -146,6 +164,6 @@ export function SkillCard({ skill, selected, onClick }: Props) {
           </span>
         )}
       </div>
-    </button>
+    </div>
   );
 }

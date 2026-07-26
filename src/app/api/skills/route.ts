@@ -86,6 +86,9 @@ function parseSkill(row: Record<string, unknown>) {
     configRequirements: JSON.parse(row.config_requirements as string ?? "[]"),
     status: row.status,
     installCount: row.install_count,
+    avgRating: Number(row.avg_rating ?? 0),
+    ratingCount: Number(row.rating_count ?? 0),
+    userRating: row.user_rating != null ? Number(row.user_rating) : null,
     createdAt: row.created_at,
     publishedAt: row.published_at,
   };
@@ -102,24 +105,30 @@ export function createSkillHandlers(dependencies: Partial<RouteDependencies> = {
     const type = searchParams.get("type") ?? "";
     const sort = searchParams.get("sort") ?? "popular";
 
-    let sql = `SELECT * FROM skills WHERE status = 'published'`;
-    const args: (string | number)[] = [];
+    const session = await getSession();
+    const userId = session ? actorFromSession(session)?.id ?? null : null;
+
+    let sql = `SELECT s.*, r.rating AS user_rating
+               FROM skills s
+               LEFT JOIN skill_ratings r ON r.skill_id = s.id AND r.user_id = ?
+               WHERE s.status = 'published'`;
+    const args: (string | number)[] = [userId ?? "__no_user__"];
 
     if (q) {
-      sql += ` AND (name LIKE ? OR description LIKE ? OR triggers LIKE ?)`;
+      sql += ` AND (s.name LIKE ? OR s.description LIKE ? OR s.triggers LIKE ?)`;
       args.push(`%${q}%`, `%${q}%`, `%${q}%`);
     }
     if (type) {
-      sql += ` AND type = ?`;
+      sql += ` AND s.type = ?`;
       args.push(type);
     }
 
     const orderMap: Record<string, string> = {
-      popular: "install_count DESC",
-      recent: "created_at DESC",
-      az: "name ASC",
+      popular: "s.install_count DESC",
+      recent: "s.created_at DESC",
+      az: "s.name ASC",
     };
-    sql += ` ORDER BY ${orderMap[sort] ?? "install_count DESC"}`;
+    sql += ` ORDER BY ${orderMap[sort] ?? "s.install_count DESC"}`;
 
     const result = await database.execute({ sql, args });
     const skills = result.rows.map((r) => parseSkill(r as Record<string, unknown>));
