@@ -31,7 +31,7 @@ function daysAgoLabel(daysAgo: number): string {
 
 async function getStats() {
   try {
-    const [skills, installs, authors, topInstalls, topContributors, topCategories, topRecent] = await Promise.all([
+    const [skills, installs, authors, topInstalls, topContributors, topCategories, topRecent, topRatings] = await Promise.all([
       client.execute({ sql: "SELECT COUNT(*) as n FROM skills WHERE status = 'published'" }),
       client.execute({ sql: "SELECT COALESCE(SUM(install_count), 0) as n FROM skills WHERE status = 'published'" }),
       client.execute({ sql: "SELECT COUNT(DISTINCT author_handle) as n FROM skills WHERE author_handle IS NOT NULL" }),
@@ -43,6 +43,12 @@ async function getStats() {
               GROUP BY c.slug, c.label ORDER BY n DESC LIMIT 5`,
       }),
       client.execute({ sql: "SELECT name, created_at FROM skills WHERE status = 'published' ORDER BY created_at DESC LIMIT 5" }),
+      client.execute({
+        sql: `SELECT name, avg_rating, rating_count FROM skills
+              WHERE status = 'published' AND rating_count >= 1
+              ORDER BY avg_rating DESC, rating_count DESC
+              LIMIT 5`,
+      }),
     ]);
     const row = (r: { rows: Record<string, unknown>[] }) => Number(r.rows[0]?.n ?? 0);
 
@@ -79,9 +85,14 @@ async function getStats() {
         value: daysAgoLabel(r.daysAgo),
         raw: maxDaysAgo - r.daysAgo + 1,
       })),
+      topRatings: topRatings.rows.map((r) => ({
+        name: String(r.name),
+        value: `${Number(r.avg_rating).toFixed(1)} ★ · ${r.rating_count}`,
+        raw: Number(r.avg_rating),
+      })),
     };
   } catch {
-    return { published: 0, installs: 0, contributors: 0, topInstalls: [], topContributors: [], topCategories: [], topRecent: [] };
+    return { published: 0, installs: 0, contributors: 0, topInstalls: [], topContributors: [], topCategories: [], topRecent: [], topRatings: [] };
   }
 }
 
@@ -110,6 +121,7 @@ export default async function SignInPage({
   const topLists = [
     { title: "Top 5 Skills · instalaciones", barColor: "var(--green)", rows: rankRows(stats.topInstalls) },
     { title: "Top 5 Skills · recientes", barColor: "var(--accent)", rows: rankRows(stats.topRecent) },
+    { title: "Top 5 Skills · Reviews", barColor: "var(--amber)", rows: rankRows(stats.topRatings) },
     { title: "Top 5 Contribuyentes", barColor: "var(--accent-indigo)", rows: rankRows(stats.topContributors) },
     { title: "Top 5 Categorías", barColor: "#c46a3f", rows: rankRows(stats.topCategories) },
   ].filter((l) => l.rows.length > 0);
