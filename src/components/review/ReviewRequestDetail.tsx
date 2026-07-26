@@ -20,11 +20,13 @@ export function ReviewRequestDetail({ request: initialRequest, viewerMode }: Pro
   const comments = [...request.comments].sort((a, b) => a.createdAt - b.createdAt);
   return <div>
     <div style={{ marginBottom: "12px" }}><Link href={viewerMode === "author" ? "/proposals" : "/review"} style={{ fontSize: "12px", color: "var(--muted)", textDecoration: "none" }}>Volver a solicitudes</Link></div>
-    <PageHeader
-      title={request.name}
-      description={`${request.slug} · v${request.version}`}
-      actions={<span style={{ fontSize: "12px", color: "var(--amber)", border: "1px solid var(--amber)", borderRadius: "3px", padding: "4px 7px" }}>{request.status.replaceAll("_", " ")}</span>}
-    />
+    <div style={{ marginBottom: "20px" }}>
+      <PageHeader
+        title={request.name}
+        description={`${request.slug} · v${request.version}`}
+        actions={<span style={{ fontSize: "12px", color: "var(--amber)", border: "1px solid var(--amber)", borderRadius: "3px", padding: "4px 7px" }}>{request.status.replaceAll("_", " ")}</span>}
+      />
+    </div>
     {request.generalComment && <aside style={feedbackStyle}><strong>Comentario general del revisor</strong><p>{request.generalComment}</p></aside>}
     {viewerMode === "reviewer" && request.status === "pending" && <div style={actionPanelStyle}><textarea value={decisionComment} onChange={(event) => setDecisionComment(event.target.value)} rows={2} placeholder="Comentario general (requerido para rechazar o pedir cambios)" style={textareaStyle} /><div style={{ display: "flex", gap: "8px", marginTop: "8px" }}><button disabled={busy} onClick={() => decide("approve")} style={approveStyle}>Aprobar</button><button disabled={busy} onClick={() => decide("request_changes")} style={neutralStyle}>Pedir cambios</button><button disabled={busy} onClick={() => decide("reject")} style={rejectStyle}>Rechazar</button></div></div>}
     {canResubmit && <div style={actionPanelStyle}><div style={{ fontSize: "13px", color: "var(--muted)", marginBottom: "8px" }}>Actualiza SKILL.md y los adjuntos antes de reenviar la propuesta.</div><button disabled={busy} onClick={resubmit} style={approveStyle}>Reenviar a revision</button></div>}

@@ -105,37 +105,39 @@ export default async function EditPage({ params }: Props) {
           <span style={{ color: "var(--text)" }}>Editar</span>
         </nav>
 
-        <PageHeader
-          title="Editar skill"
-          description={
-            <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-              <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "13px", color: "var(--accent)" }}>
-                {skill.name}
-              </span>
-              <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "11px", color: "var(--faint)" }}>
-                v{skill.version}
-              </span>
-              <span style={{ fontSize: "11px", color: "var(--faint)" }}>
-                {skill.installCount} installs
-              </span>
-            </div>
-          }
-          actions={
-            <Link
-              href={`/skills/${skill.slug}`}
-              style={{
-                fontSize: "12px",
-                color: "var(--muted)",
-                textDecoration: "none",
-                padding: "6px 12px",
-                border: "1px solid var(--border)",
-                borderRadius: "4px",
-              }}
-            >
-              ↗ Ver en catálogo
-            </Link>
-          }
-        />
+        <div style={{ marginBottom: "24px" }}>
+          <PageHeader
+            title="Editar skill"
+            description={
+              <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "13px", color: "var(--accent)" }}>
+                  {skill.name}
+                </span>
+                <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "11px", color: "var(--faint)" }}>
+                  v{skill.version}
+                </span>
+                <span style={{ fontSize: "11px", color: "var(--faint)" }}>
+                  {skill.installCount} installs
+                </span>
+              </div>
+            }
+            actions={
+              <Link
+                href={`/skills/${skill.slug}`}
+                style={{
+                  fontSize: "12px",
+                  color: "var(--muted)",
+                  textDecoration: "none",
+                  padding: "6px 12px",
+                  border: "1px solid var(--border)",
+                  borderRadius: "4px",
+                }}
+              >
+                ↗ Ver en catálogo
+              </Link>
+            }
+          />
+        </div>
 
         <SkillEditor slug={skill.slug} initialContent={skill.rawContent} />
         <VersionHistory slug={skill.slug} />

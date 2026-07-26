@@ -89,51 +89,53 @@ export default async function SkillDetailPage({ params }: PageProps) {
       </div>
 
       <div style={{ maxWidth: "860px", margin: "0 auto", padding: "32px 24px" }}>
-        <PageHeader
-          title={skill.name}
-          description={skill.description}
-          actions={
-            <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
-              <span
-                style={{
-                  fontFamily: "var(--font-jetbrains-mono), monospace",
-                  fontSize: "12px",
-                  color: "var(--muted)",
-                  padding: "2px 8px",
-                  border: "1px solid var(--border)",
-                  borderRadius: "3px",
-                }}
-              >
-                v{skill.version}
-              </span>
-              <span
-                style={{
-                  fontFamily: "var(--font-jetbrains-mono), monospace",
-                  fontSize: "9px",
-                  letterSpacing: "0.8px",
-                  textTransform: "uppercase",
-                  padding: "2px 7px",
-                  borderRadius: "3px",
-                  border: `1px solid ${meta.color}`,
-                  color: meta.color,
-                  background: `${meta.color}18`,
-                }}
-              >
-                {meta.icon} {meta.label}
-              </span>
-              {skill.authorHandle && (
-                <span style={{ fontSize: "12px", color: "var(--muted)" }}>{skill.authorHandle}</span>
-              )}
-              <StatBox label="instalaciones" value={skill.installCount.toLocaleString()} />
-              {skill.publishedAt && !isNaN(skill.publishedAt) && (() => {
-                const d = new Date(skill.publishedAt! * 1000);
-                return isNaN(d.getTime()) ? null : (
-                  <StatBox label="publicado" value={d.toLocaleDateString("es-ES", { month: "short", year: "numeric" })} />
-                );
-              })()}
-            </div>
-          }
-        />
+        <div style={{ marginBottom: "20px" }}>
+          <PageHeader
+            title={skill.name}
+            description={skill.description}
+            actions={
+              <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
+                <span
+                  style={{
+                    fontFamily: "var(--font-jetbrains-mono), monospace",
+                    fontSize: "12px",
+                    color: "var(--muted)",
+                    padding: "2px 8px",
+                    border: "1px solid var(--border)",
+                    borderRadius: "3px",
+                  }}
+                >
+                  v{skill.version}
+                </span>
+                <span
+                  style={{
+                    fontFamily: "var(--font-jetbrains-mono), monospace",
+                    fontSize: "9px",
+                    letterSpacing: "0.8px",
+                    textTransform: "uppercase",
+                    padding: "2px 7px",
+                    borderRadius: "3px",
+                    border: `1px solid ${meta.color}`,
+                    color: meta.color,
+                    background: `${meta.color}18`,
+                  }}
+                >
+                  {meta.icon} {meta.label}
+                </span>
+                {skill.authorHandle && (
+                  <span style={{ fontSize: "12px", color: "var(--muted)" }}>{skill.authorHandle}</span>
+                )}
+                <StatBox label="instalaciones" value={skill.installCount.toLocaleString()} />
+                {skill.publishedAt && !isNaN(skill.publishedAt) && (() => {
+                  const d = new Date(skill.publishedAt! * 1000);
+                  return isNaN(d.getTime()) ? null : (
+                    <StatBox label="publicado" value={d.toLocaleDateString("es-ES", { month: "short", year: "numeric" })} />
+                  );
+                })()}
+              </div>
+            }
+          />
+        </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: "16px" }}>
           {/* Left column */}
