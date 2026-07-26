@@ -1,6 +1,6 @@
 image:
   repository: comsatel/skillvault
-  tag: "0.3.2"
+  tag: "0.3.3"
   pullPolicy: Always
 
 replicaCount: 1
