@@ -1,5 +1,5 @@
 import { client } from "@/lib/db";
-import { AppHeader } from "@/components/AppHeader";
+import { PageHeader } from "@/components/PageHeader";
 import { CategoriesManager } from "@/components/CategoriesManager";
 import { Category } from "@/lib/types";
 
@@ -44,24 +44,11 @@ export default async function CategoriesPage() {
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
-      <AppHeader />
+      <PageHeader
+        title="Gestión de categorías"
+        description="Las categorías organizan el catálogo. Solo administradores pueden gestionarlas."
+      />
       <div style={{ padding: "32px 24px" }}>
-        <div style={{ marginBottom: "28px" }}>
-          <h1
-            style={{
-              fontFamily: "var(--font-geist), sans-serif",
-              fontSize: "20px",
-              fontWeight: 700,
-              color: "var(--text)",
-              marginBottom: "4px",
-            }}
-          >
-            Gestión de categorías
-          </h1>
-          <p style={{ fontSize: "13px", color: "var(--muted)" }}>
-            Las categorías organizan el catálogo. Solo administradores pueden gestionarlas.
-          </p>
-        </div>
         <CategoriesManager initialCategories={categories} skillCounts={skillCounts} />
       </div>
     </div>

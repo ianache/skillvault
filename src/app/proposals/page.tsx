@@ -1,4 +1,4 @@
-import { AppHeader } from "@/components/AppHeader";
+import { PageHeader } from "@/components/PageHeader";
 import { ReviewFilterableList } from "@/components/review/ReviewFilterableList";
 import { auth } from "@/auth";
 import { fetchReviewRequests } from "@/app/review-api";
@@ -10,10 +10,8 @@ export default async function ProposalsPage() {
   const data = session ? await fetchReviewRequests("?mine=1") : null;
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
-      <AppHeader />
+      <PageHeader title="Mis propuestas" description="Estado y comentarios de los skills enviados a revision." />
       <main style={{ maxWidth: "1100px", margin: "0 auto", padding: "32px 24px" }}>
-        <h1 style={headingStyle}>Mis propuestas</h1>
-        <p style={descriptionStyle}>Estado y comentarios de los skills enviados a revision.</p>
         {data ? (
           <ReviewFilterableList initialRequests={data.requests} counts={data.counts} mode="author" />
         ) : (
@@ -31,6 +29,3 @@ function State({ message }: { message: string }) {
     </div>
   );
 }
-
-const headingStyle: React.CSSProperties = { fontFamily: "var(--font-geist), sans-serif", fontSize: "24px", fontWeight: 700, color: "var(--text)", margin: "0 0 4px" };
-const descriptionStyle: React.CSSProperties = { fontSize: "13px", color: "var(--muted)", margin: "0 0 24px" };

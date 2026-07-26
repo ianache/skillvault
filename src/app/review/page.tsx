@@ -1,4 +1,4 @@
-import { AppHeader } from "@/components/AppHeader";
+import { PageHeader } from "@/components/PageHeader";
 import { ReviewFilterableList } from "@/components/review/ReviewFilterableList";
 import { auth } from "@/auth";
 import { fetchReviewRequests } from "@/app/review-api";
@@ -24,10 +24,8 @@ export default async function ReviewQueuePage() {
 function PageShell({ title, description, children }: { title: string; description: string; children: React.ReactNode }) {
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
-      <AppHeader />
+      <PageHeader title={title} description={description} />
       <main style={{ padding: "32px 24px" }}>
-        <h1 style={headingStyle}>{title}</h1>
-        <p style={descriptionStyle}>{description}</p>
         {children}
       </main>
     </div>
@@ -41,6 +39,3 @@ function State({ message }: { message: string }) {
     </div>
   );
 }
-
-const headingStyle: React.CSSProperties = { fontFamily: "var(--font-geist), sans-serif", fontSize: "24px", fontWeight: 700, color: "var(--text)", margin: "0 0 4px" };
-const descriptionStyle: React.CSSProperties = { fontSize: "13px", color: "var(--muted)", margin: "0 0 24px" };

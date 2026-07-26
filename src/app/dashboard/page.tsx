@@ -1,6 +1,7 @@
 import { client } from "@/lib/db";
 import Link from "next/link";
 import { DashboardClient } from "@/components/dashboard/DashboardClient";
+import { PageHeader } from "@/components/PageHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -46,45 +47,29 @@ export default async function DashboardPage() {
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
+      <PageHeader
+        title="Mis Skills"
+        description="Gestiona, edita y monitorea tus skills creados y reutilizables en SkillVault."
+        actions={
+          <Link
+            href="/publish"
+            style={{
+              fontFamily: "var(--font-geist), sans-serif",
+              fontSize: "13px",
+              fontWeight: 600,
+              padding: "9px 20px",
+              borderRadius: "8px",
+              background: "var(--accent)",
+              color: "#fff",
+              textDecoration: "none",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+            }}
+          >
+            + Publicar nuevo skill
+          </Link>
+        }
+      />
       <main style={{ padding: "32px 24px" }}>
-        {/* Page header */}
-        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "28px" }}>
-          <div>
-            <h1
-              style={{
-                fontFamily: "var(--font-geist), sans-serif",
-                fontSize: "24px",
-                fontWeight: 700,
-                color: "var(--text)",
-                margin: 0,
-              }}
-            >
-              Mis Skills
-            </h1>
-            <p style={{ fontSize: "13px", color: "var(--muted)", marginTop: "4px" }}>
-              Gestiona, edita y monitorea tus skills creados y reutilizables en SkillVault.
-            </p>
-          </div>
-          <div style={{ display: "flex", gap: "8px" }}>
-            <Link
-              href="/publish"
-              style={{
-                fontFamily: "var(--font-geist), sans-serif",
-                fontSize: "13px",
-                fontWeight: 600,
-                padding: "9px 20px",
-                borderRadius: "8px",
-                background: "var(--accent)",
-                color: "#fff",
-                textDecoration: "none",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-              }}
-            >
-              + Publicar nuevo skill
-            </Link>
-          </div>
-        </div>
-
         {/* Stats row */}
         <div
           style={{

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { WizardLayout } from "@/components/wizard/WizardLayout";
+import { PageHeader } from "@/components/PageHeader";
 import { Step1Metadata, MetadataFields } from "@/components/wizard/Step1Metadata";
 import { Step2Editor } from "@/components/wizard/Step2Editor";
 import { StepRequirements } from "@/components/wizard/StepRequirements";
@@ -87,6 +88,7 @@ export default function PublishPage() {
   if (step === 0) {
     return (
       <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
+        <PageHeader title="Publicar skill" description="Carga un SKILL.md local o crea uno nuevo desde cero." />
         {/* Header navigation bar styled like AppTopBar */}
         <header
           style={{
