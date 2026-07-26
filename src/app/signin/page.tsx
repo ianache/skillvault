@@ -119,9 +119,9 @@ export default async function SignInPage({
   ];
 
   const topLists = [
+    { title: "Top 5 Skills · Reviews", barColor: "var(--amber)", rows: rankRows(stats.topRatings) },
     { title: "Top 5 Skills · instalaciones", barColor: "var(--green)", rows: rankRows(stats.topInstalls) },
     { title: "Top 5 Skills · recientes", barColor: "var(--accent)", rows: rankRows(stats.topRecent) },
-    { title: "Top 5 Skills · Reviews", barColor: "var(--amber)", rows: rankRows(stats.topRatings) },
     { title: "Top 5 Contribuyentes", barColor: "var(--accent-indigo)", rows: rankRows(stats.topContributors) },
     { title: "Top 5 Categorías", barColor: "#c46a3f", rows: rankRows(stats.topCategories) },
   ].filter((l) => l.rows.length > 0);
