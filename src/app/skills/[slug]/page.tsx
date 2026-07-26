@@ -30,6 +30,9 @@ async function getSkill(slug: string): Promise<SkillRow | null> {
     configRequirements: JSON.parse(String(row.config_requirements ?? "[]")),
     status: String(row.status) as SkillRow["status"],
     installCount: Number(row.install_count),
+    avgRating: Number(row.avg_rating ?? 0),
+    ratingCount: Number(row.rating_count ?? 0),
+    userRating: null,
     createdAt: Number(row.created_at),
     publishedAt: row.published_at ? Number(row.published_at) : null,
   };
