@@ -215,17 +215,17 @@ export function LocalSkillLoader({ onLoaded, onSkip }: Props) {
       }}
     >
       <div style={{ marginBottom: "28px" }}>
-        <h1
+        <h2
           style={{
             fontFamily: "var(--font-geist), sans-serif",
-            fontSize: "24px",
+            fontSize: "15px",
             fontWeight: 700,
             color: "var(--text)",
             marginBottom: "6px",
           }}
         >
           Cargar skill local
-        </h1>
+        </h2>
         <p style={{ fontSize: "13px", color: "var(--muted)", lineHeight: 1.6 }}>
           Selecciona o arrastra una carpeta con tu <code style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "12px", color: "var(--accent)" }}>SKILL.md</code> o un archivo <code style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "12px", color: "var(--accent)" }}>.zip</code> con la estructura del skill.
         </p>
