@@ -25,7 +25,7 @@ function PageShell({ title, description, children }: { title: string; descriptio
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
       <AppHeader />
-      <main style={{ maxWidth: "1100px", margin: "0 auto", padding: "32px 24px" }}>
+      <main style={{ padding: "32px 24px" }}>
         <h1 style={headingStyle}>{title}</h1>
         <p style={descriptionStyle}>{description}</p>
         {children}

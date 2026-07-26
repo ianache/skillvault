@@ -46,7 +46,7 @@ export default async function DashboardPage() {
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
-      <main style={{ maxWidth: "1100px", margin: "0 auto", padding: "32px 24px" }}>
+      <main style={{ padding: "32px 24px" }}>
         {/* Page header */}
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "28px" }}>
           <div>

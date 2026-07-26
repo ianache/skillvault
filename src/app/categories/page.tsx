@@ -45,7 +45,7 @@ export default async function CategoriesPage() {
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
       <AppHeader />
-      <div style={{ maxWidth: "860px", margin: "0 auto", padding: "32px 24px" }}>
+      <div style={{ padding: "32px 24px" }}>
         <div style={{ marginBottom: "28px" }}>
           <h1
             style={{
