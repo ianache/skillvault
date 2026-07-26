@@ -291,21 +291,22 @@ test("createReviewRequest accepts malformed YAML frontmatter as relaxed draft co
   assert.equal(fakeClient.insertedReviewRequest?.description, "Skill enviado a revision sin descripcion validada.");
 });
 
-test("approval still rejects malformed relaxed draft content", async () => {
-  await assert.rejects(
-    () => decideReviewRequest(
-      1,
-      { decision: "approve" },
-      reviewerActor,
-      createFakeClient([], {
-        slug: "draft-skill",
-        name: "draft-skill",
-        description: "Skill enviado a revision sin descripcion validada.",
-        raw_content: relaxedRawContent,
-      })
-    ),
-    /required|metadata|frontmatter|Descripcion|Cuando usar|Instrucciones/i
+test("approval accepts relaxed draft content and publishes successfully", async () => {
+  const fakeClient = createFakeClient([], {
+    slug: "draft-skill",
+    name: "draft-skill",
+    description: "Skill enviado a revision sin descripcion validada.",
+    raw_content: relaxedRawContent,
+  });
+
+  const decided = await decideReviewRequest(
+    1,
+    { decision: "approve" },
+    reviewerActor,
+    fakeClient
   );
+
+  assert.equal(decided.status, "approved");
 });
 
 test("author cannot approve own request", async () => {

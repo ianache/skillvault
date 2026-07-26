@@ -225,7 +225,7 @@ async function activateApprovedRequest(
   comment: string | null,
   client: ReviewDatabaseClient
 ): Promise<void> {
-  const { frontmatter } = validateSubmission(request.rawContent);
+  const { frontmatter } = relaxedSubmission(request.rawContent);
   const reviewFiles = await client.execute({
     sql: "SELECT * FROM skill_review_files WHERE review_request_id = ? ORDER BY id",
     args: [request.id],
