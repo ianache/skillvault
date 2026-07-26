@@ -23,6 +23,7 @@ export function SkillRating({ skillSlug, avgRating, ratingCount, userRating, onR
   const [hovered, setHovered] = useState<number | null>(null);
   const [localOverride, setLocalOverride] = useState<RatingResult | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [authRequired, setAuthRequired] = useState(false);
 
   const effectiveAvg = localOverride?.avgRating ?? avgRating;
   const effectiveCount = localOverride?.ratingCount ?? ratingCount;
@@ -39,6 +40,10 @@ export function SkillRating({ skillSlug, avgRating, ratingCount, userRating, onR
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ rating: value }),
       });
+      if (res.status === 401) {
+        setAuthRequired(true);
+        return;
+      }
       if (!res.ok) return;
       const data: RatingResult = await res.json();
       setLocalOverride(data);
@@ -48,11 +53,13 @@ export function SkillRating({ skillSlug, avgRating, ratingCount, userRating, onR
     }
   }
 
-  const label = effectiveUserRating
-    ? `Tu calificación: ${effectiveUserRating}/5`
-    : effectiveCount > 0
-      ? `${effectiveAvg.toFixed(1)} (${effectiveCount})`
-      : "Sin calificaciones";
+  const label = authRequired
+    ? "Inicia sesión para calificar"
+    : effectiveUserRating
+      ? `Tu calificación: ${effectiveUserRating}/5`
+      : effectiveCount > 0
+        ? `${effectiveAvg.toFixed(1)} (${effectiveCount})`
+        : "Sin calificaciones";
 
   return (
     <div
