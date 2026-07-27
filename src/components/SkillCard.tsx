@@ -64,18 +64,56 @@ export function SkillCard({ skill, selected, onClick }: Props) {
         >
           {skill.name}
         </span>
-        <span
-          style={{
-            fontFamily: "var(--font-jetbrains-mono), monospace",
-            fontSize: "10px",
-            color: "var(--muted)",
-            whiteSpace: "nowrap",
-            marginTop: "2px",
-            flexShrink: 0,
-          }}
-        >
-          v{skill.version}
-        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
+          <span
+            style={{
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: "10px",
+              color: "var(--muted)",
+              whiteSpace: "nowrap",
+              marginTop: "2px",
+            }}
+          >
+            v{skill.version}
+          </span>
+          <a
+            href={`/api/skills/${skill.slug}/download`}
+            download
+            onClick={(e) => {
+              e.stopPropagation();
+              fetch(`/api/skills/${skill.slug}/install`, { method: "POST" }).catch(() => {});
+            }}
+            title="Descargar ZIP"
+            style={{
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: "10px",
+              padding: "2px 6px",
+              borderRadius: "3px",
+              border: "1px solid var(--border)",
+              color: "var(--muted)",
+              background: "var(--surface)",
+              textDecoration: "none",
+              display: "inline-flex",
+              alignItems: "center",
+              cursor: "pointer",
+              transition: "all .12s ease-in-out",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = "var(--accent)";
+              e.currentTarget.style.color = "var(--accent)";
+              const arrow = e.currentTarget.querySelector(".arrow");
+              if (arrow) (arrow as HTMLElement).style.transform = "translateY(1px)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = "var(--border)";
+              e.currentTarget.style.color = "var(--muted)";
+              const arrow = e.currentTarget.querySelector(".arrow");
+              if (arrow) (arrow as HTMLElement).style.transform = "translateY(0)";
+            }}
+          >
+            <span className="arrow" style={{ transition: "transform .1s", marginRight: "2px", display: "inline-block" }}>⬇</span> ZIP
+          </a>
+        </div>
       </div>
 
       {/* Category badge */}

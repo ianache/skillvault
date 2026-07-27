@@ -178,3 +178,11 @@ test("publish wizard forwards responsibility acceptance to final submission", as
   assert.match(reviewSource, /disabled=\{publishing\s*\|\|\s*!acceptedResponsibility\}/);
   assert.match(reviewSource, /cursor:\s*publishing\s*\|\|\s*!acceptedResponsibility\s*\?\s*"not-allowed"\s*:\s*"pointer"/);
 });
+
+test("SkillCard renders a zip download button that stops click propagation", async () => {
+  const cardSource = await source("../../components/SkillCard.tsx");
+  assert.match(cardSource, /href=\{\`\/api\/skills\/\$\{skill\.slug\}\/download\`\}/);
+  assert.match(cardSource, /e\.stopPropagation\(\)/);
+  assert.match(cardSource, /fetch\(\`\/api\/skills\/\$\{skill\.slug\}\/install\`/);
+});
+
