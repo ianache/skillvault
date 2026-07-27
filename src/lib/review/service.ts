@@ -111,6 +111,30 @@ function semverOrDefault(value: unknown): string {
   return typeof value === "string" && /^\d+\.\d+\.\d+$/.test(value) ? value : "1.0.0";
 }
 
+function compareSemver(a: string, b: string): number {
+  const [aMaj, aMin, aPatch] = a.split(".").map(Number);
+  const [bMaj, bMin, bPatch] = b.split(".").map(Number);
+  if (aMaj !== bMaj) return aMaj - bMaj;
+  if (aMin !== bMin) return aMin - bMin;
+  return aPatch - bPatch;
+}
+
+async function assertVersionIsGreaterThanPublished(
+  skillId: number,
+  version: string,
+  client: ReviewDatabaseClient
+): Promise<void> {
+  const currentSkill = await client.execute({
+    sql: "SELECT version FROM skills WHERE id = ?",
+    args: [skillId],
+  });
+  if (currentSkill.rows.length === 0) return;
+  const currentVersion = String(currentSkill.rows[0].version);
+  if (compareSemver(version, currentVersion) <= 0) {
+    throw new Error(`Version invalida: ${version} debe ser mayor a la version publicada actual (${currentVersion})`);
+  }
+}
+
 function normalizeReviewFiles(files: ReviewFileInput[] = []) {
   const paths = new Set<string>();
   return files.map((file) => {
@@ -331,6 +355,8 @@ export async function createReviewRequest(
     if (existingSkill.rows.length > 0) {
       throw new Error("A skill with this slug already exists — submit a new version instead");
     }
+  } else {
+    await assertVersionIsGreaterThanPublished(input.skillId, frontmatter.version, client);
   }
 
   const duplicate = await client.execute({

@@ -57,6 +57,35 @@ name: [broken
 
 Draft body.`;
 
+const higherVersionRawContent = `---
+name: demo-skill
+description: A complete enough description for the demo review skill.
+version: 1.1.0
+schema_version: "1.1"
+metadata:
+  type: code
+  triggers:
+    - demo
+compatibility:
+  - claude
+---
+# Demo Skill
+
+## Descripcion
+
+Demo description.
+
+## Cuando usar
+
+Use this demo.
+
+## Instrucciones
+
+Follow these instructions.`;
+
+const sameVersionRawContent = higherVersionRawContent.replace("version: 1.1.0", "version: 1.0.0");
+const lowerVersionRawContent = higherVersionRawContent.replace("version: 1.1.0", "version: 0.9.0");
+
 const authorActor: ReviewActor = { id: "author-1", handle: "author", roles: ["author"] };
 const reviewerActor: ReviewActor = { id: "reviewer-1", handle: "reviewer", roles: ["reviewer"] };
 const adminActor: ReviewActor = { id: "admin-1", handle: "admin", roles: ["admin"] };
@@ -77,7 +106,7 @@ type FakeClient = ReviewDatabaseClient & {
 function createFakeClient(
   files: Array<Record<string, unknown>> = [],
   requestOverrides: Partial<Record<string, unknown>> = {},
-  options: { existingSkill?: boolean } = {}
+  options: { existingSkill?: boolean; publishedVersion?: string } = {}
 ): FakeClient {
   const comments: Array<Record<string, unknown>> = [];
   const request = {
@@ -136,6 +165,9 @@ function createFakeClient(
       }
       if (sql.includes("SELECT id FROM skills WHERE slug = ?")) {
         return { rows: options.existingSkill ? [{ id: 7 }] : [] };
+      }
+      if (sql.includes("SELECT version FROM skills WHERE id = ?")) {
+        return options.publishedVersion ? { rows: [{ version: options.publishedVersion }] } : { rows: [] };
       }
       if (sql.includes("INSERT INTO skill_review_requests")) {
         fakeClient.insertedReviewRequest = {
@@ -212,6 +244,39 @@ test("rejects a new-skill submission when a skill with the same slug already exi
     ),
     /already exists/
   );
+});
+
+test("createReviewRequest rejects a version submission equal to the currently published version", async () => {
+  await assert.rejects(
+    () => createReviewRequest(
+      { rawContent: sameVersionRawContent, files: [], acceptedResponsibility: true, skillId: 7 },
+      authorActor,
+      createFakeClient([], {}, { publishedVersion: "1.0.0" })
+    ),
+    /invalida/
+  );
+});
+
+test("createReviewRequest rejects a version submission lower than the currently published version", async () => {
+  await assert.rejects(
+    () => createReviewRequest(
+      { rawContent: lowerVersionRawContent, files: [], acceptedResponsibility: true, skillId: 7 },
+      authorActor,
+      createFakeClient([], {}, { publishedVersion: "1.0.0" })
+    ),
+    /invalida/
+  );
+});
+
+test("createReviewRequest accepts a version submission greater than the currently published version", async () => {
+  const fakeClient = createFakeClient([], {}, { publishedVersion: "1.0.0" });
+  const request = await createReviewRequest(
+    { rawContent: higherVersionRawContent, files: [], acceptedResponsibility: true, skillId: 7 },
+    authorActor,
+    fakeClient
+  );
+  assert.equal(request.status, "pending");
+  assert.equal(fakeClient.insertedReviewRequest?.version, "1.1.0");
 });
 
 test("createReviewRequest stores relaxed draft metadata when responsibility is accepted", async () => {
