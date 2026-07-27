@@ -45,6 +45,13 @@ export function DetailPanel({ skill, onClose }: Props) {
       .catch(() => {});
   }
 
+  async function handleDownload() {
+    fetch(`/api/skills/${selectedSkill.slug}/install`, { method: "POST" })
+      .then((r) => r.json())
+      .then((data) => { if (data.installCount) setLiveCount(data.installCount); })
+      .catch(() => {});
+  }
+
   return (
     <div
       style={{
@@ -363,6 +370,54 @@ export function DetailPanel({ skill, onClose }: Props) {
               >
                 {copied ? "✓" : "Copiar"}
               </button>
+            </div>
+
+            {/* Alternativa de Descarga ZIP */}
+            <div
+              style={{
+                marginTop: "12px",
+                paddingTop: "12px",
+                borderTop: "1px solid var(--border)",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: "8px",
+              }}
+            >
+              <span style={{ fontSize: "11px", color: "var(--muted)" }}>
+                ¿Prefieres instalarlo manualmente?
+              </span>
+              <a
+                href={`/api/skills/${skill.slug}/download`}
+                download
+                onClick={handleDownload}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  fontSize: "11px",
+                  fontWeight: 600,
+                  color: "var(--accent)",
+                  background: "var(--accent-muted)",
+                  border: "1px solid var(--accent)",
+                  borderRadius: "4px",
+                  padding: "4px 10px",
+                  textDecoration: "none",
+                  cursor: "pointer",
+                  transition: "all .12s ease-in-out",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "var(--accent)";
+                  e.currentTarget.style.color = "var(--surface)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "var(--accent-muted)";
+                  e.currentTarget.style.color = "var(--accent)";
+                }}
+              >
+                ⬇ Descargar ZIP
+              </a>
             </div>
           </div>
         </Section>

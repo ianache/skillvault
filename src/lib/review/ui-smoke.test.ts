@@ -186,3 +186,11 @@ test("SkillCard renders a zip download button that stops click propagation", asy
   assert.match(cardSource, /fetch\(\`\/api\/skills\/\$\{skill\.slug\}\/install\`/);
 });
 
+test("DetailPanel renders a manual zip download button with visual state updates", async () => {
+  const detailSource = await source("../../components/DetailPanel.tsx");
+  assert.match(detailSource, /¿Prefieres instalarlo manualmente\?/);
+  assert.match(detailSource, /handleDownload/);
+  assert.match(detailSource, /setLiveCount\(data\.installCount\)/);
+});
+
+
