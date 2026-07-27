@@ -16,11 +16,18 @@ interface Issue {
   severity: "error" | "warning";
 }
 
-export const SkillEditorInitialDirtyContext = createContext(false);
+type SkillEditorDirtyContextValue = {
+  initiallyDirty: boolean;
+  onDirtyChange?: (dirty: boolean) => void;
+};
+
+export const SkillEditorDirtyContext = createContext<SkillEditorDirtyContextValue>({
+  initiallyDirty: false,
+});
 
 export function SkillEditor({ slug, initialContent }: Props) {
   const router = useRouter();
-  const initiallyDirty = useContext(SkillEditorInitialDirtyContext);
+  const { initiallyDirty, onDirtyChange } = useContext(SkillEditorDirtyContext);
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<unknown>(null);
   const [content, setContent] = useState(initialContent);
@@ -68,6 +75,10 @@ export function SkillEditor({ slug, initialContent }: Props) {
   useEffect(() => {
     validate(content);
   }, [content, validate]);
+
+  useEffect(() => {
+    onDirtyChange?.(dirty);
+  }, [dirty, onDirtyChange]);
 
   useEffect(() => {
     if (!editorRef.current || viewRef.current) return;

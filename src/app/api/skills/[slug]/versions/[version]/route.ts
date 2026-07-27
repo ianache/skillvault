@@ -17,7 +17,7 @@ export function createSkillVersionDetailHandlers(dependencies: Partial<RouteDepe
       sql: `SELECT sv.id, sv.version, sv.raw_content, sv.created_at
             FROM skill_versions sv
             JOIN skills s ON s.id = sv.skill_id
-            WHERE s.slug = ? AND sv.version = ?
+            WHERE s.slug = ? AND s.status = 'published' AND sv.version = ?
             LIMIT 1`,
       args: [slug, version],
     });

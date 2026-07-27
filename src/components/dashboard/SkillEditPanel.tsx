@@ -1,7 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { SkillEditor, SkillEditorInitialDirtyContext } from "./SkillEditor";
+import { useCallback, useMemo, useReducer } from "react";
+import { SkillEditor, SkillEditorDirtyContext } from "./SkillEditor";
+import {
+  initialSkillEditState,
+  shouldUseHistoricalVersion,
+  skillEditStateReducer,
+} from "./skill-edit-state";
 import { VersionHistory } from "./VersionHistory";
 
 interface Props {
@@ -10,20 +15,36 @@ interface Props {
 }
 
 export function SkillEditPanel({ slug, initialContent }: Props) {
-  const [override, setOverride] = useState<{ key: number; content: string } | null>(null);
+  const [state, dispatch] = useReducer(skillEditStateReducer, initialSkillEditState);
+  const handleDirtyChange = useCallback((dirty: boolean) => {
+    dispatch({ type: "dirty-changed", dirty });
+  }, []);
+  const dirtyContext = useMemo(() => ({
+    initiallyDirty: state.override !== null,
+    onDirtyChange: handleDirtyChange,
+  }), [handleDirtyChange, state.override]);
+
+  function handleUseAsBase(content: string) {
+    const allowed = shouldUseHistoricalVersion(
+      state.dirty,
+      () => window.confirm("Hay cambios sin guardar. Reemplazarlos con esta version historica?")
+    );
+    if (!allowed) return;
+    dispatch({ type: "use-version", key: Date.now(), content });
+  }
 
   return (
     <>
-      <SkillEditorInitialDirtyContext.Provider value={override !== null}>
+      <SkillEditorDirtyContext.Provider value={dirtyContext}>
         <SkillEditor
-          key={override?.key ?? "current"}
+          key={state.override?.key ?? "current"}
           slug={slug}
-          initialContent={override?.content ?? initialContent}
+          initialContent={state.override?.content ?? initialContent}
         />
-      </SkillEditorInitialDirtyContext.Provider>
+      </SkillEditorDirtyContext.Provider>
       <VersionHistory
         slug={slug}
-        onUseAsBase={(content) => setOverride({ key: Date.now(), content })}
+        onUseAsBase={handleUseAsBase}
       />
     </>
   );

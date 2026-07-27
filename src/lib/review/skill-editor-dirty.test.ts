@@ -1,15 +1,35 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import { test } from "node:test";
-import { join } from "node:path";
+import {
+  initialSkillEditState,
+  shouldUseHistoricalVersion,
+  skillEditStateReducer,
+} from "../../components/dashboard/skill-edit-state";
 
-const dashboardPath = join(process.cwd(), "src", "components", "dashboard");
+test("clean editors can use a historical version without prompting", () => {
+  let prompted = false;
 
-test("rollback wrapper marks a remounted editor as initially dirty", () => {
-  const panel = readFileSync(join(dashboardPath, "SkillEditPanel.tsx"), "utf8");
-  const editor = readFileSync(join(dashboardPath, "SkillEditor.tsx"), "utf8");
+  const allowed = shouldUseHistoricalVersion(false, () => {
+    prompted = true;
+    return false;
+  });
 
-  assert.match(panel, /<SkillEditorInitialDirtyContext\.Provider value=\{override !== null\}>/);
-  assert.match(editor, /const initiallyDirty = useContext\(SkillEditorInitialDirtyContext\);/);
-  assert.match(editor, /const \[dirty, setDirty\] = useState\(initiallyDirty\);/);
+  assert.equal(allowed, true);
+  assert.equal(prompted, false);
+});
+
+test("dirty editors keep their content when rollback confirmation is canceled", () => {
+  assert.equal(shouldUseHistoricalVersion(true, () => false), false);
+});
+
+test("accepted historical versions remount the editor with dirty state", () => {
+  const state = skillEditStateReducer(
+    { ...initialSkillEditState, dirty: true },
+    { type: "use-version", content: "# historical", key: 7 }
+  );
+
+  assert.deepEqual(state, {
+    override: { content: "# historical", key: 7 },
+    dirty: true,
+  });
 });

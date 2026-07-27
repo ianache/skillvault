@@ -133,15 +133,21 @@ export function VersionHistory({ slug, refreshKey, onUseAsBase }: Props) {
       <div>
         {versions.map((v, i) => (
           <div key={i}>
-            <div
+            <button
+              type="button"
               onClick={() => toggleExpand(v.version)}
+              aria-expanded={expanded === v.version}
               style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
+                width: "100%",
                 padding: "9px 16px",
+                border: "none",
                 borderBottom: expanded === v.version ? "none" : (i === versions.length - 1 ? "none" : "1px solid var(--border)"),
+                background: "transparent",
                 cursor: "pointer",
+                textAlign: "left",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -187,7 +193,7 @@ export function VersionHistory({ slug, refreshKey, onUseAsBase }: Props) {
                   minute: "2-digit",
                 })}
               </span>
-            </div>
+            </button>
 
             {expanded === v.version && (
               <div
