@@ -279,6 +279,20 @@ test("createReviewRequest accepts a version submission greater than the currentl
   assert.equal(fakeClient.insertedReviewRequest?.version, "1.1.0");
 });
 
+test("updateReviewRequest rejects lowering the version below the currently published version", async () => {
+  const fakeClient = createFakeClient([], { skill_id: 7 }, { publishedVersion: "1.0.0" });
+  await assert.rejects(
+    () => updateReviewRequest(1, { rawContent: sameVersionRawContent, files: [] }, authorActor, fakeClient),
+    /invalida/
+  );
+});
+
+test("updateReviewRequest accepts raising the version above the currently published version", async () => {
+  const fakeClient = createFakeClient([], { skill_id: 7 }, { publishedVersion: "1.0.0" });
+  const request = await updateReviewRequest(1, { rawContent: higherVersionRawContent, files: [] }, authorActor, fakeClient);
+  assert.equal(request.status, "pending");
+});
+
 test("createReviewRequest stores relaxed draft metadata when responsibility is accepted", async () => {
   const fakeClient = createFakeClient([], {
     slug: "draft-skill",

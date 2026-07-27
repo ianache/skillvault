@@ -408,6 +408,9 @@ export async function updateReviewRequest(
   const request = await getRequestRow(id, client);
   assertCanEditRequest(actor, request);
   const { frontmatter, files } = relaxedSubmission(input.rawContent, input.files);
+  if (request.skillId) {
+    await assertVersionIsGreaterThanPublished(request.skillId, frontmatter.version, client);
+  }
 
   await client.execute({
     sql: `UPDATE skill_review_requests
