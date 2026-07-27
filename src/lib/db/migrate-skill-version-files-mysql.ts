@@ -17,7 +17,7 @@ async function migrate() {
     path VARCHAR(500) NOT NULL,
     file_type VARCHAR(50) NOT NULL,
     content LONGTEXT NOT NULL,
-    created_at BIGINT NOT NULL DEFAULT 0
+    created_at BIGINT NOT NULL DEFAULT (UNIX_TIMESTAMP())
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`);
 
   await createIndex("CREATE INDEX idx_skill_version_files_skill_version_id ON skill_version_files(skill_version_id)");

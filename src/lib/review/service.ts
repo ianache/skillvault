@@ -346,8 +346,8 @@ async function activateApprovedRequest(
   for (const file of reviewFiles.rows.map(toFile)) {
     if (file.changeType === "deleted") continue;
     await client.execute({
-      sql: "INSERT INTO skill_version_files (skill_version_id, path, file_type, content) VALUES (?, ?, ?, ?)",
-      args: [skillVersionId, file.path, file.fileType, file.content],
+      sql: "INSERT INTO skill_version_files (skill_version_id, path, file_type, content, created_at) VALUES (?, ?, ?, ?, ?)",
+      args: [skillVersionId, file.path, file.fileType, file.content, publishedAt],
     });
   }
   await client.execute({
