@@ -132,7 +132,7 @@ test("exports ReviewStatusBadge, ReviewFilterTabs, and ReviewTimeline components
   assert.match(detailSource, /ReviewTimeline/);
 });
 
-test("LocalSkillLoader and PublishPage render skill loader layout and breadcrumbs", async () => {
+test("LocalSkillLoader and PublishPage render skill loader layout", async () => {
   const [loaderSource, pageSource] = await Promise.all([
     source("../../components/wizard/LocalSkillLoader.tsx"),
     source("../../app/publish/page.tsx"),
@@ -143,7 +143,7 @@ test("LocalSkillLoader and PublishPage render skill loader layout and breadcrumb
   assert.match(loaderSource, /Seleccionar carpeta/);
   assert.match(loaderSource, /Subir archivo \.zip/);
   assert.match(loaderSource, /Cargar en el wizard/);
-  assert.match(pageSource, /Cargar Skill local/);
+  assert.match(pageSource, /maxWidth: "960px"/);
 });
 
 test("Step2 editor only gates continuation by line count and responsibility acceptance", async () => {
