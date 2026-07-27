@@ -389,7 +389,7 @@ export function DetailPanel({ skill, onClose }: Props) {
                 ¿Prefieres instalarlo manualmente?
               </span>
               <a
-                href={`/api/skills/${skill.slug}/download`}
+                href={`/api/skills/${selectedSkill.slug}/download`}
                 download
                 onClick={handleDownload}
                 style={{
