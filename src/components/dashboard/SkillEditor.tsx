@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { validateSkillFrontmatter, validateBodySections } from "@/lib/skill-schema";
 import matter from "gray-matter";
@@ -16,8 +16,11 @@ interface Issue {
   severity: "error" | "warning";
 }
 
+export const SkillEditorInitialDirtyContext = createContext(false);
+
 export function SkillEditor({ slug, initialContent }: Props) {
   const router = useRouter();
+  const initiallyDirty = useContext(SkillEditorInitialDirtyContext);
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<unknown>(null);
   const [content, setContent] = useState(initialContent);
@@ -28,7 +31,7 @@ export function SkillEditor({ slug, initialContent }: Props) {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveOk, setSaveOk] = useState(false);
   const [activeTab, setActiveTab] = useState<"editor" | "preview">("editor");
-  const [dirty, setDirty] = useState(false);
+  const [dirty, setDirty] = useState(initiallyDirty);
 
   const validate = useCallback((text: string) => {
     const lineCount = text.length === 0 ? 0 : text.split("\n").length;
