@@ -52,7 +52,8 @@ export async function ensureUser(user: { id: string; username: string; email: st
     return;
   }
 
-  const primary = existing.rows[0] as Record<string, unknown>;
+  // Prioritize the exact Keycloak ID match to avoid primary key unique constraint failures on update
+  const primary = (existing.rows.find((r) => String(r.id) === user.id) || existing.rows[0]) as Record<string, unknown>;
   const primaryId = String(primary.id);
 
   await client.execute({
@@ -62,7 +63,10 @@ export async function ensureUser(user: { id: string; username: string; email: st
   });
 
   if (existing.rows.length > 1) {
-    const duplicateIds = existing.rows.slice(1).map((r) => String(r.id)).filter((id) => id !== user.id);
+    // Delete any duplicates other than the primary row we updated
+    const duplicateIds = existing.rows
+      .map((r) => String(r.id))
+      .filter((id) => id !== primaryId);
     if (duplicateIds.length > 0) {
       const placeholders = duplicateIds.map(() => "?").join(",");
       await client.execute({

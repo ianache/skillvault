@@ -5,8 +5,8 @@ import { client } from "../db";
 
 describe("User and Role Synchronization (ensureUser)", () => {
   beforeEach(async () => {
-    // Limpiar tabla de usuarios antes de cada prueba en base de datos local de test
-    await client.execute("DELETE FROM users;");
+    // Only delete test users to avoid wiping developer's local seed database records
+    await client.execute("DELETE FROM users WHERE id LIKE 'usr-test-%';");
   });
 
   test("inserts new user with their roles correctly", async () => {
@@ -72,5 +72,20 @@ describe("User and Role Synchronization (ensureUser)", () => {
 
     assert.ok(updated);
     assert.deepEqual(updated.roles, ["reviewer"]);
+  });
+
+  test("filters out roles not present in APP_ROLES", async () => {
+    await ensureUser({
+      id: "usr-test-4",
+      username: "externaluser",
+      email: "external@skillvault.dev",
+      keycloakRoles: ["author", "invalid-role", "admin", "other-realm-role"],
+    });
+
+    const users = await listUsers();
+    const created = users.find(u => u.id === "usr-test-4");
+
+    assert.ok(created);
+    assert.deepEqual(created.roles.sort(), ["admin", "author"]);
   });
 });

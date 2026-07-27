@@ -34,12 +34,16 @@ export const authConfig: NextAuthConfig = {
   callbacks: {
     async signIn({ user }) {
       if (user?.id) {
-        await ensureUser({
-          id: user.id,
-          username: user.name ?? user.email ?? user.id,
-          email: user.email ?? "",
-          keycloakRoles: (user as any).roles,
-        });
+        try {
+          await ensureUser({
+            id: user.id,
+            username: user.name ?? user.email ?? user.id,
+            email: user.email ?? "",
+            keycloakRoles: (user as any).roles,
+          });
+        } catch (error) {
+          console.error("Failed to synchronize user session with database:", error);
+        }
       }
       return true;
     },
