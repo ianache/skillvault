@@ -205,7 +205,13 @@ function createFakeClient(
         return { rows: [{ id: 42 }] };
       }
       if (sql.includes("INSERT INTO skill_version_files")) {
-        fakeClient.insertedVersionFiles.push({ skillVersionId: args[0], path: args[1], fileType: args[2], content: args[3] });
+        fakeClient.insertedVersionFiles.push({
+          skillVersionId: args[0],
+          path: args[1],
+          fileType: args[2],
+          content: args[3],
+          createdAt: args[4],
+        });
         return { rows: [] };
       }
       if (sql.includes("UPDATE skill_review_requests")) {
@@ -494,6 +500,24 @@ test("approval archives attached files into skill_version_files, excluding delet
   assert.equal(fakeClient.insertedVersionFiles.length, 1);
   assert.equal(fakeClient.insertedVersionFiles[0].path, "resources/reference.md");
   assert.equal(fakeClient.insertedVersionFiles[0].skillVersionId, 42);
+  assert.equal(typeof fakeClient.insertedVersionFiles[0].createdAt, "number");
+  assert.notEqual(fakeClient.insertedVersionFiles[0].createdAt, 0);
+});
+
+test("approval rejects a stale version after a newer version has already been published", async () => {
+  const fakeClient = createFakeClient(
+    [],
+    { skill_id: 7, version: "1.1.0" },
+    { publishedVersion: "1.2.0" }
+  );
+
+  await assert.rejects(
+    () => decideReviewRequest(1, { decision: "approve" }, reviewerActor, fakeClient),
+    /invalida/
+  );
+
+  assert.equal(fakeClient.insertedVersion, undefined);
+  assert.equal(fakeClient.updatedRequest, undefined);
 });
 
 test("author cannot approve own request", async () => {

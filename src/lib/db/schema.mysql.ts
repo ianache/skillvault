@@ -49,7 +49,7 @@ export const skillVersionFiles = mysqlTable("skill_version_files", {
   path: varchar("path", { length: 500 }).notNull(),
   fileType: varchar("file_type", { length: 50 }).notNull(),
   content: text("content").notNull().default(""),
-  createdAt: bigint("created_at", { mode: "number" }).notNull().default(0),
+  createdAt: bigint("created_at", { mode: "number" }).notNull().default(sql`(UNIX_TIMESTAMP())`),
 });
 
 export const skillReviewRequests = mysqlTable("skill_review_requests", {

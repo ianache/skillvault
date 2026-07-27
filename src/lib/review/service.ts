@@ -250,6 +250,13 @@ async function activateApprovedRequest(
   client: ReviewDatabaseClient
 ): Promise<void> {
   const { frontmatter } = relaxedSubmission(request.rawContent);
+  if (request.skillId !== null) {
+    await client.execute({
+      sql: "UPDATE skills SET updated_at = updated_at WHERE id = ? AND status = 'published'",
+      args: [request.skillId],
+    });
+    await assertVersionIsGreaterThanPublished(request.skillId, request.version, client);
+  }
   const reviewFiles = await client.execute({
     sql: "SELECT * FROM skill_review_files WHERE review_request_id = ? ORDER BY id",
     args: [request.id],
@@ -339,8 +346,8 @@ async function activateApprovedRequest(
   for (const file of reviewFiles.rows.map(toFile)) {
     if (file.changeType === "deleted") continue;
     await client.execute({
-      sql: "INSERT INTO skill_version_files (skill_version_id, path, file_type, content) VALUES (?, ?, ?, ?)",
-      args: [skillVersionId, file.path, file.fileType, file.content],
+      sql: "INSERT INTO skill_version_files (skill_version_id, path, file_type, content, created_at) VALUES (?, ?, ?, ?, ?)",
+      args: [skillVersionId, file.path, file.fileType, file.content, publishedAt],
     });
   }
   await client.execute({
