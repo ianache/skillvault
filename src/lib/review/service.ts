@@ -130,6 +130,7 @@ async function assertVersionIsGreaterThanPublished(
   });
   if (currentSkill.rows.length === 0) return;
   const currentVersion = String(currentSkill.rows[0].version);
+  if (!/^\d+\.\d+\.\d+$/.test(currentVersion)) return; // unparseable legacy version — nothing to compare against
   if (compareSemver(version, currentVersion) <= 0) {
     throw new Error(`Version invalida: ${version} debe ser mayor a la version publicada actual (${currentVersion})`);
   }
@@ -261,6 +262,7 @@ async function activateApprovedRequest(
     sql: "SELECT * FROM skill_review_files WHERE review_request_id = ? ORDER BY id",
     args: [request.id],
   });
+  const files = reviewFiles.rows.map(toFile);
   const publishedAt = Math.floor(Date.now() / 1000);
 
   let skillId = request.skillId;
@@ -326,7 +328,7 @@ async function activateApprovedRequest(
   }
 
   await client.execute({ sql: "DELETE FROM skill_files WHERE skill_id = ?", args: [skillId] });
-  for (const file of reviewFiles.rows.map(toFile)) {
+  for (const file of files) {
     if (file.changeType === "deleted") continue;
     await client.execute({
         sql: "INSERT INTO skill_files (skill_id, path, file_type, content) VALUES (?, ?, ?, ?)",
@@ -343,7 +345,7 @@ async function activateApprovedRequest(
   });
   if (insertedVersion.rows.length === 0) throw new Error("activation failed: skill version was not created");
   const skillVersionId = asNumber(insertedVersion.rows[0].id);
-  for (const file of reviewFiles.rows.map(toFile)) {
+  for (const file of files) {
     if (file.changeType === "deleted") continue;
     await client.execute({
       sql: "INSERT INTO skill_version_files (skill_version_id, path, file_type, content, created_at) VALUES (?, ?, ?, ?, ?)",

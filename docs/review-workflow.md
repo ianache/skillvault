@@ -15,16 +15,16 @@ Solo el author de una propuesta puede editarla. Un author no puede aprobar su pr
 1. Cree un skill desde **Publicar**, complete el wizard y seleccione **Enviar a revision**. El endpoint `POST /api/skills` crea una propuesta en lugar de publicar directamente.
 2. Consulte **Mis propuestas** para ver el estado, reviewer, comentarios y la fecha de actualizacion.
 3. Si el reviewer pide cambios, abra la propuesta, actualice `SKILL.md` o los adjuntos y reenviela. El reenvio devuelve la propuesta a `pending` y elimina la decision anterior.
-4. Para un skill ya publicado, el editor del dashboard envia una nueva version a revision. No modifica la version publica en ese momento.
+4. Para un skill ya publicado, el editor del dashboard envia una nueva version a revision. No modifica la version publica en ese momento. El historial de versiones permite ver, descargar o usar como base cualquier version anterior — usarla como base todavia requiere asignarle un numero de version mayor al publicado.
 
-No puede haber dos propuestas abiertas para el mismo slug y version. Los archivos adjuntos deben tener rutas relativas, unicas y sin recorridos como `../`.
+No puede haber dos propuestas abiertas para el mismo slug y version. La version enviada para un skill ya publicado debe ser estrictamente mayor a la version publicada actual (se valida al enviar y de nuevo al aprobar); de lo contrario la propuesta se rechaza con un error 422. Los archivos adjuntos deben tener rutas relativas, unicas y sin recorridos como `../`.
 
 ## Decision de un reviewer
 
 1. Abra **Revision** y seleccione una propuesta pendiente.
 2. Revise `SKILL.md`, los adjuntos y los comentarios. Puede dejar un comentario general o asociarlo a `SKILL.md` o a un archivo adjunto.
 3. Seleccione **Aprobar**, **Pedir cambios** o **Rechazar**. Pedir cambios y rechazar requieren un comentario general.
-4. Una aprobacion activa inmediatamente el contenido propuesto. El sistema actualiza el skill publicado, sus archivos y el historial de versiones en una sola transaccion.
+4. Una aprobacion activa inmediatamente el contenido propuesto. El sistema actualiza el skill publicado, sus archivos y el historial de versiones en una sola transaccion. El historial archiva tanto el `SKILL.md` como los archivos adjuntos de esa version; versiones publicadas antes de esta funcionalidad no tienen adjuntos archivados.
 
 Los estados finales son `approved` y `rejected`. Las propuestas `changes_requested` pueden volver a enviarse para una nueva revision.
 
@@ -42,6 +42,12 @@ pnpm migrate:review-workflow
 
 # MySQL
 pnpm migrate:review-workflow:mysql
+
+# SQLite — archivo de adjuntos por version
+pnpm migrate:skill-version-files
+
+# MySQL — archivo de adjuntos por version
+pnpm migrate:skill-version-files:mysql
 ```
 
 Las migraciones crean las tablas de solicitudes, archivos y comentarios de revision. Los skills publicados existentes permanecen publicados y no se convierten en propuestas.

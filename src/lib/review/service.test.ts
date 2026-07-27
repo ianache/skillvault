@@ -196,14 +196,6 @@ function createFakeClient(
         fakeClient.insertedFiles.push({ skillId: args[0], path: args[1], fileType: args[2], content: args[3] });
         return { rows: [] };
       }
-      if (sql.includes("INSERT INTO skill_versions")) {
-        if (fakeClient.failOnVersionInsert) throw new Error("version insert failed");
-        fakeClient.insertedVersion = { skillId: args[0], version: args[1], rawContent: args[2] };
-        return { rows: [] };
-      }
-      if (sql.includes("SELECT id FROM skill_versions WHERE skill_id = ? AND version = ?")) {
-        return { rows: [{ id: 42 }] };
-      }
       if (sql.includes("INSERT INTO skill_version_files")) {
         fakeClient.insertedVersionFiles.push({
           skillVersionId: args[0],
@@ -213,6 +205,14 @@ function createFakeClient(
           createdAt: args[4],
         });
         return { rows: [] };
+      }
+      if (sql.includes("INSERT INTO skill_versions")) {
+        if (fakeClient.failOnVersionInsert) throw new Error("version insert failed");
+        fakeClient.insertedVersion = { skillId: args[0], version: args[1], rawContent: args[2] };
+        return { rows: [] };
+      }
+      if (sql.includes("SELECT id FROM skill_versions WHERE skill_id = ? AND version = ?")) {
+        return { rows: [{ id: 42 }] };
       }
       if (sql.includes("UPDATE skill_review_requests")) {
         if (fakeClient.failOnApprovalUpdate && args[0] === "approved") throw new Error("approval update failed");
