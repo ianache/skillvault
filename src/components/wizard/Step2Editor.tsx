@@ -147,6 +147,10 @@ export function Step2Editor({ content, onChange, onNext, onBack, onAcceptanceCha
   const { fm, body } = renderPreview(content);
   const lineLimitExceeded = lineCount > MAX_SKILL_LINES;
   const canContinue = !lineLimitExceeded && acceptedResponsibility;
+  const descriptionValue = typeof fm.description === "string" ? fm.description : "";
+  const descriptionLength = descriptionValue.length;
+  const hasDescription = descriptionLength > 0;
+  const descriptionValid = descriptionLength >= 20 && descriptionLength <= 280;
 
   function handleAcceptanceChange(nextAccepted: boolean) {
     setAcceptedResponsibility(nextAccepted);
@@ -323,6 +327,34 @@ export function Step2Editor({ content, onChange, onNext, onBack, onAcceptanceCha
                 </div>
                 {lineCount} de {MAX_SKILL_LINES} lineas permitidas.
                 {lineLimitExceeded && " Reduzca el contenido para continuar."}
+              </div>
+
+              <div
+                style={{
+                  fontSize: "12px",
+                  padding: "8px",
+                  borderRadius: "6px",
+                  marginTop: "8px",
+                  background: descriptionValid ? "rgba(46,204,138,0.08)" : "rgba(232,80,58,0.08)",
+                  borderLeft: `2px solid ${descriptionValid ? "var(--green)" : "var(--red)"}`,
+                  color: "var(--muted)",
+                  lineHeight: 1.45,
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: "var(--font-jetbrains-mono), monospace",
+                    fontSize: "9px",
+                    color: descriptionValid ? "var(--green)" : "var(--red)",
+                    marginBottom: "4px",
+                  }}
+                >
+                  descripcion (frontmatter)
+                </div>
+                {hasDescription
+                  ? `${descriptionLength} de 20-280 caracteres permitidos.`
+                  : "Sin campo description en el frontmatter."}
+                {!descriptionValid && " Si publicas asi, SkillVault reemplaza esta descripcion por un texto generico y el skill queda sin descripcion util en el catalogo/busqueda."}
               </div>
 
               <label
