@@ -52,3 +52,6 @@ cli/node_modules/
 
 # local worktrees
 .worktrees/
+
+# subagent-driven-development scratch workspaces
+.superpowers/
