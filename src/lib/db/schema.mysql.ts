@@ -43,6 +43,15 @@ export const skillFiles = mysqlTable("skill_files", {
   createdAt: bigint("created_at", { mode: "number" }).notNull().default(0),
 });
 
+export const skillVersionFiles = mysqlTable("skill_version_files", {
+  id: int("id").autoincrement().primaryKey(),
+  skillVersionId: int("skill_version_id").notNull(),
+  path: varchar("path", { length: 500 }).notNull(),
+  fileType: varchar("file_type", { length: 50 }).notNull(),
+  content: text("content").notNull().default(""),
+  createdAt: bigint("created_at", { mode: "number" }).notNull().default(0),
+});
+
 export const skillReviewRequests = mysqlTable("skill_review_requests", {
   id: int("id").autoincrement().primaryKey(),
   skillId: int("skill_id"),

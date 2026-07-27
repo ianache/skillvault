@@ -42,6 +42,15 @@ export const skillFiles = sqliteTable("skill_files", {
   createdAt: integer("created_at").notNull().default(sql`(unixepoch())`),
 });
 
+export const skillVersionFiles = sqliteTable("skill_version_files", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  skillVersionId: integer("skill_version_id").notNull(),
+  path: text("path").notNull(),
+  fileType: text("file_type").notNull(), // "resource" | "script"
+  content: text("content").notNull().default(""),
+  createdAt: integer("created_at").notNull().default(sql`(unixepoch())`),
+});
+
 export const skillReviewRequests = sqliteTable("skill_review_requests", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   skillId: integer("skill_id"),
