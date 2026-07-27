@@ -330,6 +330,19 @@ async function activateApprovedRequest(
       sql: "INSERT INTO skill_versions (skill_id, version, raw_content, created_at) VALUES (?, ?, ?, ?)",
       args: [skillId, request.version, request.rawContent, publishedAt],
   });
+  const insertedVersion = await client.execute({
+      sql: "SELECT id FROM skill_versions WHERE skill_id = ? AND version = ? ORDER BY id DESC LIMIT 1",
+      args: [skillId, request.version],
+  });
+  if (insertedVersion.rows.length === 0) throw new Error("activation failed: skill version was not created");
+  const skillVersionId = asNumber(insertedVersion.rows[0].id);
+  for (const file of reviewFiles.rows.map(toFile)) {
+    if (file.changeType === "deleted") continue;
+    await client.execute({
+      sql: "INSERT INTO skill_version_files (skill_version_id, path, file_type, content) VALUES (?, ?, ?, ?)",
+      args: [skillVersionId, file.path, file.fileType, file.content],
+    });
+  }
   await client.execute({
       sql: `UPDATE skill_review_requests
         SET status = ?, reviewer_id = ?, reviewer_handle = ?, general_comment = ?,

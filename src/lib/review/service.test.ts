@@ -95,6 +95,7 @@ type FakeClient = ReviewDatabaseClient & {
   insertedSkill?: Record<string, unknown>;
   insertedReviewRequest?: Record<string, unknown>;
   insertedFiles: Array<Record<string, unknown>>;
+  insertedVersionFiles: Array<Record<string, unknown>>;
   insertedVersion?: Record<string, unknown>;
   updatedRequest?: Record<string, unknown>;
   failOnSkillInsert: boolean;
@@ -133,6 +134,7 @@ function createFakeClient(
 
   const fakeClient: FakeClient = {
     insertedFiles: [],
+    insertedVersionFiles: [],
     failOnSkillInsert: false,
     failOnVersionInsert: false,
     failOnApprovalUpdate: false,
@@ -194,6 +196,13 @@ function createFakeClient(
       if (sql.includes("INSERT INTO skill_versions")) {
         if (fakeClient.failOnVersionInsert) throw new Error("version insert failed");
         fakeClient.insertedVersion = { skillId: args[0], version: args[1], rawContent: args[2] };
+        return { rows: [] };
+      }
+      if (sql.includes("SELECT id FROM skill_versions WHERE skill_id = ? AND version = ?")) {
+        return { rows: [{ id: 42 }] };
+      }
+      if (sql.includes("INSERT INTO skill_version_files")) {
+        fakeClient.insertedVersionFiles.push({ skillVersionId: args[0], path: args[1], fileType: args[2], content: args[3] });
         return { rows: [] };
       }
       if (sql.includes("UPDATE skill_review_requests")) {
@@ -386,6 +395,24 @@ test("approval accepts relaxed draft content and publishes successfully", async 
   );
 
   assert.equal(decided.status, "approved");
+});
+
+test("approval archives attached files into skill_version_files, excluding deleted ones", async () => {
+  const fakeClient = createFakeClient([
+    { id: 1, review_request_id: 1, path: "resources/reference.md", file_type: "resource", content: "hello", change_type: "added", created_at: 1 },
+    { id: 2, review_request_id: 1, path: "scripts/old.sh", file_type: "script", content: "gone", change_type: "deleted", created_at: 1 },
+  ], {
+    slug: "draft-skill",
+    name: "draft-skill",
+    description: "Skill enviado a revision sin descripcion validada.",
+    raw_content: relaxedRawContent,
+  });
+
+  await decideReviewRequest(1, { decision: "approve" }, reviewerActor, fakeClient);
+
+  assert.equal(fakeClient.insertedVersionFiles.length, 1);
+  assert.equal(fakeClient.insertedVersionFiles[0].path, "resources/reference.md");
+  assert.equal(fakeClient.insertedVersionFiles[0].skillVersionId, 42);
 });
 
 test("author cannot approve own request", async () => {
