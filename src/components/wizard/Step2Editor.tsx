@@ -166,6 +166,12 @@ export function Step2Editor({ content, onChange, onNext, onBack, onAcceptanceCha
     onAcceptanceChange?.(nextAccepted);
   }
 
+  function handleCategoryChange(slug: string) {
+    if (/  type: .+/m.test(content)) {
+      onChange(content.replace(/  type: .+/m, `  type: ${slug}`));
+    }
+  }
+
   return (
     <div>
       <div style={{ marginBottom: "20px" }}>
@@ -280,6 +286,56 @@ export function Step2Editor({ content, onChange, onNext, onBack, onAcceptanceCha
 
         {/* Publication responsibility panel */}
         <div style={{ position: "sticky", top: "72px" }}>
+          {/* Category selector */}
+          <div
+            style={{
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              borderRadius: "10px",
+              padding: "14px",
+              marginBottom: "16px",
+            }}
+          >
+            <div
+              style={{
+                fontFamily: "var(--font-jetbrains-mono), monospace",
+                fontSize: "11px",
+                letterSpacing: "0.6px",
+                textTransform: "uppercase",
+                color: "var(--muted)",
+                marginBottom: "8px",
+              }}
+            >
+              Categoría del skill
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+              {categories.map((cat) => {
+                const active = fm.metadata?.type === cat.slug;
+                return (
+                  <button
+                    key={cat.slug}
+                    type="button"
+                    onClick={() => handleCategoryChange(cat.slug)}
+                    style={{
+                      fontFamily: "var(--font-geist), sans-serif",
+                      fontSize: "12.5px",
+                      fontWeight: 600,
+                      padding: "7px 12px",
+                      borderRadius: "7px",
+                      border: `1px solid ${active ? cat.color : "var(--border)"}`,
+                      background: active ? `${cat.color}18` : "var(--bg)",
+                      color: active ? cat.color : "var(--muted)",
+                      cursor: "pointer",
+                      transition: "all .1s",
+                    }}
+                  >
+                    {cat.icon} {cat.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div
             style={{
               background: "var(--surface)",
