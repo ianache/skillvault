@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import matter from "gray-matter";
+import { Category } from "@/lib/types";
 
 interface Props {
   content: string;
@@ -19,6 +20,14 @@ export function Step2Editor({ content, onChange, onNext, onBack, onAcceptanceCha
   const [lineCount, setLineCount] = useState(() => countLines(content));
   const [acceptedResponsibility, setAcceptedResponsibility] = useState(false);
   const [activeTab, setActiveTab] = useState<"editor" | "preview">("editor");
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    fetch("/api/categories")
+      .then((r) => r.json())
+      .then((d) => { if (d.categories) setCategories(d.categories); })
+      .catch(() => {});
+  }, []);
 
   const validate = useCallback((text: string) => {
     setLineCount(countLines(text));
