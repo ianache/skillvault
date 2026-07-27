@@ -167,9 +167,12 @@ export function Step2Editor({ content, onChange, onNext, onBack, onAcceptanceCha
   }
 
   function handleCategoryChange(slug: string) {
-    if (/  type: .+/m.test(content)) {
-      onChange(content.replace(/  type: .+/m, `  type: ${slug}`));
-    }
+    if (!content.startsWith("---\n")) return;
+    const end = content.indexOf("\n---", 3);
+    if (end === -1) return;
+    const head = content.slice(0, end);
+    if (!/^  type: .+$/m.test(head)) return;
+    onChange(head.replace(/^  type: .+$/m, `  type: ${slug}`) + content.slice(end));
   }
 
   return (

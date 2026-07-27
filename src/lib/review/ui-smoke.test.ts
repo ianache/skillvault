@@ -143,7 +143,8 @@ test("LocalSkillLoader and PublishPage render skill loader layout", async () => 
   assert.match(loaderSource, /Seleccionar carpeta/);
   assert.match(loaderSource, /Subir archivo \.zip/);
   assert.match(loaderSource, /Cargar en el wizard/);
-  assert.match(pageSource, /maxWidth: "960px"/);
+  assert.match(pageSource, /<PageHeader\s+title="Publicar skill"/);
+  assert.doesNotMatch(pageSource, /Cargar Skill local/);
 });
 
 test("Step2 editor only gates continuation by line count and responsibility acceptance", async () => {
