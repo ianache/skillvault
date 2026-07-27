@@ -1,15 +1,23 @@
 import { NextResponse } from "next/server";
 import { client } from "@/lib/db";
 import { auth } from "@/auth";
+import { hasCapability } from "@/lib/auth/access-policy";
 
 async function requireAdmin() {
   const session = await auth();
-  return session?.user?.roles?.includes("admin") ?? false;
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!hasCapability(session.user.roles ?? [], "admin:manage")) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+  return null;
 }
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ slug: string }> }) {
-  if (!(await requireAdmin())) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const denial = await requireAdmin();
+  if (denial) {
+    return denial;
   }
 
   const { slug } = await params;
@@ -36,8 +44,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ slug: 
 }
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ slug: string }> }) {
-  if (!(await requireAdmin())) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const denial = await requireAdmin();
+  if (denial) {
+    return denial;
   }
 
   const { slug } = await params;

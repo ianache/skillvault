@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { PageHeader } from "@/components/PageHeader";
 import { UsersManager } from "@/components/UsersManager";
-import { decidePageAccess } from "@/lib/auth/access-policy";
+import { decidePageAccess, hasCapability } from "@/lib/auth/access-policy";
 import { ensureUser, listUsers } from "@/lib/users/service";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +15,10 @@ export default async function UsersPage() {
     redirect("/api/auth/signin");
   }
   const roles = session.user.roles ?? [];
-  if (decidePageAccess("/users", true, roles) === "catalog") {
+  if (
+    decidePageAccess("/users", true, roles) === "catalog" ||
+    !hasCapability(roles, "admin:manage")
+  ) {
     redirect("/");
   }
 

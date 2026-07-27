@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { hasCapability } from "@/lib/auth/access-policy";
 import { ensureUser, listUsers } from "@/lib/users/service";
 
 export async function GET() {
   const session = await auth();
-  if (!session?.user?.id || !session.user.roles?.includes("admin")) {
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!hasCapability(session.user.roles ?? [], "admin:manage")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

@@ -67,9 +67,9 @@ The propose → review → approve/reject pipeline for publishing skills (and ne
 
 ### Auth — roles come from Keycloak, not the database
 
-`src/auth.ts` wraps NextAuth v5 with a single Keycloak provider. Keycloak puts roles in `realm_access.roles` (realm) and `resource_access[clientId].roles` (client) — never a flat `roles` claim — so `extractKeycloakRoles()` merges both, deduped. It runs in `profile()` (initial sign-in) and again in `jwt()` as a fallback on token refresh when `user` is undefined but `profile` is still present. `session()` copies `token.roles` onto `session.user.roles`, which is what every role check above reads.
+`src/auth.ts` wraps NextAuth v5 with a single Keycloak provider. SkillVault authorization counts only client roles from `resource_access[AUTH_KEYCLOAK_ID].roles` and the client's dedicated flat `roles` claim. Realm roles are ignored. When no recognized client role (`user`, `admin`, `author`, `editor`, `reviewer`) exists, NextAuth assigns `user` as an effective JWT/session role only; it does not mutate Keycloak or the local users table. Page, navigation, service, and API authorization must use `src/lib/auth/access-policy.ts`.
 
-There is currently **no local `users`/`roles` table** — nothing is persisted about a user beyond the JWT. If you add DB-backed authorization data, remember `src/proxy.ts` runs at the edge/middleware boundary while `auth()` calls from Server Components/Route Handlers run in the normal Node runtime — `src/lib/db`'s drivers (`@libsql/client` in file mode, `mysql2`) are not edge-safe, so wiring DB reads into `src/auth.ts` callbacks risks breaking the middleware unless you're careful about where the query actually executes.
+There is currently **no local `users`/`roles` authorization source** — nothing about effective authorization is persisted beyond the JWT/session. If you add DB-backed authorization data, remember `src/proxy.ts` runs at the edge/middleware boundary while `auth()` calls from Server Components/Route Handlers run in the normal Node runtime — `src/lib/db`'s drivers (`@libsql/client` in file mode, `mysql2`) are not edge-safe, so wiring DB reads into `src/auth.ts` callbacks risks breaking the middleware unless you're careful about where the query actually executes.
 
 ### CLI (`cli/`) is a fully separate package
 
