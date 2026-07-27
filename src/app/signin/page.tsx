@@ -189,7 +189,7 @@ export default async function SignInPage({
               <path d="M11 11L3 19v2h2l8-8" />
               <path d="M16 6l2 2" />
             </svg>
-            Iniciar sesión con Keycloak
+            Login con Keycloak
           </button>
         </form>
 
