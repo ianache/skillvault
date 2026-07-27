@@ -25,10 +25,8 @@ function rowToUser(row: Record<string, unknown>): AppUser {
 }
 
 // Upserts the local profile row for the signed-in Keycloak user. Roles are
-// preserved across logins — only identity fields and last_login_at refresh.
-// On first creation, roles are seeded from the user's current Keycloak roles
-// (intersected with APP_ROLES) so the "Asignar roles" checkboxes start in a
-// sane state instead of always empty; after that, only this UI changes them.
+// updated/overwritten with current Keycloak roles on each login (intersected
+// with APP_ROLES).
 export async function ensureUser(user: { id: string; username: string; email: string; keycloakRoles?: string[] }): Promise<void> {
   const whereClauses = ["id = ?", "username = ?"];
   const args: unknown[] = [user.id, user.username];
@@ -43,13 +41,13 @@ export async function ensureUser(user: { id: string; username: string; email: st
   });
 
   const now = Math.floor(Date.now() / 1000);
+  const currentRoles = (user.keycloakRoles ?? []).filter((r): r is AppRole => APP_ROLES.includes(r as AppRole));
 
   if (existing.rows.length === 0) {
-    const seedRoles = (user.keycloakRoles ?? []).filter((r): r is AppRole => APP_ROLES.includes(r as AppRole));
     await client.execute({
       sql: `INSERT INTO users (id, username, full_name, email, roles, last_login_at, created_at, updated_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      args: [user.id, user.username, user.username, user.email, JSON.stringify(seedRoles), now, now, now],
+      args: [user.id, user.username, user.username, user.email, JSON.stringify(currentRoles), now, now, now],
     });
     return;
   }
@@ -58,9 +56,9 @@ export async function ensureUser(user: { id: string; username: string; email: st
   const primaryId = String(primary.id);
 
   await client.execute({
-    sql: `UPDATE users SET id = ?, username = ?, full_name = ?, email = ?, last_login_at = ?, updated_at = ?
+    sql: `UPDATE users SET id = ?, username = ?, full_name = ?, email = ?, roles = ?, last_login_at = ?, updated_at = ?
           WHERE id = ?`,
-    args: [user.id, user.username, user.username, user.email, now, now, primaryId],
+    args: [user.id, user.username, user.username, user.email, JSON.stringify(currentRoles), now, now, primaryId],
   });
 
   if (existing.rows.length > 1) {
