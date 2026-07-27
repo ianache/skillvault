@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { getNavigationGroups } from "./navigation";
 
 type Props = {
   collapsed: boolean;
@@ -11,44 +12,7 @@ type Props = {
 
 export function AppSidebar({ collapsed, onToggleCollapse, userRoles = [] }: Props) {
   const pathname = usePathname();
-  const isAdmin = userRoles.includes("admin");
-  const isReviewer = userRoles.includes("reviewer") || isAdmin;
-
-  const navGroups = [
-    {
-      title: "Exploración",
-      items: [
-        { label: "Catálogo", href: "/", icon: "🔍" },
-        { label: "Publicar skill", href: "/publish", icon: "➕" },
-      ],
-    },
-    {
-      title: "Mi Contenido",
-      items: [
-        { label: "Mis Skills", href: "/dashboard", icon: "📦" },
-        { label: "Mis propuestas", href: "/proposals", icon: "📝" },
-      ],
-    },
-    ...(isReviewer
-      ? [
-          {
-            title: "Revisión",
-            items: [
-              { label: "Cola de revisión", href: "/review", icon: "🛡️" },
-              { label: "Categorías", href: "/categories", icon: "🏷️" },
-            ],
-          },
-        ]
-      : []),
-    ...(isAdmin
-      ? [
-          {
-            title: "Administración",
-            items: [{ label: "Usuarios y roles", href: "/users", icon: "👥" }],
-          },
-        ]
-      : []),
-  ];
+  const navGroups = getNavigationGroups(userRoles);
 
   return (
     <aside
@@ -80,7 +44,7 @@ export function AppSidebar({ collapsed, onToggleCollapse, userRoles = [] }: Prop
           style={{ background: "transparent", border: "none", color: "var(--muted)", cursor: "pointer", padding: "4px", borderRadius: "4px" }}
           title={collapsed ? "Expandir sidebar" : "Colapsar sidebar"}
         >
-          {collapsed ? "❯" : "❮"}
+          {collapsed ? "\u276F" : "\u276E"}
         </button>
       </div>
 
