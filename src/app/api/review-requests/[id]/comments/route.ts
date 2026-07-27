@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { client } from "@/lib/db";
 import { addReviewComment } from "@/lib/review/service";
 import type { AddReviewCommentInput } from "@/lib/review/types";
-import { actorFromSession, errorResponse, parseRequestId, requestBody } from "../../route-utils";
+import { actorFromSession, capabilityError, errorResponse, parseRequestId, requestBody } from "../../route-utils";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -11,6 +11,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
   const session = await auth();
   const actor = session ? actorFromSession(session) : null;
   if (!actor) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const forbidden = capabilityError(actor, "content:manage");
+  if (forbidden) return forbidden;
   const id = parseRequestId((await context.params).id);
   if (!id) return NextResponse.json({ error: "Invalid review request id" }, { status: 422 });
   try {

@@ -37,6 +37,24 @@ const authorSession = {
   },
 };
 
+const editorSession = {
+  user: {
+    id: "editor-1",
+    name: "Editor",
+    email: "editor@example.test",
+    roles: ["editor"],
+  },
+};
+
+const userSession = {
+  user: {
+    id: "user-1",
+    name: "Fallback User",
+    email: "user@example.com",
+    roles: ["user"],
+  },
+};
+
 const validRawContent = `---
 name: demo-skill
 description: A complete enough description for the demo review skill.
@@ -100,7 +118,7 @@ test("POST /api/skills creates a review request instead of a published skill", a
   const executedSql: string[] = [];
   let createInput: unknown;
   const { POST } = createSkillHandlers({
-    getSession: async () => authorSession as never,
+    getSession: async () => editorSession as never,
     database: {
       async execute(input) {
         executedSql.push(typeof input === "string" ? input : input.sql);
@@ -135,7 +153,7 @@ test("POST /api/skills creates a review request instead of a published skill", a
 test("POST /api/skills accepts relaxed draft submissions with responsibility consent", async () => {
   let createInput: unknown;
   const { POST } = createSkillHandlers({
-    getSession: async () => authorSession as never,
+    getSession: async () => editorSession as never,
     database,
     create: async (input) => {
       createInput = input;
@@ -169,7 +187,7 @@ test("POST /api/skills accepts relaxed draft submissions with responsibility con
 test("POST /api/skills rejects relaxed submissions without responsibility consent", async () => {
   let called = false;
   const { POST } = createSkillHandlers({
-    getSession: async () => authorSession as never,
+    getSession: async () => editorSession as never,
     database,
     create: async () => {
       called = true;
@@ -190,7 +208,7 @@ test("POST /api/skills rejects relaxed submissions without responsibility consen
 test("POST /api/skills rejects submissions over 300 lines", async () => {
   let called = false;
   const { POST } = createSkillHandlers({
-    getSession: async () => authorSession as never,
+    getSession: async () => editorSession as never,
     database,
     create: async () => {
       called = true;
@@ -215,7 +233,7 @@ test("POST /api/skills rejects submissions over 300 lines", async () => {
 test("POST /api/skills accepts 300 content lines with a final newline", async () => {
   let createInput: unknown;
   const { POST } = createSkillHandlers({
-    getSession: async () => authorSession as never,
+    getSession: async () => editorSession as never,
     database,
     create: async (input) => {
       createInput = input;
@@ -457,6 +475,48 @@ test("unauthenticated create returns 401", async () => {
   );
 
   assert.equal(response.status, 401);
+});
+
+test("user role receives 403 before creating a skill review request", async () => {
+  let createCalled = false;
+  const { POST } = createSkillHandlers({
+    getSession: async () => userSession as never,
+    create: async () => {
+      createCalled = true;
+      throw new Error("must not run");
+    },
+  });
+
+  const response = await POST(new NextRequest("http://localhost/api/skills", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      rawContent: validRawContent,
+      files: [],
+      acceptedResponsibility: true,
+    }),
+  }));
+
+  assert.equal(response.status, 403);
+  assert.equal(createCalled, false);
+});
+
+test("user role receives 403 before entering review request APIs", async () => {
+  let listCalled = false;
+  const { GET } = createReviewRequestsHandlers({
+    getSession: async () => userSession as never,
+    list: async () => {
+      listCalled = true;
+      throw new Error("must not run");
+    },
+  });
+
+  const response = await GET(
+    new NextRequest("http://localhost/api/review-requests")
+  );
+
+  assert.equal(response.status, 403);
+  assert.equal(listCalled, false);
 });
 
 test("invalid decision returns 422 without mutating review state", async () => {

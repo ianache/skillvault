@@ -86,8 +86,11 @@ Follow these instructions.`;
 const sameVersionRawContent = higherVersionRawContent.replace("version: 1.1.0", "version: 1.0.0");
 const lowerVersionRawContent = higherVersionRawContent.replace("version: 1.1.0", "version: 0.9.0");
 
+const userActor: ReviewActor = { id: "user-1", handle: "user", roles: ["user"] };
 const authorActor: ReviewActor = { id: "author-1", handle: "author", roles: ["author"] };
+const editorActor: ReviewActor = { id: "author-1", handle: "editor", roles: ["editor"] };
 const reviewerActor: ReviewActor = { id: "reviewer-1", handle: "reviewer", roles: ["reviewer"] };
+const authorReviewerActor: ReviewActor = { id: "author-1", handle: "reviewer", roles: ["reviewer"] };
 const adminActor: ReviewActor = { id: "admin-1", handle: "admin", roles: ["admin"] };
 
 type FakeClient = ReviewDatabaseClient & {
@@ -234,10 +237,55 @@ function createFakeClient(
   return fakeClient;
 }
 
-test("author creates pending request for a new skill", async () => {
+test("user role cannot create a review request", async () => {
+  await assert.rejects(
+    () => createReviewRequest(
+      {
+        rawContent: validRawContent,
+        files: [],
+        acceptedResponsibility: true,
+      },
+      userActor,
+      createFakeClient()
+    ),
+    /not allowed/
+  );
+});
+
+test("user role cannot edit or inspect review workflow state", async () => {
+  const fakeClient = createFakeClient();
+  await assert.rejects(
+    () => updateReviewRequest(
+      1,
+      { rawContent: validRawContent, files: [] },
+      userActor,
+      fakeClient
+    ),
+    /not allowed/
+  );
+  await assert.rejects(
+    () => listReviewRequests({}, userActor, fakeClient),
+    /not allowed/
+  );
+});
+
+test("editor role can create review requests", async () => {
+  const request = await createReviewRequest(
+    {
+      rawContent: validRawContent,
+      files: [],
+      acceptedResponsibility: true,
+    },
+    editorActor,
+    createFakeClient()
+  );
+  assert.equal(request.status, "pending");
+});
+
+test("editor creates pending request for a new skill", async () => {
   const request = await createReviewRequest(
     { rawContent: validRawContent, files: [], acceptedResponsibility: true },
-    authorActor,
+    editorActor,
     createFakeClient()
   );
   assert.equal(request.status, "pending");
@@ -248,7 +296,7 @@ test("rejects a new-skill submission when a skill with the same slug already exi
   await assert.rejects(
     () => createReviewRequest(
       { rawContent: validRawContent, files: [], acceptedResponsibility: true },
-      authorActor,
+      editorActor,
       createFakeClient([], {}, { existingSkill: true })
     ),
     /already exists/
@@ -259,7 +307,7 @@ test("createReviewRequest rejects a version submission equal to the currently pu
   await assert.rejects(
     () => createReviewRequest(
       { rawContent: sameVersionRawContent, files: [], acceptedResponsibility: true, skillId: 7 },
-      authorActor,
+      editorActor,
       createFakeClient([], {}, { publishedVersion: "1.0.0" })
     ),
     /invalida/
@@ -270,7 +318,7 @@ test("createReviewRequest rejects a version submission lower than the currently 
   await assert.rejects(
     () => createReviewRequest(
       { rawContent: lowerVersionRawContent, files: [], acceptedResponsibility: true, skillId: 7 },
-      authorActor,
+      editorActor,
       createFakeClient([], {}, { publishedVersion: "1.0.0" })
     ),
     /invalida/
@@ -281,7 +329,7 @@ test("createReviewRequest accepts a version submission greater than the currentl
   const fakeClient = createFakeClient([], {}, { publishedVersion: "1.0.0" });
   const request = await createReviewRequest(
     { rawContent: higherVersionRawContent, files: [], acceptedResponsibility: true, skillId: 7 },
-    authorActor,
+    editorActor,
     fakeClient
   );
   assert.equal(request.status, "pending");
@@ -312,7 +360,7 @@ test("createReviewRequest stores relaxed draft metadata when responsibility is a
 
   await createReviewRequest(
     { rawContent: relaxedRawContent, files: [], acceptedResponsibility: true },
-    authorActor,
+    editorActor,
     fakeClient
   );
 
@@ -324,7 +372,7 @@ test("createReviewRequest rejects relaxed drafts over 300 lines", async () => {
   await assert.rejects(
     () => createReviewRequest(
       { rawContent: overLineLimitRawContent, files: [], acceptedResponsibility: true },
-      authorActor,
+      editorActor,
       createFakeClient()
     ),
     /Maximo 300 lineas/
@@ -334,7 +382,7 @@ test("createReviewRequest rejects relaxed drafts over 300 lines", async () => {
 test("createReviewRequest accepts 300 content lines with a final newline", async () => {
   await createReviewRequest(
     { rawContent: maxLineLimitWithTerminalNewlineRawContent, files: [], acceptedResponsibility: true },
-    authorActor,
+    editorActor,
     createFakeClient([], {
       slug: "draft-skill",
       name: "draft-skill",
@@ -353,7 +401,7 @@ test("createReviewRequest falls back to default description for short frontmatte
 
   await createReviewRequest(
     { rawContent: shortDescriptionRawContent, files: [], acceptedResponsibility: true },
-    authorActor,
+    editorActor,
     fakeClient
   );
 
@@ -371,7 +419,7 @@ test("createReviewRequest accepts malformed YAML frontmatter as relaxed draft co
 
   await createReviewRequest(
     { rawContent: malformedFrontmatterRawContent, files: [], acceptedResponsibility: true },
-    authorActor,
+    editorActor,
     fakeClient
   );
 
@@ -417,7 +465,7 @@ test("approval archives attached files into skill_version_files, excluding delet
 
 test("author cannot approve own request", async () => {
   await assert.rejects(
-    () => decideReviewRequest(1, { decision: "approve" }, authorActor, createFakeClient()),
+    () => decideReviewRequest(1, { decision: "approve" }, authorReviewerActor, createFakeClient()),
     /cannot approve own request/
   );
 });

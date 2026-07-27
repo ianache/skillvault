@@ -1,6 +1,6 @@
 import matter from "gray-matter";
 import { validateBodySections, validateSkillFrontmatter } from "@/lib/skill-schema";
-import { assertCanEditRequest, canReview, hasRole } from "./auth";
+import { assertCanEditRequest, canManageContent, canPublish, canReview } from "./auth";
 import { validateReviewFilePath } from "./files";
 import type {
   AddReviewCommentInput,
@@ -357,6 +357,9 @@ export async function createReviewRequest(
   actor: ReviewActor,
   client: ReviewDatabaseClient
 ): Promise<ReviewRequest> {
+  if (!canPublish(actor)) {
+    throw new Error("Publishing is not allowed for this role");
+  }
   if (input.acceptedResponsibility !== true) throw new Error("Debes aceptar continuar con la publicacion");
   const { frontmatter, files } = relaxedSubmission(input.rawContent, input.files);
 
@@ -418,6 +421,9 @@ export async function updateReviewRequest(
   actor: ReviewActor,
   client: ReviewDatabaseClient
 ): Promise<ReviewRequest> {
+  if (!canManageContent(actor)) {
+    throw new Error("Review workflow is not allowed for this role");
+  }
   const request = await getRequestRow(id, client);
   assertCanEditRequest(actor, request);
   const { frontmatter, files } = relaxedSubmission(input.rawContent, input.files);
@@ -452,6 +458,9 @@ export async function getReviewStatusCounts(
   options: { mine?: boolean } = {},
   client: ReviewDatabaseClient
 ): Promise<ReviewStatusCounts> {
+  if (!canManageContent(actor)) {
+    throw new Error("Review workflow is not allowed for this role");
+  }
   const isMine = options.mine ?? !canReview(actor);
   const whereClause = isMine ? "WHERE author_id = ?" : "";
   const args = isMine ? [actor.id] : [];
@@ -486,6 +495,9 @@ export async function listReviewRequests(
   actor: ReviewActor,
   client: ReviewDatabaseClient
 ): Promise<ReviewRequestSummary[]> {
+  if (!canManageContent(actor)) {
+    throw new Error("Review workflow is not allowed for this role");
+  }
   const clauses: string[] = [];
   const args: unknown[] = [];
   if (query.mine || !canReview(actor)) {
@@ -513,8 +525,11 @@ export async function getReviewRequest(
   actor: ReviewActor,
   client: ReviewDatabaseClient
 ): Promise<ReviewRequestDetailDto> {
+  if (!canManageContent(actor)) {
+    throw new Error("Review workflow is not allowed for this role");
+  }
   const request = await getRequestRow(id, client);
-  if (request.authorId !== actor.id && !canReview(actor) && !hasRole(actor, "admin")) {
+  if (request.authorId !== actor.id && !canReview(actor)) {
     throw new Error("Not allowed to view this request");
   }
   const [files, comments] = await Promise.all([
@@ -530,6 +545,9 @@ export async function addReviewComment(
   actor: ReviewActor,
   client: ReviewDatabaseClient
 ): Promise<ReviewComment> {
+  if (!canManageContent(actor)) {
+    throw new Error("Review workflow is not allowed for this role");
+  }
   const request = await getReviewRequest(id, actor, client);
   const body = input.body.trim();
   if (!body) throw new Error("Comment is required");
@@ -560,9 +578,9 @@ export async function decideReviewRequest(
   client: ReviewDatabaseClient
 ): Promise<ReviewRequest> {
   assertValidDecision(input);
+  if (!canReview(actor)) throw new Error("Reviewer role is required");
   const request = await getRequestRow(id, client);
   if (request.authorId === actor.id) throw new Error("Author cannot approve own request");
-  if (!canReview(actor)) throw new Error("Reviewer role is required");
   if (request.status !== "pending" && request.status !== "changes_requested") {
     throw new Error("Review request is not active");
   }

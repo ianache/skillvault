@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { client } from "@/lib/db";
 import { getReviewRequest, updateReviewRequest } from "@/lib/review/service";
 import type { UpdateReviewRequestInput } from "@/lib/review/types";
-import { actorFromSession, errorResponse, parseRequestId, requestBody } from "../route-utils";
+import { actorFromSession, capabilityError, errorResponse, parseRequestId, requestBody } from "../route-utils";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -19,6 +19,8 @@ async function requestId(context: RouteContext) {
 export async function GET(_request: NextRequest, context: RouteContext) {
   const actor = await requireActor();
   if (!actor) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const forbidden = capabilityError(actor, "content:manage");
+  if (forbidden) return forbidden;
   const id = await requestId(context);
   if (!id) return NextResponse.json({ error: "Invalid review request id" }, { status: 422 });
   try {
@@ -32,6 +34,8 @@ export async function GET(_request: NextRequest, context: RouteContext) {
 export async function PATCH(request: NextRequest, context: RouteContext) {
   const actor = await requireActor();
   if (!actor) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const forbidden = capabilityError(actor, "content:manage");
+  if (forbidden) return forbidden;
   const id = await requestId(context);
   if (!id) return NextResponse.json({ error: "Invalid review request id" }, { status: 422 });
   try {

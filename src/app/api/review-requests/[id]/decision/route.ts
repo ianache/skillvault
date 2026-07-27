@@ -4,7 +4,7 @@ import { client } from "@/lib/db";
 import { decideReviewRequest } from "@/lib/review/service";
 import type { Session } from "next-auth";
 import type { DecideReviewRequestInput, ReviewDatabaseClient } from "@/lib/review/types";
-import { actorFromSession, errorResponse, parseRequestId, requestBody } from "../../route-utils";
+import { actorFromSession, capabilityError, errorResponse, parseRequestId, requestBody } from "../../route-utils";
 
 type RouteContext = { params: Promise<{ id: string }> };
 type DecisionRouteDeps = {
@@ -37,6 +37,8 @@ export function createReviewDecisionHandlers({
     const session = await getSession();
     const actor = session ? actorFromSession(session) : null;
     if (!actor) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const forbidden = capabilityError(actor, "review:manage");
+    if (forbidden) return forbidden;
     const id = parseRequestId((await context.params).id);
     if (!id) return NextResponse.json({ error: "Invalid review request id" }, { status: 422 });
     try {

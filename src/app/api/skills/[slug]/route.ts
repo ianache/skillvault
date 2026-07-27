@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { client } from "@/lib/db";
 import { createReviewRequest, updateReviewRequest } from "@/lib/review/service";
-import { actorFromSession, errorResponse } from "../../review-requests/route-utils";
+import { actorFromSession, capabilityError, errorResponse } from "../../review-requests/route-utils";
 import { skillSubmissionBody } from "../route";
 import type { Session } from "next-auth";
 import type { CreateReviewRequestInput, ReviewActor, ReviewDatabaseClient, ReviewRequest, UpdateReviewRequestInput } from "@/lib/review/types";
@@ -106,6 +106,8 @@ export function createSkillDetailHandlers(dependencies: Partial<RouteDependencie
     const session = await getSession();
     const actor = session ? actorFromSession(session) : null;
     if (!actor) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const forbidden = capabilityError(actor, "content:manage");
+    if (forbidden) return forbidden;
 
     const { slug } = await params;
     const skill = await database.execute({

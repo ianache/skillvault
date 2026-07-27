@@ -4,7 +4,7 @@ import { client } from "@/lib/db";
 import { createReviewRequest, getReviewStatusCounts, listReviewRequests } from "@/lib/review/service";
 import type { Session } from "next-auth";
 import type { CreateReviewRequestInput, ReviewDatabaseClient } from "@/lib/review/types";
-import { actorFromSession, errorResponse, parseReviewStatus, requestBody } from "./route-utils";
+import { actorFromSession, capabilityError, errorResponse, parseReviewStatus, requestBody } from "./route-utils";
 
 type RouteDependencies = {
   getSession: () => Promise<Session | null>;
@@ -29,6 +29,8 @@ export function createReviewRequestsHandlers(dependencies: Partial<RouteDependen
   async function GET(request: NextRequest) {
     const actor = await requireActor();
     if (!actor) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const forbidden = capabilityError(actor, "content:manage");
+    if (forbidden) return forbidden;
     const status = parseReviewStatus(request.nextUrl.searchParams.get("status"));
     if (status === null) return NextResponse.json({ error: "Invalid review request status" }, { status: 422 });
     try {
@@ -46,6 +48,8 @@ export function createReviewRequestsHandlers(dependencies: Partial<RouteDependen
   async function POST(request: NextRequest) {
     const actor = await requireActor();
     if (!actor) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const forbidden = capabilityError(actor, "publish:create");
+    if (forbidden) return forbidden;
     try {
       const input = await requestBody(request) as CreateReviewRequestInput;
       const reviewRequest = await create(input, actor, database);

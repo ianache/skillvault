@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import type { Session } from "next-auth";
+import {
+  hasCapability,
+  type SkillVaultCapability,
+} from "@/lib/auth/access-policy";
 import type { ReviewActor, ReviewStatus } from "@/lib/review/types";
 
 const reviewStatuses: ReviewStatus[] = ["pending", "changes_requested", "approved", "rejected"];
@@ -9,6 +13,15 @@ export function actorFromSession(session: Session): ReviewActor | null {
   if (!user?.id) return null;
 
   return { id: user.id, handle: user.name ?? user.email ?? null, roles: user.roles ?? [] };
+}
+
+export function capabilityError(
+  actor: ReviewActor,
+  capability: SkillVaultCapability,
+) {
+  return hasCapability(actor.roles, capability)
+    ? null
+    : NextResponse.json({ error: "Forbidden" }, { status: 403 });
 }
 
 export function parseRequestId(value: string): number | null {

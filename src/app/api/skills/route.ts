@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { client } from "@/lib/db";
 import { createReviewRequest } from "@/lib/review/service";
 import type { CreateReviewRequestInput, ReviewActor, ReviewDatabaseClient, ReviewFileInput, ReviewRequest } from "@/lib/review/types";
-import { actorFromSession, errorResponse } from "../review-requests/route-utils";
+import { actorFromSession, capabilityError, errorResponse } from "../review-requests/route-utils";
 import type { Session } from "next-auth";
 
 type RouteDependencies = {
@@ -140,6 +140,8 @@ export function createSkillHandlers(dependencies: Partial<RouteDependencies> = {
     const session = await getSession();
     const actor = session ? actorFromSession(session) : null;
     if (!actor) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const forbidden = capabilityError(actor, "publish:create");
+    if (forbidden) return forbidden;
 
     let input: CreateReviewRequestInput | null;
     try {
