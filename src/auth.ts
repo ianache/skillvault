@@ -5,6 +5,7 @@ import {
   normalizeSkillVaultRoles,
   resolveSkillVaultJwtRoles,
 } from "@/lib/auth/role-policy";
+import { ensureUser } from "@/lib/users/service";
 
 export const authConfig: NextAuthConfig = {
   trustHost: true,
@@ -31,6 +32,17 @@ export const authConfig: NextAuthConfig = {
     }),
   ],
   callbacks: {
+    async signIn({ user }) {
+      if (user?.id) {
+        await ensureUser({
+          id: user.id,
+          username: user.name ?? user.email ?? user.id,
+          email: user.email ?? "",
+          keycloakRoles: (user as any).roles,
+        });
+      }
+      return true;
+    },
     redirect({ url, baseUrl }) {
       const issuer = process.env.AUTH_KEYCLOAK_ISSUER;
       // Allow redirecting to Keycloak issuer URL
