@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { WizardLayout } from "@/components/wizard/WizardLayout";
 import { PageHeader } from "@/components/PageHeader";
@@ -89,54 +88,8 @@ export default function PublishPage() {
     return (
       <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
         <PageHeader title="Publicar skill" description="Carga un SKILL.md local o crea uno nuevo desde cero." />
-        {/* Header navigation bar styled like AppTopBar */}
-        <header
-          style={{
-            height: "56px",
-            borderBottom: "1px solid var(--border)",
-            display: "flex",
-            alignItems: "center",
-            padding: "0 24px",
-            gap: "14px",
-            position: "sticky",
-            top: 0,
-            background: "var(--bg)",
-            zIndex: 20,
-          }}
-        >
-          <nav style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12.5px" }}>
-            <Link
-              href="/"
-              title="Inicio"
-              style={{
-                color: "var(--muted)",
-                textDecoration: "none",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "4px",
-                fontWeight: 500,
-              }}
-            >
-              <span>🏠</span>
-              <span>Inicio</span>
-            </Link>
-            <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-              <span style={{ color: "var(--faint)" }}>/</span>
-              <Link
-                href="/publish"
-                style={{ color: "var(--muted)", textDecoration: "none", fontWeight: 500 }}
-              >
-                Publicar skill
-              </Link>
-            </span>
-            <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-              <span style={{ color: "var(--faint)" }}>/</span>
-              <span style={{ fontWeight: 600, color: "var(--text)" }}>Cargar Skill local</span>
-            </span>
-          </nav>
-        </header>
 
-        <div style={{ maxWidth: "680px", margin: "40px auto", padding: "0 24px" }}>
+        <div style={{ maxWidth: "960px", margin: "0 auto", padding: "44px 32px 80px" }}>
           <LocalSkillLoader
             onLoaded={handleLoaded}
             onSkip={() => setStep(1)}
