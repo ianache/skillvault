@@ -415,6 +415,22 @@ test("approval archives attached files into skill_version_files, excluding delet
   assert.equal(fakeClient.insertedVersionFiles[0].skillVersionId, 42);
 });
 
+test("approval rejects a stale version after a newer version has already been published", async () => {
+  const fakeClient = createFakeClient(
+    [],
+    { skill_id: 7, version: "1.1.0" },
+    { publishedVersion: "1.2.0" }
+  );
+
+  await assert.rejects(
+    () => decideReviewRequest(1, { decision: "approve" }, reviewerActor, fakeClient),
+    /invalida/
+  );
+
+  assert.equal(fakeClient.insertedVersion, undefined);
+  assert.equal(fakeClient.updatedRequest, undefined);
+});
+
 test("author cannot approve own request", async () => {
   await assert.rejects(
     () => decideReviewRequest(1, { decision: "approve" }, authorActor, createFakeClient()),
