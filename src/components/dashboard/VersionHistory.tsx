@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface Version {
   version: string;
@@ -25,6 +25,7 @@ export function VersionHistory({ slug, refreshKey }: Props) {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [detail, setDetail] = useState<VersionDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const detailRequestId = useRef(0);
 
   useEffect(() => {
     setLoading(true);
@@ -36,6 +37,7 @@ export function VersionHistory({ slug, refreshKey }: Props) {
   }, [slug, refreshKey]);
 
   async function toggleExpand(version: string) {
+    const requestId = ++detailRequestId.current;
     if (expanded === version) {
       setExpanded(null);
       setDetail(null);
@@ -47,11 +49,17 @@ export function VersionHistory({ slug, refreshKey }: Props) {
     try {
       const res = await fetch(`/api/skills/${slug}/versions/${version}`);
       const data = await res.json();
-      setDetail(res.ok ? data : null);
+      if (detailRequestId.current === requestId) {
+        setDetail(res.ok ? data : null);
+      }
     } catch {
-      setDetail(null);
+      if (detailRequestId.current === requestId) {
+        setDetail(null);
+      }
     } finally {
-      setDetailLoading(false);
+      if (detailRequestId.current === requestId) {
+        setDetailLoading(false);
+      }
     }
   }
 
@@ -214,7 +222,14 @@ export function VersionHistory({ slug, refreshKey }: Props) {
                     </pre>
                     {detail.files.length > 0 && (
                       <div style={{ fontSize: "11px", color: "var(--muted)", marginTop: "6px" }}>
-                        {detail.files.length} archivo{detail.files.length > 1 ? "s" : ""} adjunto{detail.files.length > 1 ? "s" : ""}: {detail.files.map((f) => f.path).join(", ")}
+                        <div>
+                          {detail.files.length} archivo{detail.files.length > 1 ? "s" : ""} adjunto{detail.files.length > 1 ? "s" : ""}:
+                        </div>
+                        <div style={{ marginTop: "3px", maxHeight: "88px", overflowY: "auto", overflowX: "hidden" }}>
+                          {detail.files.map((f) => (
+                            <div key={f.path} style={{ overflowWrap: "anywhere" }}>{f.path}</div>
+                          ))}
+                        </div>
                       </div>
                     )}
                     <button
