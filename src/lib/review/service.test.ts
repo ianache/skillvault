@@ -282,6 +282,39 @@ test("editor role can create review requests", async () => {
   assert.equal(request.status, "pending");
 });
 
+test("author role can create a review request for an existing skill edit", async () => {
+  const fakeClient = createFakeClient([], {}, { publishedVersion: "1.0.0" });
+
+  const request = await createReviewRequest(
+    {
+      rawContent: higherVersionRawContent,
+      files: [],
+      acceptedResponsibility: true,
+      skillId: 7,
+    },
+    authorActor,
+    fakeClient
+  );
+
+  assert.equal(request.status, "pending");
+  assert.equal(fakeClient.insertedReviewRequest?.skillId, 7);
+});
+
+test("author role cannot create a review request for a new skill", async () => {
+  await assert.rejects(
+    () => createReviewRequest(
+      {
+        rawContent: validRawContent,
+        files: [],
+        acceptedResponsibility: true,
+      },
+      authorActor,
+      createFakeClient()
+    ),
+    /Publishing is not allowed/
+  );
+});
+
 test("editor creates pending request for a new skill", async () => {
   const request = await createReviewRequest(
     { rawContent: validRawContent, files: [], acceptedResponsibility: true },
@@ -510,6 +543,16 @@ test("invalid review decision is rejected", async () => {
     () => decideReviewRequest(1, { decision: "anything" as never }, reviewerActor, createFakeClient()),
     /Invalid review decision/
   );
+});
+
+test("unauthorized reviewer receives authorization denial before decision validation", async () => {
+  const fakeClient = createFakeClient();
+
+  await assert.rejects(
+    () => decideReviewRequest(1, { decision: "anything" as never }, authorActor, fakeClient),
+    /Reviewer role is required/
+  );
+  assert.equal(fakeClient.commands.length, 0);
 });
 
 test("admin cannot edit another author's request", async () => {

@@ -1,6 +1,6 @@
 import matter from "gray-matter";
 import { validateBodySections, validateSkillFrontmatter } from "@/lib/skill-schema";
-import { assertCanEditRequest, canManageContent, canPublish, canReview } from "./auth";
+import { assertCanCreateReviewRequest, assertCanEditRequest, canManageContent, canReview } from "./auth";
 import { validateReviewFilePath } from "./files";
 import type {
   AddReviewCommentInput,
@@ -357,9 +357,7 @@ export async function createReviewRequest(
   actor: ReviewActor,
   client: ReviewDatabaseClient
 ): Promise<ReviewRequest> {
-  if (!canPublish(actor)) {
-    throw new Error("Publishing is not allowed for this role");
-  }
+  assertCanCreateReviewRequest(actor, input);
   if (input.acceptedResponsibility !== true) throw new Error("Debes aceptar continuar con la publicacion");
   const { frontmatter, files } = relaxedSubmission(input.rawContent, input.files);
 
@@ -577,8 +575,8 @@ export async function decideReviewRequest(
   actor: ReviewActor,
   client: ReviewDatabaseClient
 ): Promise<ReviewRequest> {
-  assertValidDecision(input);
   if (!canReview(actor)) throw new Error("Reviewer role is required");
+  assertValidDecision(input);
   const request = await getRequestRow(id, client);
   if (request.authorId === actor.id) throw new Error("Author cannot approve own request");
   if (request.status !== "pending" && request.status !== "changes_requested") {

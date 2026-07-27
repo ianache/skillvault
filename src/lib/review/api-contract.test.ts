@@ -89,6 +89,7 @@ const overLineLimitRawContent = Array.from({ length: 301 }, (_, index) => `line 
 const maxLineLimitWithTerminalNewlineRawContent = `${Array.from({ length: 300 }, (_, index) => `line ${index + 1}`).join("\n")}\n`;
 
 const updatedRawContent = validRawContent.replace("Follow these instructions.", "Follow the updated instructions.");
+const higherVersionRawContent = updatedRawContent.replace("version: 1.0.0", "version: 1.1.0");
 
 function reviewRequest(overrides: Partial<ReviewRequest> = {}): ReviewRequest {
   return {
@@ -358,6 +359,69 @@ test("PATCH /api/skills/:slug creates a review request without requiring respons
   });
 });
 
+test("PATCH /api/skills/:slug allows an author to create an existing-skill review request", async () => {
+  let insertedReviewRequest: Record<string, unknown> | undefined;
+  const publishedFiles = [{ path: "resources/reference.md", fileType: "resource", content: "Reference" }];
+  const { PATCH } = createSkillDetailHandlers({
+    getSession: async () => authorSession as never,
+    database: {
+      async execute(input) {
+        const sql = typeof input === "string" ? input : input.sql;
+        const args = typeof input === "string" ? [] : input.args ?? [];
+        if (sql.includes("SELECT id, raw_content FROM skills")) {
+          return { rows: [{ id: 4, raw_content: validRawContent }] };
+        }
+        if (sql.includes("SELECT path, file_type, content FROM skill_files")) {
+          return { rows: publishedFiles.map((file) => ({ path: file.path, file_type: file.fileType, content: file.content })) };
+        }
+        if (sql.includes("SELECT id FROM skill_review_requests") && sql.includes("skill_id = ?")) {
+          return { rows: [] };
+        }
+        if (sql.includes("SELECT version FROM skills WHERE id = ?")) {
+          return { rows: [{ version: "1.0.0" }] };
+        }
+        if (sql.includes("SELECT id FROM skill_review_requests") && sql.includes("slug = ?")) {
+          return { rows: [] };
+        }
+        if (sql.includes("INSERT INTO skill_review_requests")) {
+          insertedReviewRequest = {
+            skillId: args[0],
+            slug: args[1],
+            authorId: args[7],
+          };
+          return { rows: [] };
+        }
+        if (sql.includes("SELECT * FROM skill_review_requests") && sql.includes("ORDER BY id DESC")) {
+          return { rows: [reviewRequest({ id: 12, skillId: 4, version: "1.1.0", rawContent: higherVersionRawContent })] };
+        }
+        if (sql.includes("DELETE FROM skill_review_files")) {
+          return { rows: [] };
+        }
+        if (sql.includes("INSERT INTO skill_review_files")) {
+          return { rows: [] };
+        }
+        throw new Error(`Unexpected query: ${sql}`);
+      },
+    },
+  });
+
+  const response = await PATCH(
+    new NextRequest("http://test/api/skills/demo-skill", {
+      method: "PATCH",
+      body: JSON.stringify({ rawContent: higherVersionRawContent }),
+    }),
+    { params: Promise.resolve({ slug: "demo-skill" }) }
+  );
+
+  assert.equal(response.status, 201);
+  assert.deepEqual(await response.json(), { slug: "demo-skill", reviewRequestId: 12, status: "pending" });
+  assert.deepEqual(insertedReviewRequest, {
+    skillId: 4,
+    slug: "demo-skill",
+    authorId: "author-1",
+  });
+});
+
 test("catalog excludes pending review requests", async () => {
   let catalogSql = "";
   const { GET } = createSkillHandlers({
@@ -481,6 +545,30 @@ test("user role receives 403 before creating a skill review request", async () =
   let createCalled = false;
   const { POST } = createSkillHandlers({
     getSession: async () => userSession as never,
+    create: async () => {
+      createCalled = true;
+      throw new Error("must not run");
+    },
+  });
+
+  const response = await POST(new NextRequest("http://localhost/api/skills", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      rawContent: validRawContent,
+      files: [],
+      acceptedResponsibility: true,
+    }),
+  }));
+
+  assert.equal(response.status, 403);
+  assert.equal(createCalled, false);
+});
+
+test("author role receives 403 before creating a new skill review request", async () => {
+  let createCalled = false;
+  const { POST } = createSkillHandlers({
+    getSession: async () => authorSession as never,
     create: async () => {
       createCalled = true;
       throw new Error("must not run");

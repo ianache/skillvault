@@ -13,6 +13,21 @@ export function canPublish(actor: ReviewActor): boolean {
   return hasCapability(actor.roles, "publish:create");
 }
 
+export function assertCanCreateReviewRequest(
+  actor: ReviewActor,
+  input: { skillId?: number | null },
+): void {
+  if (input.skillId) {
+    if (!canManageContent(actor)) {
+      throw new Error("Review workflow is not allowed for this role");
+    }
+    return;
+  }
+  if (!canPublish(actor)) {
+    throw new Error("Publishing is not allowed for this role");
+  }
+}
+
 export function assertCanEditRequest(
   actor: ReviewActor,
   request: { authorId: string; status: string },
