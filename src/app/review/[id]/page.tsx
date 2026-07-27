@@ -2,12 +2,13 @@ import { AppHeader } from "@/components/AppHeader";
 import { ReviewRequestDetail } from "@/components/review/ReviewRequestDetail";
 import { auth } from "@/auth";
 import { fetchReviewRequest } from "@/app/review-api";
+import { hasCapability } from "@/lib/auth/access-policy";
 import type { ReviewRequestDetailDto } from "@/lib/review/types";
 
 export const dynamic = "force-dynamic";
 
 export default async function ReviewDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const session = await auth(); const id = Number((await params).id); const roles = session?.user?.roles ?? []; const canReview = roles.includes("reviewer") || roles.includes("admin");
+  const session = await auth(); const id = Number((await params).id); const roles = session?.user?.roles ?? []; const canReview = hasCapability(roles, "review:manage");
   let request: ReviewRequestDetailDto | null = null; let error: string | null = null;
   if (canReview && Number.isInteger(id) && id > 0) { try { request = await fetchReviewRequest(id); } catch (reason) { error = reason instanceof Error ? reason.message : "No se pudo cargar la solicitud."; } }
   const content = request ? <ReviewRequestDetail request={request} viewerMode="reviewer" /> : <State message={error ?? "No tienes permiso para revisar solicitudes."} />;

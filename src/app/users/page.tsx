@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { PageHeader } from "@/components/PageHeader";
 import { UsersManager } from "@/components/UsersManager";
+import { decidePageAccess } from "@/lib/auth/access-policy";
 import { ensureUser, listUsers } from "@/lib/users/service";
 
 export const dynamic = "force-dynamic";
@@ -13,15 +14,16 @@ export default async function UsersPage() {
   if (!session?.user) {
     redirect("/api/auth/signin");
   }
-  if (!session.user.roles?.includes("admin")) {
-    redirect("/unauthorized");
+  const roles = session.user.roles ?? [];
+  if (decidePageAccess("/users", true, roles) === "catalog") {
+    redirect("/");
   }
 
   await ensureUser({
     id: session.user.id,
     username: session.user.name ?? session.user.email ?? session.user.id,
     email: session.user.email ?? "",
-    keycloakRoles: session.user.roles,
+    keycloakRoles: roles,
   });
   const users = await listUsers();
 

@@ -2,13 +2,14 @@ import { PageHeader } from "@/components/PageHeader";
 import { ReviewFilterableList } from "@/components/review/ReviewFilterableList";
 import { auth } from "@/auth";
 import { fetchReviewRequests } from "@/app/review-api";
+import { hasCapability } from "@/lib/auth/access-policy";
 
 export const dynamic = "force-dynamic";
 
 export default async function ReviewQueuePage() {
   const session = await auth();
   const roles = session?.user?.roles ?? [];
-  const canReview = roles.includes("reviewer") || roles.includes("admin");
+  const canReview = hasCapability(roles, "review:manage");
   const data = canReview ? await fetchReviewRequests("") : null;
   return (
     <PageShell title="Cola de revision" description="Solicitudes pendientes asignadas al equipo revisor.">
