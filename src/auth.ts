@@ -1,4 +1,4 @@
-import NextAuth from "next-auth";
+import NextAuth, { type NextAuthConfig } from "next-auth";
 import Keycloak from "next-auth/providers/keycloak";
 import {
   getEffectiveSkillVaultRoles,
@@ -6,7 +6,7 @@ import {
   resolveSkillVaultJwtRoles,
 } from "@/lib/auth/role-policy";
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const authConfig: NextAuthConfig = {
   trustHost: true,
   pages: {
     signIn: "/signin",
@@ -31,6 +31,39 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
+    redirect({ url, baseUrl }) {
+      const issuer = process.env.AUTH_KEYCLOAK_ISSUER;
+      // Allow redirecting to Keycloak issuer URL
+      if (issuer) {
+        try {
+          const urlObj = new URL(url);
+          const issuerObj = new URL(issuer);
+          if (urlObj.origin === issuerObj.origin && url.startsWith(issuer)) {
+            return url;
+          }
+        } catch (e) {
+          // Ignore invalid URL
+        }
+      }
+      
+      // Allow relative callback URLs (excluding protocol-relative URLs)
+      if (url.startsWith("/") && !url.startsWith("//")) {
+        return `${baseUrl}${url}`;
+      }
+      
+      // Allow same-origin redirects
+      try {
+        const urlObj = new URL(url);
+        const baseUrlObj = new URL(baseUrl);
+        if (urlObj.origin === baseUrlObj.origin) {
+          return url;
+        }
+      } catch (e) {
+        // Fallback to baseUrl if URL parsing fails
+      }
+      
+      return baseUrl;
+    },
     jwt({ token, user, profile, account }) {
       token.roles = resolveSkillVaultJwtRoles({
         userRoles: user && "roles" in user ? user.roles : undefined,
@@ -53,4 +86,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session;
     },
   },
-});
+};
+
+export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);
