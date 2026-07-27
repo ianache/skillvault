@@ -1,7 +1,6 @@
 import { client } from "@/lib/db";
 import { notFound } from "next/navigation";
-import { SkillEditor } from "@/components/dashboard/SkillEditor";
-import { VersionHistory } from "@/components/dashboard/VersionHistory";
+import { SkillEditPanel } from "@/components/dashboard/SkillEditPanel";
 import { PageHeader } from "@/components/PageHeader";
 import Link from "next/link";
 
@@ -139,8 +138,7 @@ export default async function EditPage({ params }: Props) {
           />
         </div>
 
-        <SkillEditor slug={skill.slug} initialContent={skill.rawContent} />
-        <VersionHistory slug={skill.slug} />
+        <SkillEditPanel slug={skill.slug} initialContent={skill.rawContent} />
       </main>
     </div>
   );

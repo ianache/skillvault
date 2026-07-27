@@ -17,9 +17,10 @@ interface VersionDetail {
 interface Props {
   slug: string;
   refreshKey?: number;
+  onUseAsBase?: (content: string) => void;
 }
 
-export function VersionHistory({ slug, refreshKey }: Props) {
+export function VersionHistory({ slug, refreshKey, onUseAsBase }: Props) {
   const [versions, setVersions] = useState<Version[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -248,6 +249,25 @@ export function VersionHistory({ slug, refreshKey }: Props) {
                     >
                       Descargar .zip
                     </button>
+                    {onUseAsBase && (
+                      <button
+                        onClick={() => onUseAsBase(detail.rawContent)}
+                        style={{
+                          marginTop: "8px",
+                          marginLeft: "8px",
+                          fontFamily: "var(--font-jetbrains-mono), monospace",
+                          fontSize: "11px",
+                          padding: "6px 12px",
+                          borderRadius: "4px",
+                          border: "1px solid var(--accent)",
+                          background: "none",
+                          color: "var(--accent)",
+                          cursor: "pointer",
+                        }}
+                      >
+                        Usar esta version como base
+                      </button>
+                    )}
                   </>
                 )}
               </div>
