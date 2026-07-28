@@ -11,7 +11,7 @@ export default async function ProposalsPage() {
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
       <PageHeader title="Mis propuestas" description="Estado y comentarios de los skills enviados a revision." />
-      <main style={{ maxWidth: "1100px", margin: "0 auto", padding: "32px 24px" }}>
+      <main style={{ padding: "32px 24px" }}>
         {data ? (
           <ReviewFilterableList initialRequests={data.requests} counts={data.counts} mode="author" />
         ) : (

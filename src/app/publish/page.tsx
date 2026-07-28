@@ -89,7 +89,7 @@ export default function PublishPage() {
       <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
         <PageHeader title="Publicar skill" description="Carga un SKILL.md local o crea uno nuevo desde cero." />
 
-        <div style={{ maxWidth: "960px", margin: "0 auto", padding: "44px 32px 80px" }}>
+        <div style={{ padding: "32px 24px" }}>
           <LocalSkillLoader
             onLoaded={handleLoaded}
             onSkip={() => setStep(1)}

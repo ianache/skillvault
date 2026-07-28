@@ -168,9 +168,7 @@ export function WizardLayout({ currentStep, children }: Props) {
       {/* Content */}
       <div
         style={{
-          maxWidth: "960px",
-          margin: "0 auto",
-          padding: "44px 32px 80px",
+          padding: "32px 24px",
         }}
       >
         {children}
