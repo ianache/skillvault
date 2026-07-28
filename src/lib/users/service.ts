@@ -56,6 +56,18 @@ export async function ensureUser(user: { id: string; username: string; email: st
   const primary = (existing.rows.find((r) => String(r.id) === user.id) || existing.rows[0]) as Record<string, unknown>;
   const primaryId = String(primary.id);
 
+  if (primaryId !== user.id) {
+    // Cascading updates for orphaned records before primary ID is mutated
+    await client.execute({
+      sql: "UPDATE skills SET author_id = ? WHERE author_id = ?",
+      args: [user.id, primaryId],
+    });
+    await client.execute({
+      sql: "UPDATE skill_review_requests SET author_id = ? WHERE author_id = ?",
+      args: [user.id, primaryId],
+    });
+  }
+
   await client.execute({
     sql: `UPDATE users SET id = ?, username = ?, full_name = ?, email = ?, roles = ?, last_login_at = ?, updated_at = ?
           WHERE id = ?`,

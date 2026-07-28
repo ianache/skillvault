@@ -7,6 +7,8 @@ describe("User and Role Synchronization (ensureUser)", () => {
   beforeEach(async () => {
     // Only delete test users to avoid wiping developer's local seed database records
     await client.execute("DELETE FROM users WHERE id LIKE 'usr-test-%';");
+    await client.execute("DELETE FROM skills WHERE slug LIKE 'skill-test-%';");
+    await client.execute("DELETE FROM skill_review_requests WHERE slug LIKE 'skill-test-%';");
   });
 
   test("inserts new user with their roles correctly", async () => {
@@ -87,5 +89,53 @@ describe("User and Role Synchronization (ensureUser)", () => {
 
     assert.ok(created);
     assert.deepEqual(created.roles.sort(), ["admin", "author"]);
+  });
+
+  test("propagates author_id updates to skills and skill_review_requests when Keycloak ID changes", async () => {
+    // 1. Registrar usuario inicial con id antiguo
+    await ensureUser({
+      id: "usr-test-old",
+      username: "testuser",
+      email: "test@skillvault.dev",
+      keycloakRoles: ["author"],
+    });
+
+    // 2. Insertar registros asociados a ese id antiguo
+    await client.execute({
+      sql: "INSERT INTO skills (slug, name, description, type, author_id) VALUES (?, ?, ?, ?, ?)",
+      args: ["skill-test-1", "Test Skill", "Test Desc", "code", "usr-test-old"],
+    });
+
+    await client.execute({
+      sql: "INSERT INTO skill_review_requests (slug, name, description, type, version, author_id, raw_content) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      args: ["skill-test-req-1", "Test Req", "Test Req", "code", "1.0.0", "usr-test-old", "some raw content"],
+    });
+
+    // 3. Simular login con un nuevo ID de Keycloak para el mismo usuario (mismo username/email)
+    await ensureUser({
+      id: "usr-test-new",
+      username: "testuser",
+      email: "test@skillvault.dev",
+      keycloakRoles: ["author"],
+    });
+
+    // 4. Verificar que el usuario tiene el nuevo ID
+    const users = await listUsers();
+    const updatedUser = users.find(u => u.username === "testuser");
+    assert.ok(updatedUser);
+    assert.strictEqual(updatedUser.id, "usr-test-new");
+
+    // 5. Verificar que los registros en skills y skill_review_requests se actualizaron
+    const skillRes = await client.execute({
+      sql: "SELECT author_id FROM skills WHERE slug = ?",
+      args: ["skill-test-1"],
+    });
+    assert.strictEqual(skillRes.rows[0]?.author_id, "usr-test-new");
+
+    const reqRes = await client.execute({
+      sql: "SELECT author_id FROM skill_review_requests WHERE slug = ?",
+      args: ["skill-test-req-1"],
+    });
+    assert.strictEqual(reqRes.rows[0]?.author_id, "usr-test-new");
   });
 });
