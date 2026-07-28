@@ -9,6 +9,7 @@ type Props = {
   user?: {
     name?: string | null;
     email?: string | null;
+    roles?: string[];
   } | null;
   onOpenMobileDrawer: () => void;
 };

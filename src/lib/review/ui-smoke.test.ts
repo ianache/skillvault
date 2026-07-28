@@ -237,3 +237,14 @@ test("AppSidebar renders SVG icons with paths and sutil horizontal divider", asy
   assert.match(sidebarSource, /borderTop:\s*"1px solid var\(--sv-sidebar-border\)"/);
 });
 
+test("UserMenu contains stateful dropdown, custom role badges, and click-outside capability", async () => {
+  const menuSource = await source("../../components/UserMenu.tsx");
+  assert.match(menuSource, /const\s*\[isOpen,\s*setIsOpen\]\s*=\s*useState/);
+  assert.match(menuSource, /useRef/);
+  assert.match(menuSource, /useEffect/);
+  assert.match(menuSource, /roleBadgeMap/);
+  assert.match(menuSource, /Administrador/);
+  assert.match(menuSource, /Revisor/);
+});
+
+
