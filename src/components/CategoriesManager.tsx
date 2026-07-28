@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Category } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import { CategoriesDrawer } from "./CategoriesDrawer";
+import { PageHeader } from "./PageHeader";
 
 interface Props {
   initialCategories: Category[];
@@ -89,157 +90,169 @@ export function CategoriesManager({ initialCategories, skillCounts }: Props) {
 
   return (
     <div>
-      {error && (
+      <PageHeader
+        title="Gestión de categorías"
+        description="Las categorías organizan el catálogo. Solo administradores pueden gestionarlas."
+        actions={
+          <button
+            onClick={() => {
+              setSelectedCategory(null);
+              setDrawerMode("create");
+              setIsDrawerOpen(true);
+              setError("");
+            }}
+            style={{
+              padding: "9px 18px",
+              background: "var(--accent)",
+              border: "none",
+              borderRadius: "6px",
+              color: "#fff",
+              cursor: "pointer",
+              fontSize: "13px",
+              fontWeight: 600,
+              boxShadow: "0 1px 3px rgba(0,0,0,0.15)",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+            }}
+          >
+            + Nueva categoría
+          </button>
+        }
+      />
+
+      <div style={{ padding: "32px 24px" }}>
+        {error && (
+          <div
+            style={{
+              padding: "10px 14px",
+              background: "#E8503A18",
+              border: "1px solid #E8503A55",
+              borderRadius: "6px",
+              color: "#E8503A",
+              fontSize: "13px",
+              marginBottom: "16px",
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        {/* Table */}
         <div
           style={{
-            padding: "10px 14px",
-            background: "#E8503A18",
-            border: "1px solid #E8503A55",
-            borderRadius: "6px",
-            color: "#E8503A",
-            fontSize: "13px",
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+            borderRadius: "8px",
+            overflow: "hidden",
             marginBottom: "16px",
           }}
         >
-          {error}
-        </div>
-      )}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "40px 1fr 180px 80px 80px 120px",
+              padding: "10px 16px",
+              borderBottom: "1px solid var(--border)",
+              fontSize: "11px",
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              color: "var(--muted)",
+              letterSpacing: "0.5px",
+              textTransform: "uppercase",
+            }}
+          >
+            <span>Icono</span>
+            <span>Nombre / Descripción</span>
+            <span>Slug</span>
+            <span>Color</span>
+            <span>Skills</span>
+            <span></span>
+          </div>
 
-      {/* Table */}
-      <div
-        style={{
-          background: "var(--surface)",
-          border: "1px solid var(--border)",
-          borderRadius: "8px",
-          overflow: "hidden",
-          marginBottom: "16px",
-        }}
-      >
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "40px 1fr 180px 80px 80px 120px",
-            padding: "10px 16px",
-            borderBottom: "1px solid var(--border)",
-            fontSize: "11px",
-            fontFamily: "var(--font-jetbrains-mono), monospace",
-            color: "var(--muted)",
-            letterSpacing: "0.5px",
-            textTransform: "uppercase",
-          }}
-        >
-          <span>Icono</span>
-          <span>Nombre / Descripción</span>
-          <span>Slug</span>
-          <span>Color</span>
-          <span>Skills</span>
-          <span></span>
-        </div>
-
-        {categories.map((cat) => (
-          <div key={cat.slug}>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "40px 1fr 180px 80px 80px 120px",
-                padding: "12px 16px",
-                borderBottom: "1px solid var(--border)",
-                alignItems: "center",
-              }}
-            >
-              <span style={{ fontSize: "18px" }}>{cat.icon}</span>
-              <div>
-                <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--text)" }}>{cat.label}</div>
-                <div style={{ fontSize: "12px", color: "var(--muted)", marginTop: "2px" }}>{cat.description || "—"}</div>
-              </div>
-              <span
+          {categories.map((cat) => (
+            <div key={cat.slug}>
+              <div
                 style={{
-                  fontFamily: "var(--font-jetbrains-mono), monospace",
-                  fontSize: "12px",
-                  color: "var(--muted)",
+                  display: "grid",
+                  gridTemplateColumns: "40px 1fr 180px 80px 80px 120px",
+                  padding: "12px 16px",
+                  borderBottom: "1px solid var(--border)",
+                  alignItems: "center",
                 }}
               >
-                {cat.slug}
-              </span>
-              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <span style={{ fontSize: "18px" }}>{cat.icon}</span>
+                <div>
+                  <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--text)" }}>{cat.label}</div>
+                  <div style={{ fontSize: "12px", color: "var(--muted)", marginTop: "2px" }}>{cat.description || "—"}</div>
+                </div>
                 <span
                   style={{
-                    width: "14px",
-                    height: "14px",
-                    borderRadius: "50%",
-                    background: cat.color,
-                    display: "inline-block",
-                    flexShrink: 0,
-                  }}
-                />
-                <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "11px", color: "var(--muted)" }}>
-                  {cat.color}
-                </span>
-              </div>
-              <span
-                style={{
-                  fontFamily: "var(--font-jetbrains-mono), monospace",
-                  fontSize: "12px",
-                  color: (skillCounts[cat.slug] ?? 0) > 0 ? "var(--text)" : "var(--muted)",
-                  fontVariantNumeric: "tabular-nums",
-                }}
-              >
-                {skillCounts[cat.slug] ?? 0}
-              </span>
-              <div style={{ display: "flex", gap: "6px", justifyContent: "flex-end" }}>
-                <button
-                  onClick={() => {
-                    setSelectedCategory(cat);
-                    setDrawerMode("edit");
-                    setIsDrawerOpen(true);
-                    setError("");
-                  }}
-                  style={{ padding: "4px 10px", background: "none", border: "1px solid var(--border)", borderRadius: "5px", color: "var(--muted)", cursor: "pointer", fontSize: "12px" }}
-                >
-                  Editar
-                </button>
-                <button
-                  onClick={() => handleDelete(cat.slug)}
-                  disabled={(skillCounts[cat.slug] ?? 0) > 0}
-                  title={(skillCounts[cat.slug] ?? 0) > 0 ? "Tiene skills asignados" : "Eliminar"}
-                  style={{
-                    padding: "4px 10px",
-                    background: "none",
-                    border: "1px solid var(--border)",
-                    borderRadius: "5px",
-                    color: (skillCounts[cat.slug] ?? 0) > 0 ? "var(--border)" : "#E8503A",
-                    cursor: (skillCounts[cat.slug] ?? 0) > 0 ? "not-allowed" : "pointer",
+                    fontFamily: "var(--font-jetbrains-mono), monospace",
                     fontSize: "12px",
+                    color: "var(--muted)",
                   }}
                 >
-                  Eliminar
-                </button>
+                  {cat.slug}
+                </span>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <span
+                    style={{
+                      width: "14px",
+                      height: "14px",
+                      borderRadius: "50%",
+                      background: cat.color,
+                      display: "inline-block",
+                      flexShrink: 0,
+                    }}
+                  />
+                  <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "11px", color: "var(--muted)" }}>
+                    {cat.color}
+                  </span>
+                </div>
+                <span
+                  style={{
+                    fontFamily: "var(--font-jetbrains-mono), monospace",
+                    fontSize: "12px",
+                    color: (skillCounts[cat.slug] ?? 0) > 0 ? "var(--text)" : "var(--muted)",
+                    fontVariantNumeric: "tabular-nums",
+                  }}
+                >
+                  {skillCounts[cat.slug] ?? 0}
+                </span>
+                <div style={{ display: "flex", gap: "6px", justifyContent: "flex-end" }}>
+                  <button
+                    onClick={() => {
+                      setSelectedCategory(cat);
+                      setDrawerMode("edit");
+                      setIsDrawerOpen(true);
+                      setError("");
+                    }}
+                    style={{ padding: "4px 10px", background: "none", border: "1px solid var(--border)", borderRadius: "5px", color: "var(--muted)", cursor: "pointer", fontSize: "12px" }}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => handleDelete(cat.slug)}
+                    disabled={(skillCounts[cat.slug] ?? 0) > 0}
+                    title={(skillCounts[cat.slug] ?? 0) > 0 ? "Tiene skills asignados" : "Eliminar"}
+                    style={{
+                      padding: "4px 10px",
+                      background: "none",
+                      border: "1px solid var(--border)",
+                      borderRadius: "5px",
+                      color: (skillCounts[cat.slug] ?? 0) > 0 ? "var(--border)" : "#E8503A",
+                      cursor: (skillCounts[cat.slug] ?? 0) > 0 ? "not-allowed" : "pointer",
+                      fontSize: "12px",
+                    }}
+                  >
+                    Eliminar
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-
-      <button
-        onClick={() => {
-          setSelectedCategory(null);
-          setDrawerMode("create");
-          setIsDrawerOpen(true);
-          setError("");
-        }}
-        style={{
-          padding: "9px 18px",
-          background: "var(--accent)",
-          border: "none",
-          borderRadius: "6px",
-          color: "#fff",
-          cursor: "pointer",
-          fontSize: "13px",
-          fontWeight: 600,
-        }}
-      >
-        + Nueva categoría
-      </button>
 
       <CategoriesDrawer
         isOpen={isDrawerOpen}
