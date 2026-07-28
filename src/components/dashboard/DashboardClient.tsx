@@ -321,6 +321,18 @@ function SkillRow({ skill, isLast }: { skill: Skill; isLast: boolean }) {
         >
           ↗
         </Link>
+        <a
+          href={`/api/skills/${skill.slug}/download`}
+          download
+          onClick={(e) => {
+            e.stopPropagation();
+            fetch(`/api/skills/${skill.slug}/install`, { method: "POST" }).catch(() => {});
+          }}
+          style={actionBtnStyle}
+          title="Descargar ZIP"
+        >
+          ↓
+        </a>
         <Link
           href={`/skills/${skill.slug}/edit`}
           style={{ ...actionBtnStyle, color: "var(--accent)", borderColor: "rgba(59,110,255,0.3)" }}
