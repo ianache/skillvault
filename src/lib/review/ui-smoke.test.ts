@@ -207,5 +207,10 @@ test("SkillCard handles inline category edit on hover and click for authorized r
   expect(cardSource).toContain("stopPropagation");
 });
 
-
-
+test("DashboardClient renders a zip download action in rows with click propagation stopped", async () => {
+  const dashboardSource = await source("../../components/dashboard/DashboardClient.tsx");
+  assert.match(dashboardSource, /href=\{\`\/api\/skills\/\$\{skill\.slug\}\/download\`\}/);
+  assert.match(dashboardSource, /download/);
+  assert.match(dashboardSource, /e\.stopPropagation\(\)/);
+  assert.match(dashboardSource, /fetch\(\`\/api\/skills\/\$\{skill\.slug\}\/install\`/);
+});
