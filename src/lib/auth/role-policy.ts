@@ -21,9 +21,11 @@ function roleArray(value: unknown): string[] {
 }
 
 export function normalizeSkillVaultRoles(values: unknown): SkillVaultRole[] {
-  const roles = roleArray(values).filter(
-    (role): role is SkillVaultRole => roleSet.has(role),
-  );
+  const roles = roleArray(values)
+    .map((r) => r.toLowerCase())
+    .filter(
+      (role): role is SkillVaultRole => roleSet.has(role),
+    );
   const unique = [...new Set(roles)];
   return unique.length > 0 ? unique : ["user"];
 }

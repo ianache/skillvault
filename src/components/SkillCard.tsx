@@ -35,10 +35,8 @@ export function SkillCard({
 
   const stripeClass = `stripe-${skill.type}`;
 
-  const canEdit = selected && (
-    userRoles.includes("admin") ||
-    userRoles.includes("reviewer") ||
-    userRoles.includes("editor")
+  const canEdit = userRoles.some((r) =>
+    ["admin", "reviewer", "editor"].includes(r.toLowerCase())
   );
 
   return (
