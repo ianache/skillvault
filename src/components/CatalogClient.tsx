@@ -11,6 +11,7 @@ interface Props {
   initialCategories: Category[];
   initialQuery?: string;
   initialType?: string;
+  user?: { id: string; name?: string | null; email?: string | null; roles: string[] } | null;
 }
 
 const SORT_OPTIONS = [
@@ -19,7 +20,7 @@ const SORT_OPTIONS = [
   { value: "az",      label: "A–Z" },
 ];
 
-export function CatalogClient({ initialSkills, initialCategories, initialQuery = "", initialType = "" }: Props) {
+export function CatalogClient({ initialSkills, initialCategories, initialQuery = "", initialType = "", user = null }: Props) {
   const searchParams = useSearchParams();
   const [skills, setSkills] = useState<SkillRow[]>(initialSkills);
   const [categories, setCategories] = useState<Category[]>(initialCategories);
@@ -34,6 +35,11 @@ export function CatalogClient({ initialSkills, initialCategories, initialQuery =
   const [sort, setSort] = useState("popular");
   const [selected, setSelected] = useState<SkillRow | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const handleCategoryUpdate = useCallback((slug: string, newType: string) => {
+    setSkills((prev) => prev.map((s) => (s.slug === slug ? { ...s, type: newType } : s)));
+    setSelected((prev) => (prev && prev.slug === slug ? { ...prev, type: newType } : prev));
+  }, []);
 
   // Refresh categories when they may have changed
   useEffect(() => {
@@ -221,6 +227,9 @@ export function CatalogClient({ initialSkills, initialCategories, initialQuery =
               onClick={() =>
                 setSelected(selected?.slug === skill.slug ? null : skill)
               }
+              userRoles={user?.roles ?? []}
+              categories={categories}
+              onCategoryUpdate={handleCategoryUpdate}
             />
           ))}
           {!loading && skills.length === 0 && (

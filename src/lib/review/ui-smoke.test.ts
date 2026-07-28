@@ -8,6 +8,13 @@ import { Breadcrumbs } from "@/components/shell/Breadcrumbs";
 
 const expect = (actual: unknown) => ({
   toBe: (expected: unknown) => assert.equal(actual, expected),
+  toContain: (expected: string) => {
+    if (typeof actual === "string") {
+      assert.ok(actual.includes(expected), `Expected source to contain "${expected}"`);
+    } else {
+      throw new Error("actual must be a string");
+    }
+  }
 });
 
 const source = (path: string) => readFile(new URL(path, import.meta.url), "utf8");
@@ -192,5 +199,13 @@ test("DetailPanel renders a manual zip download button with visual state updates
   assert.match(detailSource, /handleDownload/);
   assert.match(detailSource, /setLiveCount\(data\.installCount\)/);
 });
+
+test("SkillCard handles inline category edit on hover and click for authorized roles", async () => {
+  const cardSource = await source("../../components/SkillCard.tsx");
+  expect(cardSource).toContain("isEditingCategory");
+  expect(cardSource).toContain("pencil-icon");
+  expect(cardSource).toContain("stopPropagation");
+});
+
 
 

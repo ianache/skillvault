@@ -1,12 +1,16 @@
 "use client";
 
-import { CATEGORY_META, SkillRow } from "@/lib/types";
+import { useState } from "react";
+import { Category, CATEGORY_META, SkillRow } from "@/lib/types";
 import { SkillRating } from "./SkillRating";
 
 interface Props {
   skill: SkillRow;
   selected: boolean;
   onClick: () => void;
+  userRoles?: string[];
+  categories?: Category[];
+  onCategoryUpdate?: (slug: string, newType: string) => void;
 }
 
 function fmtCount(n: number) {
@@ -14,9 +18,28 @@ function fmtCount(n: number) {
   return String(n);
 }
 
-export function SkillCard({ skill, selected, onClick }: Props) {
-  const meta = CATEGORY_META[skill.type] ?? { label: skill.type, color: "#8590A8", icon: "◇" };
+export function SkillCard({
+  skill,
+  selected,
+  onClick,
+  userRoles = [],
+  categories = [],
+  onCategoryUpdate,
+}: Props) {
+  const [isEditingCategory, setIsEditingCategory] = useState(false);
+  const [isHoveredCategory, setIsHoveredCategory] = useState(false);
+
+  const meta = categories.find((c) => c.slug === skill.type) ??
+    CATEGORY_META[skill.type] ??
+    { label: skill.type, color: "#8590A8", icon: "◇" };
+
   const stripeClass = `stripe-${skill.type}`;
+
+  const canEdit = selected && (
+    userRoles.includes("admin") ||
+    userRoles.includes("reviewer") ||
+    userRoles.includes("editor")
+  );
 
   return (
     <div
@@ -118,21 +141,85 @@ export function SkillCard({ skill, selected, onClick }: Props) {
 
       {/* Category badge */}
       <div style={{ marginBottom: "8px" }}>
-        <span
-          style={{
-            fontFamily: "var(--font-jetbrains-mono), monospace",
-            fontSize: "9px",
-            letterSpacing: "0.8px",
-            textTransform: "uppercase",
-            padding: "2px 6px",
-            borderRadius: "3px",
-            border: `1px solid ${meta.color}`,
-            color: meta.color,
-            background: `${meta.color}18`,
-          }}
-        >
-          {meta.icon} {meta.label}
-        </span>
+        {(() => {
+          if (isEditingCategory) {
+            return (
+              <select
+                value={skill.type}
+                onBlur={() => setIsEditingCategory(false)}
+                onClick={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
+                onChange={async (e) => {
+                  e.stopPropagation();
+                  const newType = e.target.value;
+                  setIsEditingCategory(false);
+                  onCategoryUpdate?.(skill.slug, newType);
+                  try {
+                     await fetch(`/api/skills/${skill.slug}/category`, {
+                       method: "PUT",
+                       headers: { "Content-Type": "application/json" },
+                       body: JSON.stringify({ type: newType }),
+                     });
+                  } catch (err) {
+                     console.error("Error actualizando categoría", err);
+                  }
+                }}
+                style={{
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                  fontSize: "11px",
+                  background: "var(--surface)",
+                  color: "var(--text)",
+                  border: "1px solid var(--accent)",
+                  borderRadius: "4px",
+                  padding: "2px 6px",
+                  outline: "none",
+                  cursor: "pointer",
+                }}
+              >
+                {categories.map((cat) => (
+                  <option key={cat.slug} value={cat.slug}>
+                    {cat.icon} {cat.label}
+                  </option>
+                ))}
+              </select>
+            );
+          }
+
+          return (
+            <span
+              onMouseEnter={() => { if (canEdit) setIsHoveredCategory(true); }}
+              onMouseLeave={() => { if (canEdit) setIsHoveredCategory(false); }}
+              onClick={(e) => {
+                if (canEdit) {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  setIsEditingCategory(true);
+                }
+              }}
+              style={{
+                fontFamily: "var(--font-jetbrains-mono), monospace",
+                fontSize: "9px",
+                letterSpacing: "0.8px",
+                textTransform: "uppercase",
+                padding: "2px 6px",
+                borderRadius: "3px",
+                border: `1px solid ${meta.color}`,
+                color: meta.color,
+                background: `${meta.color}18`,
+                cursor: canEdit ? "pointer" : "default",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+              }}
+              title={canEdit ? "Hacer clic para editar categoría" : undefined}
+            >
+              {meta.icon} {meta.label}
+              {canEdit && isHoveredCategory && (
+                <span className="pencil-icon" style={{ marginLeft: "4px", fontSize: "10px", opacity: 0.8 }}>✏️</span>
+              )}
+            </span>
+          );
+        })()}
       </div>
 
       {/* Description */}

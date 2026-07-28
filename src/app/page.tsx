@@ -172,7 +172,13 @@ export default async function HomePage({ searchParams }: HomeProps) {
         </div>
       </div>
 
-      <CatalogClient initialSkills={skills} initialCategories={categories} initialQuery={q ?? ""} initialType={type ?? ""} />
+      <CatalogClient
+        initialSkills={skills}
+        initialCategories={categories}
+        initialQuery={q ?? ""}
+        initialType={type ?? ""}
+        user={session?.user ? { id: session.user.id, name: session.user.name, email: session.user.email, roles: (session.user as any).roles ?? [] } : null}
+      />
     </div>
   );
 }
