@@ -404,7 +404,7 @@ export function DetailPanel({ skill, onClose }: Props) {
                         borderRadius: "5px",
                         border: `1px solid ${selectedOS === os ? "var(--sv-accent)" : "var(--border)"}`,
                         background: selectedOS === os ? "rgba(169, 119, 46, 0.12)" : "none",
-                        color: selectedOS === os ? "var(--sv-accent-dark)" : "var(--muted)",
+                        color: selectedOS === os ? "var(--sv-sidebar-active-text)" : "var(--muted)",
                         cursor: "pointer",
                         transition: "all 0.15s ease",
                       }}

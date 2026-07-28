@@ -65,9 +65,6 @@ export default async function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <body
-        style={{
-          fontFamily: `var(--font-ibm-plex-sans), system-ui, sans-serif`,
-        }}
         className={`${geist.variable} ${ibmPlexSans.variable} ${jetbrainsMono.variable} min-h-screen`}
       >
         <AppShell user={user}>{children}</AppShell>
