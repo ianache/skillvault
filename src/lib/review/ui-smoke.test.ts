@@ -222,3 +222,18 @@ test("UserMenu renders a sign-in Link with callbackUrl support when user is not 
   assert.match(menuSource, /Link/);
   assert.match(menuSource, /href=\{\`\/signin\?callbackUrl=\$\{encodeURIComponent\(currentUrl\)\}\`\}/);
 });
+
+test("navigation groups are divided into exactly two blocks and use SVG paths", async () => {
+  const navSource = await source("../../components/shell/navigation.ts");
+  assert.ok(navSource.includes("title: \"Exploración y Contenido\""), "Debe tener el bloque principal de contenido");
+  assert.ok(navSource.includes("title: \"Gestión y Administración\""), "Debe tener el bloque de administración");
+  assert.ok(navSource.includes("iconPath:"), "Debe exportar iconPath en lugar de icon de emoji");
+});
+
+test("AppSidebar renders SVG icons with paths and sutil horizontal divider", async () => {
+  const sidebarSource = await source("../../components/shell/AppSidebar.tsx");
+  assert.match(sidebarSource, /<svg/);
+  assert.match(sidebarSource, /<path/);
+  assert.match(sidebarSource, /borderTop:\s*"1px solid var\(--sv-sidebar-border\)"/);
+});
+

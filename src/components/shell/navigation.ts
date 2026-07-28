@@ -6,7 +6,7 @@ import {
 export type NavigationItem = {
   label: string;
   href: string;
-  icon: string;
+  iconPath: string;
   capability?: SkillVaultCapability;
 };
 
@@ -17,58 +17,48 @@ export type NavigationGroup = {
 
 const NAVIGATION: NavigationGroup[] = [
   {
-    title: "Exploraci\u00f3n",
+    title: "Exploración y Contenido",
     items: [
-      { label: "Cat\u00e1logo", href: "/", icon: "\u{1F50D}" },
+      { label: "Catálogo", href: "/", iconPath: "M4 4h16v4H4zM4 12h16v8H4z" },
       {
         label: "Publicar skill",
         href: "/publish",
-        icon: "\u2795",
+        iconPath: "M12 5v14M5 12h14",
         capability: "publish:create",
       },
-    ],
-  },
-  {
-    title: "Mi Contenido",
-    items: [
       {
         label: "Mis Skills",
         href: "/dashboard",
-        icon: "\u{1F4E6}",
+        iconPath: "M12 2l2.9 6.06 6.6.77-4.86 4.6 1.25 6.57L12 16.9l-5.9 3.1 1.25-6.57-4.86-4.6 6.6-.77z",
         capability: "content:manage",
       },
       {
         label: "Mis propuestas",
         href: "/proposals",
-        icon: "\u{1F4DD}",
+        iconPath: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M9 15h6M9 11h2",
         capability: "content:manage",
       },
     ],
   },
   {
-    title: "Revisi\u00f3n",
+    title: "Gestión y Administración",
     items: [
       {
-        label: "Cola de revisi\u00f3n",
+        label: "Cola de revisión",
         href: "/review",
-        icon: "\u{1F6E1}\uFE0F",
+        iconPath: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z",
         capability: "review:manage",
       },
       {
-        label: "Categor\u00edas",
+        label: "Categorías",
         href: "/categories",
-        icon: "\u{1F3F7}\uFE0F",
+        iconPath: "M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z",
         capability: "admin:manage",
       },
-    ],
-  },
-  {
-    title: "Administraci\u00f3n",
-    items: [
       {
         label: "Usuarios y roles",
         href: "/users",
-        icon: "\u{1F465}",
+        iconPath: "M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",
         capability: "admin:manage",
       },
     ],
