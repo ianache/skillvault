@@ -11,12 +11,12 @@ async function run() {
     const username = String(user.username);
 
     // Actualizar skills donde el author_handle coincide con el username, pero el author_id está huérfano o es diferente
-    const skillsRes = await client.execute({
+    await client.execute({
       sql: "UPDATE skills SET author_id = ? WHERE author_handle = ? AND (author_id IS NULL OR author_id != ?)",
       args: [userId, username, userId],
     });
 
-    const requestsRes = await client.execute({
+    await client.execute({
       sql: "UPDATE skill_review_requests SET author_id = ? WHERE author_handle = ? AND (author_id IS NULL OR author_id != ?)",
       args: [userId, username, userId],
     });
