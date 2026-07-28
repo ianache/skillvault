@@ -2,14 +2,25 @@ import { client } from "@/lib/db";
 import Link from "next/link";
 import { DashboardClient } from "@/components/dashboard/DashboardClient";
 import { PageHeader } from "@/components/PageHeader";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
-async function getStats() {
+async function getStats(userId: string) {
   const [skillsRes, installsRes, typesRes] = await Promise.all([
-    client.execute("SELECT COUNT(*) as count FROM skills WHERE status = 'published'"),
-    client.execute("SELECT COALESCE(SUM(install_count), 0) as total FROM skills WHERE status = 'published'"),
-    client.execute("SELECT type, COUNT(*) as count FROM skills WHERE status = 'published' GROUP BY type ORDER BY count DESC"),
+    client.execute({
+      sql: "SELECT COUNT(*) as count FROM skills WHERE status = 'published' AND author_id = ?",
+      args: [userId]
+    }),
+    client.execute({
+      sql: "SELECT COALESCE(SUM(install_count), 0) as total FROM skills WHERE status = 'published' AND author_id = ?",
+      args: [userId]
+    }),
+    client.execute({
+      sql: "SELECT type, COUNT(*) as count FROM skills WHERE status = 'published' AND author_id = ? GROUP BY type ORDER BY count DESC",
+      args: [userId]
+    }),
   ]);
 
   return {
@@ -19,10 +30,11 @@ async function getStats() {
   };
 }
 
-async function getSkills() {
-  const res = await client.execute(
-    "SELECT id, slug, name, description, type, author_handle, version, triggers, compatibility, install_count, created_at, published_at, status FROM skills ORDER BY install_count DESC, created_at DESC"
-  );
+async function getSkills(userId: string) {
+  const res = await client.execute({
+    sql: "SELECT id, slug, name, description, type, author_handle, version, triggers, compatibility, install_count, created_at, published_at, status FROM skills WHERE author_id = ? ORDER BY install_count DESC, created_at DESC",
+    args: [userId]
+  });
   return res.rows.map((r) => ({
     id: r.id as number,
     slug: r.slug as string,
@@ -43,7 +55,13 @@ async function getSkills() {
 export const metadata = { title: "Mis Skills" };
 
 export default async function DashboardPage() {
-  const [stats, skills] = await Promise.all([getStats(), getSkills()]);
+  const session = await auth();
+  if (!session?.user?.id) {
+    redirect("/api/auth/signin");
+  }
+
+  const userId = session.user.id;
+  const [stats, skills] = await Promise.all([getStats(userId), getSkills(userId)]);
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
