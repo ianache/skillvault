@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { logoutAction } from "@/app/actions/auth";
 
@@ -22,8 +21,6 @@ const roleBadgeMap: Record<string, { label: string; bg: string; color: string; b
 };
 
 export function UserMenu({ user }: Props) {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -38,28 +35,26 @@ export function UserMenu({ user }: Props) {
   }, []);
 
   if (!user) {
-    const currentUrl = searchParams.toString() ? `${pathname}?${searchParams.toString()}` : pathname;
-
     return (
-      <Link
-        href={`/signin?callbackUrl=${encodeURIComponent(currentUrl)}`}
-        style={{
-          display: "inline-block",
-          textDecoration: "none",
-          fontSize: "13px",
-          fontWeight: 600,
-          color: "#fff",
-          background: "var(--accent)",
-          border: "none",
-          borderRadius: "6px",
-          padding: "5px 14px",
-          cursor: "pointer",
-          whiteSpace: "nowrap",
-        }}
-      >
-        Iniciar sesión
-      </Link>
-    );
+        <Link
+          href="/signin"
+          style={{
+            display: "inline-block",
+            textDecoration: "none",
+            fontSize: "13px",
+            fontWeight: 600,
+            color: "#fff",
+            background: "var(--accent)",
+            border: "none",
+            borderRadius: "6px",
+            padding: "5px 14px",
+            cursor: "pointer",
+            whiteSpace: "nowrap",
+          }}
+        >
+          Iniciar sesión
+        </Link>
+      );
   }
 
   const name = user.name ?? user.email ?? "Usuario";
