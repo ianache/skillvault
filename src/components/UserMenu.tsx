@@ -1,6 +1,8 @@
 "use client";
 
-import { loginAction, logoutAction } from "@/app/actions/auth";
+import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
+import { logoutAction } from "@/app/actions/auth";
 
 type Props = {
   user?: {
@@ -10,26 +12,31 @@ type Props = {
 };
 
 export function UserMenu({ user }: Props) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   if (!user) {
+    const currentUrl = searchParams.toString() ? `${pathname}?${searchParams.toString()}` : pathname;
+
     return (
-      <form action={loginAction}>
-        <button
-          type="submit"
-          style={{
-            fontSize: "13px",
-            fontWeight: 600,
-            color: "#fff",
-            background: "var(--accent)",
-            border: "none",
-            borderRadius: "6px",
-            padding: "5px 14px",
-            cursor: "pointer",
-            whiteSpace: "nowrap",
-          }}
-        >
-          Iniciar sesión
-        </button>
-      </form>
+      <Link
+        href={`/signin?callbackUrl=${encodeURIComponent(currentUrl)}`}
+        style={{
+          display: "inline-block",
+          textDecoration: "none",
+          fontSize: "13px",
+          fontWeight: 600,
+          color: "#fff",
+          background: "var(--accent)",
+          border: "none",
+          borderRadius: "6px",
+          padding: "5px 14px",
+          cursor: "pointer",
+          whiteSpace: "nowrap",
+        }}
+      >
+        Iniciar sesión
+      </Link>
     );
   }
 
@@ -81,3 +88,4 @@ export function UserMenu({ user }: Props) {
     </div>
   );
 }
+
