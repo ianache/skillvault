@@ -39,8 +39,6 @@ export function SkillCard({
     ["admin", "reviewer", "editor"].includes(r.toLowerCase())
   );
 
-  console.log(`[SkillCard Debug] Skill: ${skill.slug} | userRoles:`, userRoles, "| canEdit:", canEdit);
-
   return (
     <div
       role="button"
