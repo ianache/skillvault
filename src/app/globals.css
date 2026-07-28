@@ -121,6 +121,30 @@ h1, h2, h3, h4 {
   50%       { opacity: 0.4; }
 }
 
+@keyframes svFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── CLI Download Buttons ── */
+.cli-download-btn {
+  transition: all 0.15s ease-in-out !important;
+}
+.cli-download-btn:hover {
+  transform: translateY(-1.5px) scale(1.02);
+  filter: brightness(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+.cli-download-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }

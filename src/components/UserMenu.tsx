@@ -65,9 +65,10 @@ export function UserMenu({ user }: Props) {
   const name = user.name ?? user.email ?? "Usuario";
   const email = user.email ?? "";
   const initials = name
-    .split(" ")
+    .trim()
+    .split(/\s+/)
     .slice(0, 2)
-    .map((w: string) => w[0])
+    .map((w: string) => w[0] || "")
     .join("")
     .toUpperCase();
 

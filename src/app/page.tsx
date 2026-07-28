@@ -108,6 +108,8 @@ export default async function HomePage({ searchParams }: HomeProps) {
         </code>
         <div style={{ display: "flex", gap: "8px", marginLeft: "auto" }}>
           <a
+            id="download-windows"
+            className="cli-download-btn"
             href="https://github.com/ianache/skillvault/releases/latest/download/skillvault-win-x64.exe"
             style={{
               fontSize: "12.5px",
@@ -132,6 +134,8 @@ export default async function HomePage({ searchParams }: HomeProps) {
             Windows
           </a>
           <a
+            id="download-macos"
+            className="cli-download-btn"
             href="https://github.com/ianache/skillvault/releases/latest/download/skillvault-macos-x64"
             style={{
               fontSize: "12.5px",
@@ -156,6 +160,8 @@ export default async function HomePage({ searchParams }: HomeProps) {
             macOS
           </a>
           <a
+            id="download-linux"
+            className="cli-download-btn"
             href="https://github.com/ianache/skillvault/releases/latest/download/skillvault-linux-x64"
             style={{
               fontSize: "12.5px",
