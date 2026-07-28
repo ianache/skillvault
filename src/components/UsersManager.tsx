@@ -32,7 +32,9 @@ const pillBase: React.CSSProperties = {
   fontSize: "12.5px",
   fontWeight: 600,
   cursor: "pointer",
-  border: "1px solid var(--border)",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderColor: "var(--border)",
   background: "var(--surface)",
   color: "var(--muted)",
 };
@@ -151,10 +153,10 @@ export function UsersManager({ initialUsers }: Props) {
         </div>
 
         <div style={{ display: "flex", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "8px", padding: "3px" }}>
-          <button type="button" onClick={() => setStatusFilter("active")} style={statusFilter === "active" ? pillActive : { ...pillBase, border: "none", borderRadius: "6px" }}>
+          <button type="button" onClick={() => setStatusFilter("active")} style={statusFilter === "active" ? pillActive : { ...pillBase, borderWidth: "1px", borderStyle: "solid", borderColor: "transparent", borderRadius: "6px" }}>
             Activos
           </button>
-          <button type="button" onClick={() => setStatusFilter("inactive")} style={statusFilter === "inactive" ? pillActive : { ...pillBase, border: "none", borderRadius: "6px" }}>
+          <button type="button" onClick={() => setStatusFilter("inactive")} style={statusFilter === "inactive" ? pillActive : { ...pillBase, borderWidth: "1px", borderStyle: "solid", borderColor: "transparent", borderRadius: "6px" }}>
             Inactivos
           </button>
         </div>
