@@ -10,7 +10,7 @@ function buildKeycloakLogoutUrl(idToken?: string): string | null {
   if (idToken) {
     logoutUrl.searchParams.set("id_token_hint", idToken);
   }
-  const baseUrl = process.env.AUTH_URL ?? process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+  const baseUrl = (process.env.AUTH_URL ?? process.env.NEXTAUTH_URL ?? "http://localhost:3000").replace(/\/$/, "");
   logoutUrl.searchParams.set("post_logout_redirect_uri", baseUrl + "/signin");
   return logoutUrl.toString();
 }
