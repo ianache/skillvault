@@ -138,4 +138,51 @@ describe("User and Role Synchronization (ensureUser)", () => {
     });
     assert.strictEqual(reqRes.rows[0]?.author_id, "usr-test-new");
   });
+
+  test("propagates author_id updates and deletes duplicate users safely without data loss", async () => {
+    // 1. Registrar dos usuarios con el mismo username/email para simular duplicados
+    await client.execute({
+      sql: `INSERT INTO users (id, username, full_name, email, roles, last_login_at, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      args: ["usr-test-dup1", "dupuser", "dupuser", "dup@skillvault.dev", "[]", 100, 100, 100],
+    });
+    await client.execute({
+      sql: `INSERT INTO users (id, username, full_name, email, roles, last_login_at, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      args: ["usr-test-dup2", "dupuser", "dupuser", "dup@skillvault.dev", "[]", 50, 50, 50],
+    });
+
+    // 2. Asociar un skill al usuario duplicado secundario (usr-test-dup2) que será eliminado
+    await client.execute({
+      sql: "INSERT INTO skills (slug, name, description, type, author_id) VALUES (?, ?, ?, ?, ?)",
+      args: ["skill-test-dup", "Dup Skill", "Dup Desc", "code", "usr-test-dup2"],
+    });
+
+    // 3. Iniciar sesión con un nuevo ID de Keycloak
+    await ensureUser({
+      id: "usr-test-dup-new",
+      username: "dupuser",
+      email: "dup@skillvault.dev",
+      keycloakRoles: ["author"],
+    });
+
+    // 4. Verificar que se eliminaron los registros duplicados de users
+    const users = await listUsers();
+    const dup1 = users.find(u => u.id === "usr-test-dup1");
+    const dup2 = users.find(u => u.id === "usr-test-dup2");
+    assert.strictEqual(dup1, undefined);
+    assert.strictEqual(dup2, undefined);
+
+    // 5. Verificar que el usuario activo tiene el ID nuevo
+    const active = users.find(u => u.username === "dupuser");
+    assert.ok(active);
+    assert.strictEqual(active.id, "usr-test-dup-new");
+
+    // 6. Verificar que el skill del usuario eliminado se actualizó al nuevo ID
+    const skillRes = await client.execute({
+      sql: "SELECT author_id FROM skills WHERE slug = ?",
+      args: ["skill-test-dup"],
+    });
+    assert.strictEqual(skillRes.rows[0]?.author_id, "usr-test-dup-new");
+  });
 });
