@@ -11,7 +11,7 @@ function buildKeycloakLogoutUrl(idToken?: string): string | null {
     logoutUrl.searchParams.set("id_token_hint", idToken);
   }
   const baseUrl = process.env.AUTH_URL ?? process.env.NEXTAUTH_URL ?? "http://localhost:3000";
-  logoutUrl.searchParams.set("post_logout_redirect_uri", baseUrl);
+  logoutUrl.searchParams.set("post_logout_redirect_uri", baseUrl + "/signin");
   return logoutUrl.toString();
 }
 
@@ -22,5 +22,5 @@ export async function loginAction() {
 export async function logoutAction() {
   const session = await auth();
   const keycloakLogoutUrl = buildKeycloakLogoutUrl(session?.idToken);
-  await signOut({ redirectTo: keycloakLogoutUrl ?? "/" });
+  await signOut({ redirectTo: keycloakLogoutUrl ?? "/signin" });
 }
