@@ -1,0 +1,66 @@
+/* SkillVault design tokens — generated from the App Shell / Publicar Skill screens */
+:root {
+  /* Surfaces */
+  --sv-bg: #f7f5f0;
+  --sv-bg-soft: #faf9f5;
+  --sv-surface: #ffffff;
+  --sv-subtle: #f0ede6;
+  --sv-subtle-2: #e2dccf;
+
+  /* Text */
+  --sv-text: #1a1d21;
+  --sv-text-muted: #5c6270;
+  --sv-text-faint: #8a8f99;
+
+  /* Borders / dividers */
+  --sv-border: #e6e1d8;
+  --sv-border-strong: #d8d2c5;
+  --sv-divider: #c9c2b3;
+
+  /* Brand accent (brown) */
+  --sv-accent: #a9772e;
+  --sv-accent-dark: #7a5f26;
+  --sv-accent-rgb: 169, 119, 46;
+
+  /* Secondary accent (amber, category tags) */
+  --sv-accent-2: #d9822b;
+  --sv-accent-2-rgb: 217, 130, 43;
+
+  /* Status */
+  --sv-teal: #0f9488;
+  --sv-teal-rgb: 15, 148, 136;
+  --sv-danger: #b3392f;
+  --sv-text-rgb: 26, 29, 33;
+
+  /* Dark sidebar (merged from Publicar Skill) */
+  --sv-sidebar-bg: #1c1a17;
+  --sv-sidebar-border: #302c26;
+  --sv-sidebar-text: #c9c5bd;
+  --sv-sidebar-text-dim: #6f6a5d;
+  --sv-sidebar-active-bg: rgba(169, 119, 46, 0.28);
+  --sv-sidebar-active-text: #e8ab6a;
+
+  /* Dark mode (content area) */
+  --sv-dark-bg: #16140f;
+  --sv-dark-surface: #221f19;
+  --sv-dark-border: #34302a;
+  --sv-dark-text: #f2efe9;
+  --sv-dark-text-muted: #a8a196;
+
+  /* Overlay */
+  --sv-backdrop-rgb: 26, 29, 33;
+  --sv-shadow-rgb: 20, 20, 20;
+  --sv-shadow-sm: 0 1px 2px rgba(20, 20, 20, 0.04);
+  --sv-shadow-md: 0 12px 32px rgba(20, 20, 20, 0.14);
+  --sv-shadow-lg: 0 20px 60px rgba(20, 20, 20, 0.2);
+
+  /* Type */
+  --sv-font-display: 'Space Grotesk', sans-serif;
+  --sv-font-mono: 'JetBrains Mono', monospace;
+
+  /* Radius */
+  --sv-radius-sm: 6px;
+  --sv-radius-md: 8px;
+  --sv-radius-lg: 12px;
+  --sv-radius-pill: 20px;
+}

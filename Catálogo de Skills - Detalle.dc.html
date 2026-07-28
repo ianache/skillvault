@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_ds/skillvault/styles.css">
+  <style>
+    body { margin: 0; background: var(--sv-bg); }
+    a { color: var(--sv-accent); }
+    a:hover { color: var(--sv-accent-dark); }
+  </style>
+</helmet>
+
+<dc-import name="App Shell" active-item="Catálogo" breadcrumb="{{ breadcrumb }}" page-title="Catálogo de Skills" page-description="Skills reutilizables para Claude Code y otros harnesses compatibles con el estándar SKILL.md de Anthropic." cli-command="skillvault install <slug> --harness claude" hint-size="100%,100vh">
+
+  <div style="display: flex; gap: 28px; align-items: flex-start;">
+
+    <aside style="width: 220px; flex-shrink: 0;">
+      <div style="font-size: 11px; font-weight: 700; color: var(--sv-text-faint); font-family: var(--sv-font-mono); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;">Categorías</div>
+      <div style="display: flex; flex-direction: column; gap: 2px;">
+        <sc-for list="{{ categories }}" as="cat" hint-placeholder-count="9">
+          <div onClick="{{ cat.select }}" style="display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 8px; cursor: pointer; background: {{ cat.bg }};">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{ cat.color }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="{{ cat.iconPath }}"></path></svg>
+            <span style="flex: 1; font-size: 13.5px; font-weight: 500; color: {{ cat.color }};">{{ cat.label }}</span>
+            <span style="font-size: 12px; color: var(--sv-text-faint); font-family: var(--sv-font-mono);">{{ cat.count }}</span>
+          </div>
+        </sc-for>
+      </div>
+      <button type="button" onClick="{{ onPublish }}" style="width: 100%; box-sizing: border-box; margin-top: 20px; padding: 11px 14px; border-radius: 8px; border: 1px solid rgba(var(--sv-accent-rgb),0.4); background: rgba(var(--sv-accent-rgb),0.08); color: var(--sv-accent-dark); font-family: var(--sv-font-display); font-weight: 700; font-size: 13.5px; cursor: pointer;">+ Publicar Skill</button>
+    </aside>
+
+    <div style="flex: 1; min-width: 0;">
+      <div style="font-size: 14px; font-weight: 600; margin-bottom: 18px;">{{ resultsLabel }}</div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px;">
+        <sc-for list="{{ skills }}" as="skill" hint-placeholder-count="5">
+          <div onClick="{{ skill.select }}" style="background: var(--sv-surface); border: 1px solid {{ skill.borderColor }}; border-radius: 12px; box-shadow: var(--sv-shadow-sm); padding: 18px 20px; cursor: pointer;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+              <div style="font-weight: 700; font-size: 15px; line-height: 1.3;">{{ skill.name }}</div>
+              <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+                <span style="font-family: var(--sv-font-mono); color: var(--sv-text-faint); font-size: 11.5px;">{{ skill.version }}</span>
+                <sc-if value="{{ skill.hasZip }}" hint-placeholder-val="{{ false }}">
+                  <span style="font-size: 10.5px; font-family: var(--sv-font-mono); font-weight: 600; color: var(--sv-text-muted); border: 1px solid var(--sv-border-strong); padding: 2px 6px; border-radius: 5px;">↓ ZIP</span>
+                </sc-if>
+              </div>
+            </div>
+
+            <div style="margin: 10px 0 12px;">
+              <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-family: var(--sv-font-mono); font-weight: 600; color: var(--sv-accent); border: 1px solid rgba(var(--sv-accent-rgb),0.35); background: rgba(var(--sv-accent-rgb),0.08); padding: 3px 9px; border-radius: 6px;">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="{{ skill.categoryIconPath }}"></path></svg>
+                {{ skill.category }}
+              </span>
+            </div>
+
+            <p style="margin: 0 0 12px 0; font-size: 13px; color: var(--sv-text-muted); line-height: 1.5; min-height: 39px;">{{ skill.description }}</p>
+
+            <span style="font-size: 11.5px; color: var(--sv-text-muted); background: var(--sv-subtle); padding: 3px 9px; border-radius: 20px; font-family: var(--sv-font-mono); display: inline-block; margin-bottom: 14px;">{{ skill.trigger }}</span>
+
+            <div style="display: flex; align-items: center; gap: 2px; margin-bottom: 12px;">
+              <sc-for list="{{ skill.stars }}" as="star" hint-placeholder-count="5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="{{ star.fill }}" stroke="var(--sv-accent)" stroke-width="1.6" stroke-linejoin="round"><path d="M12 2.5l2.9 6.06 6.6.77-4.86 4.6 1.25 6.57L12 17.4l-5.9 3.1 1.25-6.57-4.86-4.6 6.6-.77z"></path></svg>
+              </sc-for>
+              <span style="font-size: 12px; color: var(--sv-text-muted); margin-left: 6px;">{{ skill.ratingLabel }}</span>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: var(--sv-text-faint);">
+              <span>↓ {{ skill.downloads }}</span>
+              <span style="border: 1px solid var(--sv-border-strong); padding: 2px 8px; border-radius: 20px; font-family: var(--sv-font-mono);">{{ skill.harness }}</span>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <sc-if value="{{ hasSelected }}" hint-placeholder-val="{{ false }}">
+  <div style="position: fixed; top: 0; right: 0; width: 620px; max-width: 92vw; height: 100vh; background: var(--sv-surface); border-left: 1px solid var(--sv-border); box-shadow: var(--sv-shadow-lg); z-index: 300; overflow-y: auto; box-sizing: border-box; padding: 28px 32px 48px;">
+
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 14px;">
+      <div>
+        <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;">
+          <span style="font-family: var(--sv-font-mono); font-weight: 700; font-size: 21px;">{{ selected.name }}</span>
+          <span style="font-family: var(--sv-font-mono); color: var(--sv-text-faint); font-size: 13px;">{{ selected.version }}</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+          <sc-if value="{{ isEditingCategory }}" hint-placeholder-val="{{ false }}">
+            <select value="{{ selected.categoryId }}" onChange="{{ onCategoryComboChange }}" onBlur="{{ onCategoryComboBlur }}" autoFocus="{{ true }}" style="margin: 0; margin-left: 0; text-align-last: left; font-size: 11px; font-family: var(--sv-font-mono); font-weight: 700; color: var(--sv-accent-dark); background: rgba(var(--sv-accent-rgb),0.1); border: 1px solid var(--sv-accent); padding: 3px 9px; border-radius: 5px; cursor: pointer;">
+              <sc-for list="{{ categoryOptions }}" as="opt" hint-placeholder-count="9">
+                <option value="{{ opt.id }}">{{ opt.label }}</option>
+              </sc-for>
+            </select>
+          </sc-if>
+          <sc-if value="{{ isNotEditingCategory }}" hint-placeholder-val="{{ true }}">
+            <span onDoubleClick="{{ onCategoryBadgeDoubleClick }}" title="Doble clic para cambiar la categoría" style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-family: var(--sv-font-mono); font-weight: 700; color: var(--sv-accent-dark); background: rgba(var(--sv-accent-rgb),0.1); border: 1px solid rgba(var(--sv-accent-rgb),0.3); padding: 3px 9px; border-radius: 5px; cursor: pointer;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="{{ selected.categoryIconPath }}"></path></svg>
+              {{ selected.category }}
+            </span>
+          </sc-if>
+          <span style="font-size: 13px; color: var(--sv-text-muted);">{{ selected.author }}</span>
+        </div>
+      </div>
+      <button type="button" onClick="{{ onCloseDrawer }}" aria-label="Cerrar" style="background: none; border: none; padding: 4px; margin: -4px; cursor: pointer; color: var(--sv-text-muted); flex-shrink: 0;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+      </button>
+    </div>
+
+    <p style="margin: 18px 0 24px; font-size: 14.5px; color: var(--sv-text); line-height: 1.55;">{{ selected.description }}</p>
+
+    <div style="margin-bottom: 22px;">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+        <span style="font-size: 11px; font-weight: 700; color: var(--sv-text-faint); font-family: var(--sv-font-mono); text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Invocación</span>
+        <div style="flex: 1; height: 1px; background: var(--sv-border);"></div>
+      </div>
+      <div style="background: var(--sv-subtle); border: 1px solid var(--sv-border); border-radius: 8px; padding: 12px 16px; font-family: var(--sv-font-mono); font-size: 13px; color: var(--sv-text); overflow-x: auto; white-space: nowrap;">{{ selected.invocation }}</div>
+    </div>
+
+    <div style="margin-bottom: 22px;">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+        <span style="font-size: 11px; font-weight: 700; color: var(--sv-text-faint); font-family: var(--sv-font-mono); text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Triggers</span>
+        <div style="flex: 1; height: 1px; background: var(--sv-border);"></div>
+      </div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <sc-for list="{{ selected.triggers }}" as="trg" hint-placeholder-count="1">
+          <span style="font-family: var(--sv-font-mono); font-size: 12.5px; color: var(--sv-accent-dark); background: rgba(var(--sv-accent-rgb),0.08); border: 1px solid rgba(var(--sv-accent-rgb),0.3); padding: 5px 11px; border-radius: 6px;">{{ trg }}</span>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 24px;">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+        <span style="font-size: 11px; font-weight: 700; color: var(--sv-text-faint); font-family: var(--sv-font-mono); text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Compatibilidad</span>
+        <div style="flex: 1; height: 1px; background: var(--sv-border);"></div>
+      </div>
+      <span style="display: inline-flex; align-items: center; gap: 6px; font-family: var(--sv-font-mono); font-size: 12.5px; font-weight: 600; color: var(--sv-teal); border: 1px solid rgba(var(--sv-teal-rgb),0.4); background: rgba(var(--sv-teal-rgb),0.08); padding: 5px 12px; border-radius: 20px;">✓ {{ selected.compatibility }}</span>
+    </div>
+
+    <div style="margin-bottom: 24px;">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+        <span style="font-size: 11px; font-weight: 700; color: var(--sv-text-faint); font-family: var(--sv-font-mono); text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Instalar</span>
+        <div style="flex: 1; height: 1px; background: var(--sv-border);"></div>
+      </div>
+
+      <div style="background: var(--sv-bg-soft); border: 1px solid var(--sv-border); border-radius: 12px; padding: 18px;">
+        <div style="font-size: 10.5px; font-weight: 700; color: var(--sv-text-faint); font-family: var(--sv-font-mono); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Harness</div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+          <sc-for list="{{ selected.harnessOptions }}" as="h" hint-placeholder-count="5">
+            <button type="button" onClick="{{ h.select }}" style="{{ h.style }}">{{ h.label }}</button>
+          </sc-for>
+        </div>
+
+        <div style="font-size: 10.5px; font-weight: 700; color: var(--sv-text-faint); font-family: var(--sv-font-mono); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Alcance</div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+          <sc-for list="{{ selected.scopeOptions }}" as="sc" hint-placeholder-count="2">
+            <button type="button" onClick="{{ sc.select }}" style="{{ sc.style }}">{{ sc.label }}</button>
+          </sc-for>
+        </div>
+
+        <div style="font-family: var(--sv-font-mono); font-size: 12.5px; color: var(--sv-text-muted); margin-bottom: 12px;">→ <span style="color: var(--sv-accent-dark);">{{ selected.installPath }}</span></div>
+
+        <div style="display: flex; align-items: stretch; gap: 8px;">
+          <div style="flex: 1; background: var(--sv-sidebar-bg); color: #d8d2c5; border-radius: 8px; padding: 12px 14px; font-family: var(--sv-font-mono); font-size: 12.5px; line-height: 1.5; overflow-x: auto; white-space: pre-wrap; word-break: break-word;">{{ selected.installCommand }}</div>
+          <button type="button" onClick="{{ onCopyCommand }}" style="flex-shrink: 0; padding: 0 16px; border-radius: 8px; border: 1px solid var(--sv-border-strong); background: var(--sv-surface); color: var(--sv-text); font-family: var(--sv-font-display); font-size: 13px; font-weight: 600; cursor: pointer;">{{ copyLabel }}</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 28px; flex-wrap: wrap;">
+      <span style="font-size: 13px; color: var(--sv-text-muted);">¿Prefieres instalarlo manualmente?</span>
+      <button type="button" style="padding: 9px 16px; border-radius: 8px; border: 1px solid rgba(var(--sv-accent-rgb),0.4); background: rgba(var(--sv-accent-rgb),0.08); color: var(--sv-accent-dark); font-family: var(--sv-font-display); font-weight: 700; font-size: 13px; cursor: pointer; white-space: nowrap;">↓ Descargar ZIP</button>
+    </div>
+
+    <div style="display: flex; gap: 40px; padding-top: 20px; border-top: 1px solid var(--sv-border);">
+      <div>
+        <div style="font-family: var(--sv-font-mono); font-size: 20px; font-weight: 700;">{{ selected.installs }}</div>
+        <div style="font-size: 12px; color: var(--sv-text-faint); margin-top: 2px;">instalaciones</div>
+      </div>
+      <div>
+        <div style="font-family: var(--sv-font-mono); font-size: 20px; font-weight: 700;">{{ selected.published }}</div>
+        <div style="font-size: 12px; color: var(--sv-text-faint); margin-top: 2px;">publicado</div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+</dc-import>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const CATEGORY_ICONS = {
+  all: 'M12 2l3 5-3 5-3-5z M12 12l3 5-3 5-3-5z',
+  code: 'M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zM8 10l-2 2 2 2M14 10l2 2-2 2',
+  docs: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M9 15h6M9 11h2',
+  data: 'M4 4h16v6H4zM4 14h10v6H4z',
+  ui: 'M3 5h18v14H3zM3 9h18M9 9v10',
+  infra: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.04 1.56V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 9 19.35a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.65 15 1.7 1.7 0 0 0 3 14v-.09A2 2 0 0 1 3 9.91H3.1A1.7 1.7 0 0 0 4.65 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.65 1.7 1.7 0 0 0 10.04 3.1V3a2 2 0 1 1 4 0v.09c0 .69.4 1.31 1.04 1.56A1.7 1.7 0 0 0 17 4.65l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.35 9c.55.24 1.35.4 1.65.91V14',
+  ai: 'M12 2a2 2 0 0 1 2 2v2h1a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3h1V4a2 2 0 0 1 2-2zM8 13h.01M16 13h.01M9 17h6',
+  requirements: 'M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11',
+  quality: 'M12 2.5l2.9 6.06 6.6.77-4.86 4.6 1.25 6.57L12 17.4l-5.9 3.1 1.25-6.57-4.86-4.6 6.6-.77z',
+  finance: 'M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6',
+};
+
+const CATEGORIES = [
+  { id: 'all', label: 'Todos', count: 5 },
+  { id: 'code', label: 'Code', count: 1 },
+  { id: 'docs', label: 'Docs', count: 0 },
+  { id: 'data', label: 'Data', count: 0 },
+  { id: 'ui', label: 'UI / Frontend', count: 0 },
+  { id: 'infra', label: 'Infra', count: 2 },
+  { id: 'ai', label: 'AI & Agents', count: 0 },
+  { id: 'requirements', label: 'Requirements', count: 0 },
+  { id: 'quality', label: 'Quality', count: 0 },
+  { id: 'finance', label: 'Finance', count: 1 },
+];
+
+const INITIAL_SKILLS = [
+  {
+    id: 1, name: 'report-userstory-testcase', version: 'v1.0.0', categoryId: 'requirements', category: 'REQUIREMENTS',
+    description: 'Skill enviado a revision sin descripcion validada.', trigger: 'report-userstory-testcase', hasZip: true,
+    avgRating: 5, ratingCount: 1, downloads: 5, harness: 'claude', author: 'Miguel Merino',
+    invocation: 'Skill({ skill: "report-userstory-testcase" })', triggers: ['report-userstory-testcase'], compatibility: 'claude',
+    installPath: '~/.claude/skills/report-userstory-testcase.md', installs: '0', published: 'jul 2026',
+  },
+  {
+    id: 2, name: 'k8s-cluster-diagnostic', version: 'v1.0.0', categoryId: 'infra', category: 'INFRA',
+    description: 'Use when diagnosing Kubernetes cluster health, analyzing node and pod issues.', trigger: '/k8s-diagnostic', hasZip: false,
+    avgRating: 5, ratingCount: 12, downloads: 3, harness: 'claude', author: 'Miguel Merino',
+    invocation: 'Skill({ skill: "k8s-cluster-diagnostic" })', triggers: ['/k8s-diagnostic'], compatibility: 'claude',
+    installPath: '~/.claude/skills/k8s-cluster-diagnostic.md', installs: '3', published: 'jun 2026',
+  },
+  {
+    id: 3, name: 'informe-mensual-horas-proyecto', version: 'v1.0.0', categoryId: 'finance', category: 'FINANCE',
+    description: 'Genera el informe mensual de horas por proyecto para Contabilidad, clasificando y...', trigger: 'informe-mensual-horas-proyecto', hasZip: true,
+    avgRating: 0, ratingCount: 0, downloads: 0, harness: 'claude', author: 'Miguel Merino',
+    invocation: 'Skill({ skill: "informe-mensual-horas-proyecto" })', triggers: ['informe-mensual-horas-proyecto'], compatibility: 'claude',
+    installPath: '~/.claude/skills/informe-mensual-horas-proyecto.md', installs: '0', published: 'jul 2026',
+  },
+  {
+    id: 4, name: 'evaluate-user-story-skill', version: 'v1.0.0', categoryId: 'code', category: 'CODE',
+    description: 'Skill enviado a revision sin descripcion validada.', trigger: 'evaluate-user-story-skill', hasZip: false,
+    avgRating: 0, ratingCount: 0, downloads: 0, harness: 'claude', author: 'Miguel Merino',
+    invocation: 'Skill({ skill: "evaluate-user-story-skill" })', triggers: ['evaluate-user-story-skill'], compatibility: 'claude',
+    installPath: '~/.claude/skills/evaluate-user-story-skill.md', installs: '0', published: 'jul 2026',
+  },
+  {
+    id: 5, name: 'k8s-node-autoscaler', version: 'v0.4.0', categoryId: 'infra', category: 'INFRA',
+    description: 'Recomienda ajustes de autoscaling para nodepools con base en el uso reciente.', trigger: '/k8s-autoscaler', hasZip: false,
+    avgRating: 0, ratingCount: 0, downloads: 1, harness: 'claude', author: 'Miguel Merino',
+    invocation: 'Skill({ skill: "k8s-node-autoscaler" })', triggers: ['/k8s-autoscaler'], compatibility: 'claude',
+    installPath: '~/.claude/skills/k8s-node-autoscaler.md', installs: '1', published: 'jun 2026',
+  },
+];
+
+const HARNESS_LIST = ['claude', 'codex', 'opencode', 'agy', 'cursor'];
+const SCOPE_LIST = ['global', 'local'];
+
+class Component extends DCLogic {
+  state = {
+    activeCategory: 'all',
+    selectedId: 4,
+    harnessBySkill: {},
+    scopeBySkill: {},
+    copied: false,
+    isEditingCategory: false,
+    categoryOverrideBySkill: {},
+  };
+
+  onSelectCategory = (id) => this.setState({ activeCategory: id });
+  onSelectSkill = (id) => this.setState({ selectedId: id, copied: false });
+  onCloseDrawer = () => this.setState({ selectedId: null });
+  onPublish = () => {};
+
+  onSelectHarness = (skillId, h) => this.setState((s) => ({ harnessBySkill: { ...s.harnessBySkill, [skillId]: h } }));
+  onSelectScope = (skillId, sc) => this.setState((s) => ({ scopeBySkill: { ...s.scopeBySkill, [skillId]: sc } }));
+
+  onCategoryBadgeDoubleClick = () => this.setState({ isEditingCategory: true });
+  onCategoryComboBlur = () => this.setState({ isEditingCategory: false });
+  onCategoryComboChange = (e) => {
+    const newId = e.target.value;
+    this.setState((s) => ({
+      categoryOverrideBySkill: { ...s.categoryOverrideBySkill, [s.selectedId]: newId },
+      isEditingCategory: false,
+    }));
+  };
+
+  onCopyCommand = () => {
+    this.setState({ copied: true });
+    setTimeout(() => this.setState({ copied: false }), 1500);
+  };
+
+  renderVals() {
+    const { activeCategory, selectedId, harnessBySkill, scopeBySkill, copied, isEditingCategory, categoryOverrideBySkill } = this.state;
+
+    const categories = CATEGORIES.map((c) => ({
+      ...c,
+      select: () => this.onSelectCategory(c.id),
+      bg: c.id === activeCategory ? 'rgba(var(--sv-accent-rgb),0.1)' : 'transparent',
+      color: c.id === activeCategory ? 'var(--sv-accent-dark)' : 'var(--sv-text)',
+      iconPath: CATEGORY_ICONS[c.id],
+    }));
+
+    const filtered = INITIAL_SKILLS.filter((s) => activeCategory === 'all' || s.categoryId === activeCategory);
+
+    const skills = filtered.map((skill) => {
+      const stars = [1, 2, 3, 4, 5].map((n) => ({ fill: n <= Math.round(skill.avgRating) ? 'var(--sv-accent)' : 'none' }));
+      const ratingLabel = skill.ratingCount > 0 ? `${skill.avgRating.toFixed(1)} (${skill.ratingCount})` : 'Sin calificaciones';
+      return {
+        ...skill,
+        stars,
+        ratingLabel,
+        categoryIconPath: CATEGORY_ICONS[skill.categoryId],
+        select: () => this.onSelectSkill(skill.id),
+        borderColor: skill.id === selectedId ? 'var(--sv-accent)' : 'var(--sv-border)',
+      };
+    });
+
+    const selectedRaw = INITIAL_SKILLS.find((s) => s.id === selectedId) || null;
+    let selected = null;
+    if (selectedRaw) {
+      const overrideCategoryId = categoryOverrideBySkill[selectedRaw.id];
+      const categoryId = overrideCategoryId || selectedRaw.categoryId;
+      const categoryMeta = CATEGORIES.find((c) => c.id === categoryId) || CATEGORIES.find((c) => c.id === 'all');
+      const currentHarness = harnessBySkill[selectedRaw.id] || selectedRaw.compatibility;
+      const currentScope = scopeBySkill[selectedRaw.id] || 'global';
+      const pill = (active) => 'padding:7px 14px; border-radius:7px; font-family:\'JetBrains Mono\',monospace; font-size:12.5px; font-weight:600; cursor:pointer; white-space:nowrap;' +
+        (active ? 'background:rgba(var(--sv-accent-rgb),0.12); border:1px solid var(--sv-accent); color:var(--sv-accent-dark);' : 'background:var(--sv-surface); border:1px solid var(--sv-border-strong); color:var(--sv-text-muted);');
+      const harnessOptions = HARNESS_LIST.map((h) => ({
+        label: h,
+        select: () => this.onSelectHarness(selectedRaw.id, h),
+        style: pill(h === currentHarness),
+      }));
+      const scopeOptions = SCOPE_LIST.map((sc) => ({
+        label: sc,
+        select: () => this.onSelectScope(selectedRaw.id, sc),
+        style: pill(sc === currentScope),
+      }));
+      selected = {
+        ...selectedRaw,
+        categoryId,
+        category: categoryMeta.label.toUpperCase(),
+        categoryIconPath: CATEGORY_ICONS[categoryId],
+        harnessOptions,
+        scopeOptions,
+        installCommand: `skillvault install ${selectedRaw.name} --harness ${currentHarness} --scope ${currentScope}`,
+      };
+    }
+
+    const categoryOptions = CATEGORIES.filter((c) => c.id !== 'all');
+
+    return {
+      breadcrumb: [
+        { label: 'Inicio', color: 'var(--sv-text-muted)', weight: 400, hasSeparator: true },
+        { label: 'Catálogo de Skills', color: 'var(--sv-text)', weight: 600, hasSeparator: false },
+      ],
+      categories,
+      skills,
+      resultsLabel: `${skills.length} skills encontrados`,
+      onPublish: this.onPublish,
+      hasSelected: !!selected,
+      selected,
+      onCloseDrawer: this.onCloseDrawer,
+      onCopyCommand: this.onCopyCommand,
+      copyLabel: copied ? 'Copiado' : 'Copiar',
+      isEditingCategory,
+      isNotEditingCategory: !isEditingCategory,
+      categoryOptions,
+      onCategoryBadgeDoubleClick: this.onCategoryBadgeDoubleClick,
+      onCategoryComboChange: this.onCategoryComboChange,
+      onCategoryComboBlur: this.onCategoryComboBlur,
+    };
+  }
+}
+
+</script>
+</body>
+</html>
