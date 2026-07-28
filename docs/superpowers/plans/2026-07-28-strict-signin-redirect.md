@@ -1,10 +1,10 @@
-# Plan de Implementación: Redirección Estricta a /signin en Login y Logout
+# Plan de Implementación: Redirección Estricta a /signin y Botón + Nuevo Skill en Catálogo
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Redirigir de manera estricta y limpia a los usuarios a la página `/signin` al iniciar sesión desde el menú de usuario y al cerrar sesión mediante Keycloak.
+**Goal:** Redirigir de manera estricta y limpia a los usuarios a la página `/signin` al iniciar sesión desde el menú de usuario y al cerrar sesión mediante Keycloak. Además, mover y renombrar el botón de "+ Publicar Skill" al panel del título y descripción en la página de catálogo de la aplicación.
 
-**Architecture:** Modificar el parámetro `post_logout_redirect_uri` y el fallback de NextAuth `signOut` del servidor en `src/app/actions/auth.ts`, simplificar el enlace estático en el componente de cliente `src/components/UserMenu.tsx`, y actualizar los tests correspondientes.
+**Architecture:** Modificar el parámetro `post_logout_redirect_uri` y el fallback de NextAuth `signOut` del servidor en `src/app/actions/auth.ts`, simplificar el enlace estático en el componente de cliente `src/components/UserMenu.tsx`, mover el botón "+ Publicar Skill" en `src/components/CatalogClient.tsx` hacia `<PageHeader />` en `src/app/page.tsx`, y actualizar los tests correspondientes.
 
 **Tech Stack:** Next.js (App Router), NextAuth.js v5, TypeScript.
 
@@ -24,58 +24,10 @@
 **Interfaces:**
 - Produces: `logoutAction()` que realiza el cierre de sesión redirigiendo estrictamente a `/signin`.
 
-- [ ] **Step 1: Modificar `buildKeycloakLogoutUrl` en `src/app/actions/auth.ts`**
-  Actualizar `logoutUrl.searchParams.set("post_logout_redirect_uri", baseUrl)` para concatenar `/signin`.
-  ```typescript
-  logoutUrl.searchParams.set("post_logout_redirect_uri", baseUrl + "/signin");
-  ```
-
-- [ ] **Step 2: Modificar `logoutAction` en `src/app/actions/auth.ts`**
-  Modificar el callback de `signOut` para redirigir a `/signin` por defecto.
-  ```typescript
-  await signOut({ redirectTo: keycloakLogoutUrl ?? "/signin" });
-  ```
-
-  El archivo `src/app/actions/auth.ts` debe quedar exactamente así:
-  ```typescript
-  "use server";
-
-  import { auth, signIn, signOut } from "@/auth";
-
-  function buildKeycloakLogoutUrl(idToken?: string): string | null {
-    const issuer = process.env.AUTH_KEYCLOAK_ISSUER;
-    if (!issuer) return null;
-
-    const logoutUrl = new URL(`${issuer}/protocol/openid-connect/logout`);
-    if (idToken) {
-      logoutUrl.searchParams.set("id_token_hint", idToken);
-    }
-    const baseUrl = process.env.AUTH_URL ?? process.env.NEXTAUTH_URL ?? "http://localhost:3000";
-    logoutUrl.searchParams.set("post_logout_redirect_uri", baseUrl + "/signin");
-    return logoutUrl.toString();
-  }
-
-  export async function loginAction() {
-    await signIn("keycloak");
-  }
-
-  export async function logoutAction() {
-    const session = await auth();
-    const keycloakLogoutUrl = buildKeycloakLogoutUrl(session?.idToken);
-    await signOut({ redirectTo: keycloakLogoutUrl ?? "/signin" });
-  }
-  ```
-
-- [ ] **Step 3: Ejecutar compilador TypeScript para verificar la sintaxis**
-  Ejecutar: `pnpm tsc --noEmit`
-  Esperado: Compilación exitosa con salida limpia.
-
-- [ ] **Step 4: Confirmar los cambios de la Task 1 en Git**
-  Ejecutar:
-  ```bash
-  git add src/app/actions/auth.ts
-  git commit -m "feat: configure strict /signin redirect on logout action"
-  ```
+- [x] **Step 1: Modificar `buildKeycloakLogoutUrl` en `src/app/actions/auth.ts`**
+- [x] **Step 2: Modificar `logoutAction` en `src/app/actions/auth.ts`**
+- [x] **Step 3: Ejecutar compilador TypeScript para verificar la sintaxis**
+- [x] **Step 4: Confirmar los cambios de la Task 1 en Git**
 
 ---
 
@@ -163,4 +115,61 @@
   ```bash
   git add src/lib/review/ui-smoke.test.ts
   git commit -m "test: update UserMenu smoke test assertion to match static signin path"
+  ```
+
+---
+
+### Task 4: Reposicionar y Renombrar Botón en Catálogo de Skills
+
+**Files:**
+- Modify: `src/app/page.tsx`
+- Modify: `src/components/CatalogClient.tsx`
+
+**Interfaces:**
+- Produces: `<PageHeader />` con botón `+ Nuevo Skill` en `src/app/page.tsx`, y remoción del botón duplicado en `src/components/CatalogClient.tsx`.
+
+- [ ] **Step 1: Modificar `src/app/page.tsx`**
+  Importar `Link` desde `"next/link"` y pasar el enlace estilizado como la propiedad `actions` de `<PageHeader />`.
+  ```typescript
+        <PageHeader
+          title={q ? `Resultados para "${q}"` : "Catálogo de Skills"}
+          description="Skills reutilizables para Claude Code y otros harnesses compatibles con el estándar SKILL.md de Anthropic."
+          actions={
+            <Link
+              href="/publish"
+              style={{
+                padding: "9px 18px",
+                background: "var(--accent)",
+                border: "none",
+                borderRadius: "6px",
+                color: "#fff",
+                cursor: "pointer",
+                fontSize: "13px",
+                fontWeight: 600,
+                textDecoration: "none",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.15)",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                transition: "opacity 0.15s ease",
+              }}
+            >
+              + Nuevo Skill
+            </Link>
+          }
+        />
+  ```
+
+- [ ] **Step 2: Modificar `src/components/CatalogClient.tsx`**
+  Eliminar el bloque `div` que contiene el antiguo enlace `+ Publicar Skill` de la barra lateral izquierda `<aside>` (líneas 125 a 151).
+
+- [ ] **Step 3: Ejecutar compilador TypeScript y suite de pruebas**
+  Ejecutar: `pnpm tsc --noEmit` y `pnpm test`
+  Esperado: Compilación exitosa y todas las pruebas de humo pasan de forma impecable.
+
+- [ ] **Step 4: Confirmar los cambios de la Task 4 en Git**
+  Ejecutar:
+  ```bash
+  git add src/app/page.tsx src/components/CatalogClient.tsx
+  git commit -m "feat: move publish button to PageHeader as + Nuevo Skill"
   ```
