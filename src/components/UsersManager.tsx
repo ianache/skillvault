@@ -153,10 +153,10 @@ export function UsersManager({ initialUsers }: Props) {
         </div>
 
         <div style={{ display: "flex", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "8px", padding: "3px" }}>
-          <button type="button" onClick={() => setStatusFilter("active")} style={statusFilter === "active" ? pillActive : { ...pillBase, borderWidth: "1px", borderStyle: "solid", borderColor: "transparent", borderRadius: "6px" }}>
+          <button type="button" onClick={() => setStatusFilter("active")} style={statusFilter === "active" ? pillActive : { ...pillBase, borderColor: "transparent", borderRadius: "6px" }}>
             Activos
           </button>
-          <button type="button" onClick={() => setStatusFilter("inactive")} style={statusFilter === "inactive" ? pillActive : { ...pillBase, borderWidth: "1px", borderStyle: "solid", borderColor: "transparent", borderRadius: "6px" }}>
+          <button type="button" onClick={() => setStatusFilter("inactive")} style={statusFilter === "inactive" ? pillActive : { ...pillBase, borderColor: "transparent", borderRadius: "6px" }}>
             Inactivos
           </button>
         </div>
