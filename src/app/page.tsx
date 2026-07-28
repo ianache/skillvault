@@ -4,6 +4,7 @@ import { CatalogClient } from "@/components/CatalogClient";
 import { AppHeader } from "@/components/AppHeader";
 import { PageHeader } from "@/components/PageHeader";
 import { Category, SkillRow, SkillType } from "@/lib/types";
+import Link from "next/link";
 
 async function getCategories(): Promise<Category[]> {
   const result = await client.execute(
@@ -75,6 +76,29 @@ export default async function HomePage({ searchParams }: HomeProps) {
       <PageHeader
         title={q ? `Resultados para "${q}"` : "Catálogo de Skills"}
         description="Skills reutilizables para Claude Code y otros harnesses compatibles con el estándar SKILL.md de Anthropic."
+        actions={
+          <Link
+            href="/publish"
+            style={{
+              padding: "9px 18px",
+              background: "var(--accent)",
+              border: "none",
+              borderRadius: "6px",
+              color: "#fff",
+              cursor: "pointer",
+              fontSize: "13px",
+              fontWeight: 600,
+              textDecoration: "none",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.15)",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              transition: "opacity 0.15s ease",
+            }}
+          >
+            + Nuevo Skill
+          </Link>
+        }
       />
 
       {/* CLI download banner */}

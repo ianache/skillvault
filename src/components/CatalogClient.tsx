@@ -122,33 +122,7 @@ export function CatalogClient({ initialSkills, initialCategories, initialQuery =
           })}
         </div>
 
-        <div
-          style={{
-            margin: "20px 16px 0",
-            paddingTop: "16px",
-            borderTop: "1px solid var(--border)",
-          }}
-        >
-          <a
-            href="/publish"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              padding: "8px 10px",
-              borderRadius: "4px",
-              border: "1px solid var(--accent)",
-              background: "var(--accent-muted)",
-              color: "var(--accent)",
-              textDecoration: "none",
-              fontSize: "12px",
-              fontWeight: 600,
-              transition: "background .12s",
-            }}
-          >
-            + Publicar Skill
-          </a>
-        </div>
+
       </aside>
 
       {/* ── Main ── */}
