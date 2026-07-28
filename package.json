@@ -19,6 +19,7 @@
         "migrate:skill-ratings:mysql": "tsx src/lib/db/migrate-skill-ratings-mysql.ts",
         "migrate:skill-version-files": "tsx src/lib/db/migrate-skill-version-files.ts",
         "migrate:skill-version-files:mysql": "tsx src/lib/db/migrate-skill-version-files-mysql.ts",
+        "migrate:orphan-skills": "tsx src/lib/db/migrate-orphan-skills.ts",
         "test": "pnpm run test:review",
         "test:review": "tsx --test src/lib/review/*.test.ts"
     },
