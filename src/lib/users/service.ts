@@ -56,37 +56,83 @@ export async function ensureUser(user: { id: string; username: string; email: st
   const primary = (existing.rows.find((r) => String(r.id) === user.id) || existing.rows[0]) as Record<string, unknown>;
   const primaryId = String(primary.id);
 
+  // Identify all IDs that are being superseded or deleted
+  const idsToMigrate = new Set<string>();
   if (primaryId !== user.id) {
-    // Cascading updates for orphaned records before primary ID is mutated
-    await client.execute({
-      sql: "UPDATE skills SET author_id = ? WHERE author_id = ?",
-      args: [user.id, primaryId],
-    });
-    await client.execute({
-      sql: "UPDATE skill_review_requests SET author_id = ? WHERE author_id = ?",
-      args: [user.id, primaryId],
-    });
+    idsToMigrate.add(primaryId);
   }
 
-  await client.execute({
-    sql: `UPDATE users SET id = ?, username = ?, full_name = ?, email = ?, roles = ?, last_login_at = ?, updated_at = ?
-          WHERE id = ?`,
-    args: [user.id, user.username, user.username, user.email, JSON.stringify(currentRoles), now, now, primaryId],
-  });
-
+  const duplicateIds: string[] = [];
   if (existing.rows.length > 1) {
-    // Delete any duplicates other than the primary row we updated
-    const duplicateIds = existing.rows
-      .map((r) => String(r.id))
-      .filter((id) => id !== primaryId);
+    for (const row of existing.rows) {
+      const rid = String(row.id);
+      if (rid !== primaryId) {
+        duplicateIds.push(rid);
+        idsToMigrate.add(rid);
+      }
+    }
+  }
+
+  // We perform the entire mutation (cascade + user updates + duplicate cleanup) in a transaction
+  await client.transaction(async (tx) => {
+    // 1. If we have IDs to migrate, cascade update child references across ALL relevant tables
+    if (idsToMigrate.size > 0) {
+      const sourceIds = Array.from(idsToMigrate);
+      const placeholders = sourceIds.map(() => "?").join(",");
+
+      // a. skills.author_id
+      await tx.execute({
+        sql: `UPDATE skills SET author_id = ? WHERE author_id IN (${placeholders})`,
+        args: [user.id, ...sourceIds],
+      });
+
+      // b. skill_review_requests.author_id
+      await tx.execute({
+        sql: `UPDATE skill_review_requests SET author_id = ? WHERE author_id IN (${placeholders})`,
+        args: [user.id, ...sourceIds],
+      });
+
+      // c. skill_review_requests.reviewer_id
+      await tx.execute({
+        sql: `UPDATE skill_review_requests SET reviewer_id = ? WHERE reviewer_id IN (${placeholders})`,
+        args: [user.id, ...sourceIds],
+      });
+
+      // d. skill_review_comments.author_id
+      await tx.execute({
+        sql: `UPDATE skill_review_comments SET author_id = ? WHERE author_id IN (${placeholders})`,
+        args: [user.id, ...sourceIds],
+      });
+
+      // e. installs.user_id
+      await tx.execute({
+        sql: `UPDATE installs SET user_id = ? WHERE user_id IN (${placeholders})`,
+        args: [user.id, ...sourceIds],
+      });
+
+      // f. skill_ratings.user_id
+      await tx.execute({
+        sql: `UPDATE skill_ratings SET user_id = ? WHERE user_id IN (${placeholders})`,
+        args: [user.id, ...sourceIds],
+      });
+    }
+
+    // 2. Update/Upsert primary user row
+    await tx.execute({
+      sql: `UPDATE users SET id = ?, username = ?, full_name = ?, email = ?, roles = ?, last_login_at = ?, updated_at = ?
+            WHERE id = ?`,
+      args: [user.id, user.username, user.username, user.email, JSON.stringify(currentRoles), now, now, primaryId],
+    });
+
+    // 3. Clean up duplicates
     if (duplicateIds.length > 0) {
-      const placeholders = duplicateIds.map(() => "?").join(",");
-      await client.execute({
-        sql: `DELETE FROM users WHERE id IN (${placeholders})`,
+      const delPlaceholders = duplicateIds.map(() => "?").join(",");
+      await tx.execute({
+        sql: `DELETE FROM users WHERE id IN (${delPlaceholders})`,
         args: duplicateIds,
       });
     }
-  }
+  });
 }
 
 export async function listUsers(): Promise<AppUser[]> {
