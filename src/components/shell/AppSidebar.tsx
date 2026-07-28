@@ -21,8 +21,8 @@ export function AppSidebar({ collapsed, onToggleCollapse, userRoles = [] }: Prop
         height: "100vh",
         position: "sticky",
         top: 0,
-        background: "var(--surface)",
-        borderRight: "1px solid var(--border)",
+        background: "var(--sv-sidebar-bg)",
+        borderRight: "1px solid var(--sv-sidebar-border)",
         display: "flex",
         flexDirection: "column",
         transition: "width 0.2s ease",
@@ -31,20 +31,20 @@ export function AppSidebar({ collapsed, onToggleCollapse, userRoles = [] }: Prop
       }}
     >
       {/* Brand Header */}
-      <div style={{ height: "56px", padding: "0 16px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid var(--border)" }}>
+      <div style={{ height: "56px", padding: "0 16px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid var(--sv-sidebar-border)" }}>
         <Link href="/" style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none" }}>
-          <span style={{ width: "28px", height: "28px", background: "var(--accent)", borderRadius: "6px", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: "12px", fontFamily: "var(--font-jetbrains-mono), monospace" }}>
+          <span style={{ width: "28px", height: "28px", background: "var(--sv-accent)", borderRadius: "6px", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: "12px", fontFamily: "var(--font-jetbrains-mono), monospace" }}>
             SV
           </span>
-          {!collapsed && <span style={{ fontWeight: 700, fontSize: "15px", color: "var(--text)", letterSpacing: "-0.3px" }}>SkillVault</span>}
+          {!collapsed && <span style={{ fontWeight: 700, fontSize: "15px", color: "var(--sv-sidebar-text)", letterSpacing: "-0.3px", fontFamily: "var(--sv-font-display), sans-serif" }}>SkillVault</span>}
         </Link>
         <button
           type="button"
           onClick={onToggleCollapse}
-          style={{ background: "transparent", border: "none", color: "var(--muted)", cursor: "pointer", padding: "4px", borderRadius: "4px" }}
+          style={{ background: "transparent", border: "none", color: "var(--sv-sidebar-text-dim)", cursor: "pointer", padding: "4px", borderRadius: "4px" }}
           title={collapsed ? "Expandir sidebar" : "Colapsar sidebar"}
         >
-          {collapsed ? "\u276F" : "\u276E"}
+          {collapsed ? "❯" : "❮"}
         </button>
       </div>
 
@@ -53,7 +53,7 @@ export function AppSidebar({ collapsed, onToggleCollapse, userRoles = [] }: Prop
         {navGroups.map((group) => (
           <div key={group.title} style={{ marginBottom: "20px" }}>
             {!collapsed && (
-              <div style={{ fontSize: "10px", fontWeight: 700, color: "var(--faint)", textTransform: "uppercase", letterSpacing: "0.05em", padding: "0 12px 6px" }}>
+              <div style={{ fontSize: "10px", fontWeight: 700, color: "var(--sv-sidebar-text-dim)", textTransform: "uppercase", letterSpacing: "0.05em", padding: "0 12px 6px", fontFamily: "var(--font-jetbrains-mono), monospace" }}>
                 {group.title}
               </div>
             )}
@@ -74,8 +74,8 @@ export function AppSidebar({ collapsed, onToggleCollapse, userRoles = [] }: Prop
                     textDecoration: "none",
                     fontSize: "13px",
                     fontWeight: isActive ? 600 : 500,
-                    color: isActive ? "var(--accent)" : "var(--text)",
-                    background: isActive ? "var(--accent-muted)" : "transparent",
+                    color: isActive ? "var(--sv-sidebar-active-text)" : "var(--sv-sidebar-text)",
+                    background: isActive ? "var(--sv-sidebar-active-bg)" : "transparent",
                     transition: "all 0.15s ease",
                     marginBottom: "2px",
                   }}
@@ -91,7 +91,7 @@ export function AppSidebar({ collapsed, onToggleCollapse, userRoles = [] }: Prop
 
       {/* Footer Version */}
       {!collapsed && (
-        <div style={{ padding: "12px 16px", borderTop: "1px solid var(--border)", fontSize: "11px", color: "var(--faint)", fontFamily: "var(--font-jetbrains-mono), monospace" }}>
+        <div style={{ padding: "12px 16px", borderTop: "1px solid var(--sv-sidebar-border)", fontSize: "11px", color: "var(--sv-sidebar-text-dim)", fontFamily: "var(--font-jetbrains-mono), monospace" }}>
           SkillVault v0.3.0
         </div>
       )}
