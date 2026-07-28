@@ -1,21 +1,23 @@
 @import "tailwindcss";
+@import "../../_ds/skillvault/styles.css";
 
 /* ── SkillVault Design Tokens ── */
 :root {
-  --bg:            #0b0d10;
-  --surface:       #14181d;
-  --raised:        #161b24;
-  --border:        #1f242b;
-  --border-subtle: #232830;
+  /* Mapeo de variables nativas a los tokens del Design System en tema oscuro por defecto */
+  --bg:            var(--sv-dark-bg);
+  --surface:       var(--sv-dark-surface);
+  --raised:        #1f1c16;
+  --border:        var(--sv-dark-border);
+  --border-subtle: #2b2721;
 
-  --accent:        #cfa554;
-  --accent-dim:    #b88f45;
-  --accent-muted:  rgba(207,165,84,0.14);
+  --accent:        var(--sv-accent);
+  --accent-dim:    var(--sv-accent-dark);
+  --accent-muted:  rgba(169,119,46,0.14);
   --accent-indigo: #8f94ff;
 
-  --text:          #f2f0ea;
-  --muted:         #8b9099;
-  --faint:         #5b616b;
+  --text:          var(--sv-dark-text);
+  --muted:         var(--sv-dark-text-muted);
+  --faint:         var(--sv-sidebar-text-dim);
 
   --cat-code:   #3B6EFF;
   --cat-docs:   #2ECC8A;
@@ -24,51 +26,51 @@
   --cat-infra:  #E88B3A;
   --cat-ai:     #E8503A;
 
-  --green:  #4fd1c5;
+  --green:  var(--sv-teal);
   --amber:  #E88B3A;
-  --red:    #E8503A;
+  --red:    var(--sv-danger);
   --cyan:   #4AB8E8;
   --purple: #C45FD4;
 
-  --status-published: #4fd1c5;
+  --status-published: var(--sv-teal);
   --status-review:    #E88B3A;
-  --status-draft:     #8b9099;
-  --status-rejected:  #E8503A;
+  --status-draft:     var(--sv-sidebar-text-dim);
+  --status-rejected:  var(--sv-danger);
 }
 
 [data-theme="light"] {
-  --bg:            #f7f5f0;
-  --surface:       #ffffff;
-  --raised:        #f0ede6;
-  --border:        #e6e1d8;
-  --border-subtle: #d8d2c5;
-  --text:          #1a1d21;
-  --muted:         #5c6270;
-  --faint:         #8a8f99;
-  --accent:        #a9772e;
-  --accent-dim:    #946a29;
+  --bg:            var(--sv-bg);
+  --surface:       var(--sv-surface);
+  --raised:        var(--sv-subtle);
+  --border:        var(--sv-border);
+  --border-subtle: var(--sv-border-strong);
+  --text:          var(--sv-text);
+  --muted:         var(--sv-text-muted);
+  --faint:         var(--sv-text-faint);
+  --accent:        var(--sv-accent);
+  --accent-dim:    var(--sv-accent-dark);
   --accent-muted:  rgba(169,119,46,0.12);
   --accent-indigo: #5a5fd6;
-  --green:         #0f9488;
-  --status-published: #0f9488;
+  --green:         var(--sv-teal);
+  --status-published: var(--sv-teal);
 }
 
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
-    --bg:            #f7f5f0;
-    --surface:       #ffffff;
-    --raised:        #f0ede6;
-    --border:        #e6e1d8;
-    --border-subtle: #d8d2c5;
-    --text:          #1a1d21;
-    --muted:         #5c6270;
-    --faint:         #8a8f99;
-    --accent:        #a9772e;
-    --accent-dim:    #946a29;
+    --bg:            var(--sv-bg);
+    --surface:       var(--sv-surface);
+    --raised:        var(--sv-subtle);
+    --border:        var(--sv-border);
+    --border-subtle: var(--sv-border-strong);
+    --text:          var(--sv-text);
+    --muted:         var(--sv-text-muted);
+    --faint:         var(--sv-text-faint);
+    --accent:        var(--sv-accent);
+    --accent-dim:    var(--sv-accent-dark);
     --accent-muted:  rgba(169,119,46,0.12);
     --accent-indigo: #5a5fd6;
-    --green:         #0f9488;
-    --status-published: #0f9488;
+    --green:         var(--sv-teal);
+    --status-published: var(--sv-teal);
   }
 }
 
@@ -78,6 +80,7 @@
 html { scroll-behavior: smooth; }
 
 body {
+  font-family: var(--sv-font-display);
   background: var(--bg);
   color: var(--text);
   font-size: 14px;
