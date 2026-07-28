@@ -425,6 +425,7 @@ test("PATCH /api/skills/:slug allows an author to create an existing-skill revie
 test("catalog excludes pending review requests", async () => {
   let catalogSql = "";
   const { GET } = createSkillHandlers({
+    getSession: async () => null,
     database: {
       async execute(input) {
         catalogSql = typeof input === "string" ? input : input.sql;
@@ -436,7 +437,8 @@ test("catalog excludes pending review requests", async () => {
   const response = await GET(new NextRequest("http://test/api/skills"));
 
   assert.equal(response.status, 200);
-  assert.match(catalogSql, /FROM skills WHERE status = 'published'/);
+  assert.match(catalogSql, /FROM skills s/);
+  assert.match(catalogSql, /s\.status = 'published'/);
 });
 
 test("detail returns published raw content while a pending version exists", async () => {
