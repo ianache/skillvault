@@ -214,3 +214,11 @@ test("DashboardClient renders a zip download action in rows with click propagati
   assert.match(dashboardSource, /e\.stopPropagation\(\)/);
   assert.match(dashboardSource, /fetch\(\`\/api\/skills\/\$\{skill\.slug\}\/install\`/);
 });
+
+test("UserMenu renders a sign-in Link with callbackUrl support when user is not logged in", async () => {
+  const menuSource = await source("../../components/UserMenu.tsx");
+  assert.match(menuSource, /usePathname\(\)/);
+  assert.match(menuSource, /useSearchParams\(\)/);
+  assert.match(menuSource, /Link/);
+  assert.match(menuSource, /href=\{\`\/signin\?callbackUrl=\$\{encodeURIComponent\(currentUrl\)\}\`\}/);
+});
