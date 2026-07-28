@@ -1,7 +1,7 @@
 "use client";
 
 import { CATEGORY_META, SkillRow } from "@/lib/types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface Props {
   skill: SkillRow | null;
@@ -18,11 +18,43 @@ const HARNESSES = {
 
 type HarnessKey = keyof typeof HARNESSES;
 
+const WindowsIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M0 3.449L9.75 2.1v9.45H0V3.449zM0 12.45h9.75v9.45L0 20.551v-8.1zM10.95 1.937L24 0v11.55H10.95V1.937zM10.95 12.45H24v11.55l-13.05-1.937v-9.613z" />
+  </svg>
+);
+
+const MacIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.07 2.47.3 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-.96.04-2.13.64-2.82 1.37-.58.62-1.09 1.76-.95 2.87 1.07.08 2.18-.46 2.78-1.18z" />
+  </svg>
+);
+
+const LinuxIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2a10 10 0 0 0-3.32 19.44c.1-.03.17-.11.17-.22V20c0-.83.6-1.5 1.4-1.5.4 0 .76.16 1.04.42l.06.06c.28.26.64.42 1.04.42.8 0 1.4-.67 1.4-1.5v-1.22c0-.11.07-.19.17-.22A10 10 0 0 0 12 2zm1.45 13.55a1.72 1.72 0 1 1-3.44 0 1.72 1.72 0 0 1 3.44 0z" />
+  </svg>
+);
+
 export function DetailPanel({ skill, onClose }: Props) {
   const [harness, setHarness] = useState<HarnessKey>("claude");
   const [scope, setScope] = useState<"global" | "local">("global");
   const [copied, setCopied] = useState(false);
   const [liveCount, setLiveCount] = useState<number | null>(null);
+  const [selectedOS, setSelectedOS] = useState<"windows" | "macos" | "linux">("windows");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const platform = window.navigator.platform.toLowerCase();
+      if (platform.includes("mac")) {
+        setSelectedOS("macos");
+      } else if (platform.includes("linux")) {
+        setSelectedOS("linux");
+      } else {
+        setSelectedOS("windows");
+      }
+    }
+  }, []);
 
   if (!skill) return null;
   const selectedSkill = skill;
@@ -35,7 +67,8 @@ export function DetailPanel({ skill, onClose }: Props) {
   const displayCount = liveCount ?? skill.installCount;
 
   async function copyCmd() {
-    await navigator.clipboard.writeText(cmd).catch(() => {});
+    const fullCmd = selectedOS === "windows" ? `powershell -Command "${cmd}"` : cmd;
+    await navigator.clipboard.writeText(fullCmd).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
     // Increment counter in background
@@ -348,28 +381,90 @@ export function DetailPanel({ skill, onClose }: Props) {
               </code>
             </div>
 
-            {/* Command */}
-            <div style={{ background: "var(--bg)", border: "1px solid var(--border)", borderRadius: "4px", padding: "10px 12px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px" }}>
-              <code style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "11px", color: "var(--text)", flex: 1, wordBreak: "break-all" }}>
-                {cmd}
-              </code>
-              <button
-                onClick={copyCmd}
+            {/* Command and OS Selector */}
+            <div style={{ marginTop: "16px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--faint)", fontFamily: "var(--font-jetbrains-mono), monospace", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                  Comando CLI
+                </span>
+                {/* OS Selector */}
+                <div style={{ display: "flex", gap: "4px" }}>
+                  {(["windows", "macos", "linux"] as const).map((os) => (
+                    <button
+                      key={os}
+                      type="button"
+                      onClick={() => setSelectedOS(os)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        fontSize: "11px",
+                        fontWeight: 600,
+                        padding: "3px 8px",
+                        borderRadius: "5px",
+                        border: `1px solid ${selectedOS === os ? "var(--sv-accent)" : "var(--border)"}`,
+                        background: selectedOS === os ? "rgba(169, 119, 46, 0.12)" : "none",
+                        color: selectedOS === os ? "var(--sv-accent-dark)" : "var(--muted)",
+                        cursor: "pointer",
+                        transition: "all 0.15s ease",
+                      }}
+                      title={`Ver comando para ${os}`}
+                    >
+                      {os === "windows" && <WindowsIcon />}
+                      {os === "macos" && <MacIcon />}
+                      {os === "linux" && <LinuxIcon />}
+                      <span style={{ textTransform: "capitalize" }}>{os === "macos" ? "macOS" : os}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Terminal Box */}
+              <div
                 style={{
-                  fontFamily: "var(--font-jetbrains-mono), monospace",
-                  fontSize: "10px",
-                  padding: "3px 8px",
-                  borderRadius: "3px",
-                  border: `1px solid ${copied ? "var(--green)" : "var(--border)"}`,
-                  background: "none",
-                  color: copied ? "var(--green)" : "var(--muted)",
-                  cursor: "pointer",
-                  flexShrink: 0,
-                  transition: "all .12s",
+                  background: "var(--sv-sidebar-bg)",
+                  border: "1px solid var(--sv-sidebar-border)",
+                  borderRadius: "8px",
+                  padding: "12px 14px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: "8px",
+                  boxShadow: "inset 0 1px 3px rgba(0,0,0,0.2)",
                 }}
               >
-                {copied ? "✓" : "Copiar"}
-              </button>
+                <code
+                  style={{
+                    fontFamily: "var(--font-jetbrains-mono), monospace",
+                    fontSize: "12.5px",
+                    color: "#f2efe9",
+                    flex: 1,
+                    wordBreak: "break-all",
+                    lineHeight: "1.4",
+                  }}
+                >
+                  {selectedOS === "windows" ? `powershell -Command "${cmd}"` : cmd}
+                </code>
+                <button
+                  type="button"
+                  onClick={copyCmd}
+                  style={{
+                    fontFamily: "var(--font-jetbrains-mono), monospace",
+                    fontSize: "11px",
+                    fontWeight: 600,
+                    padding: "4px 10px",
+                    borderRadius: "6px",
+                    border: `1px solid ${copied ? "var(--sv-teal)" : "var(--sv-sidebar-border)"}`,
+                    background: copied ? "rgba(15, 148, 136, 0.15)" : "rgba(255,255,255,0.05)",
+                    color: copied ? "var(--sv-teal)" : "#c9c5bd",
+                    cursor: "pointer",
+                    flexShrink: 0,
+                    transition: "all .12s",
+                  }}
+                >
+                  {copied ? "Copiado" : "Copiar"}
+                </button>
+              </div>
             </div>
 
             {/* Alternativa de Descarga ZIP */}
