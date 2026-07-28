@@ -247,4 +247,12 @@ test("UserMenu contains stateful dropdown, custom role badges, and click-outside
   assert.match(menuSource, /Revisor/);
 });
 
+test("CLI Download links render clean inline SVGs for Windows, macOS, and Linux", async () => {
+  const pageSource = await source("../../app/page.tsx");
+  assert.match(pageSource, /svg[^>]+viewBox="0 0 88 88"[^>]*className="windows-svg"/);
+  assert.match(pageSource, /svg[^>]+viewBox="0 0 170 170"[^>]*className="apple-svg"/);
+  assert.match(pageSource, /svg[^>]+viewBox="0 0 342 342"[^>]*className="linux-svg"/);
+});
+
+
 
