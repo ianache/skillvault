@@ -72,31 +72,32 @@ export default function AgentsPage() {
     <div style={{ minHeight: "100vh", background: "var(--bg)", fontFamily: "var(--sv-font-display), sans-serif" }}>
       <style>{`
         @keyframes sv-pulse-teal {
-          0% { transform: scale(0.92); box-shadow: 0 0 0 0 rgba(15, 148, 136, 0.6); }
+          0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(15, 148, 136, 0.6); }
           70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(15, 148, 136, 0); }
-          100% { transform: scale(0.92); box-shadow: 0 0 0 0 rgba(15, 148, 136, 0); }
+          100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(15, 148, 136, 0); }
         }
         .sv-pulse-indicator {
           animation: sv-pulse-teal 2s infinite;
         }
         .sv-agent-card {
-          transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+          transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .sv-agent-card:hover {
           transform: translateY(-4px);
-          box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06) !important;
-          border-color: var(--accent) !important;
+          box-shadow: var(--sv-shadow-md, 0 12px 32px rgba(20, 20, 20, 0.08)) !important;
+          border-color: var(--sv-accent, #a9772e) !important;
         }
         .sv-btn-chat {
-          background: var(--surface);
-          border: 1px solid var(--border);
-          color: var(--text);
-          transition: all 0.15s ease;
+          background: var(--sv-surface, #ffffff);
+          border: 1px solid var(--sv-border, #e6e1d8);
+          color: var(--sv-text, #1a1d21);
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .sv-btn-chat:hover {
-          background: var(--accent-muted);
-          border-color: var(--accent);
-          color: var(--accent-dim);
+          background: rgba(169, 119, 46, 0.05);
+          border-color: var(--sv-accent, #a9772e);
+          color: var(--sv-accent, #a9772e);
+          box-shadow: 0 4px 12px rgba(169, 119, 46, 0.08);
         }
       `}</style>
 
@@ -197,178 +198,157 @@ export default function AgentsPage() {
             {agents.map((agent) => {
               const initials = getInitials(agent.name);
               const gradient = getGradient(agent.name);
-              const isActive = agent.status === "active";
+              const STATUS_META: Record<AIAgent["status"], { label: string; color: string; bg: string; pulse: boolean }> = {
+                active: { label: "ACTIVO", color: "var(--sv-teal, #0f9488)", bg: "rgba(15, 148, 136, 0.12)", pulse: true },
+                draft: { label: "BORRADOR", color: "var(--sv-text-muted, #5c6270)", bg: "rgba(92, 98, 112, 0.12)", pulse: false },
+                paused: { label: "PAUSADO", color: "var(--sv-text-faint, #8a8f99)", bg: "rgba(138, 143, 153, 0.12)", pulse: false },
+              };
+              const statusMeta = STATUS_META[agent.status];
 
               return (
                 <div
                   key={agent.id}
                   className="sv-agent-card"
                   style={{
-                    background: "var(--surface)",
-                    border: "1px solid var(--border)",
+                    background: "var(--sv-surface, #ffffff)",
+                    border: "1px solid var(--sv-border, #e6e1d8)",
                     borderRadius: "12px",
-                    padding: "24px",
+                    padding: "20px",
+                    boxShadow: "0 1px 2px rgba(20,20,20,0.04)",
                     display: "flex",
                     flexDirection: "column",
+                    gap: "12px",
                     position: "relative",
-                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.03)",
                   }}
                 >
-                  {/* Top Row: Avatar & Status */}
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: "16px", marginBottom: "16px" }}>
-                    <div style={{ position: "relative" }}>
-                      <div
-                        style={{
-                          width: "48px",
-                          height: "48px",
-                          borderRadius: "10px",
-                          background: gradient,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          color: "#fff",
-                          fontWeight: 700,
-                          fontSize: "16px",
-                          fontFamily: "var(--sv-font-mono), monospace",
-                        }}
-                      >
-                        {initials}
-                      </div>
-                      {/* Active indicator badge */}
-                      {isActive && (
-                        <div
-                          className="sv-pulse-indicator"
-                          style={{
-                            position: "absolute",
-                            bottom: "-2px",
-                            right: "-2px",
-                            width: "12px",
-                            height: "12px",
-                            borderRadius: "50%",
-                            background: "var(--green, #0f9488)",
-                            border: "2px solid var(--surface)",
-                          }}
-                          title="Agente Activo"
-                        />
-                      )}
-                    </div>
+                  {/* Title & Version/Model Row */}
+                  <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: "8px" }}>
+                    <span
+                      style={{
+                        fontFamily: "var(--sv-font-mono), 'JetBrains Mono', monospace",
+                        fontSize: "14.5px",
+                        fontWeight: 600,
+                        color: "var(--sv-text, #1a1d21)",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {agent.name}
+                    </span>
+                    <span
+                      style={{
+                        fontFamily: "var(--sv-font-mono), 'JetBrains Mono', monospace",
+                        fontSize: "12px",
+                        color: "var(--sv-text-faint, #8a8f99)",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {agent.model}
+                    </span>
+                  </div>
 
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <h3
-                        style={{
-                          fontSize: "16px",
-                          fontWeight: 700,
-                          color: "var(--text)",
-                          margin: "0 0 4px",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                        }}
-                      >
-                        {agent.name}
-                      </h3>
-                      <div
-                        style={{
-                          fontSize: "11px",
-                          fontFamily: "var(--sv-font-mono), monospace",
-                          color: "var(--muted)",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "6px",
-                        }}
-                      >
-                        <span>{agent.model}</span>
-                        <span>•</span>
-                        <span>{new Date(agent.createdAt).toLocaleDateString("es-ES", { day: "numeric", month: "short" })}</span>
-                      </div>
-                    </div>
+                  {/* Status Badge */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      padding: "3px 9px",
+                      borderRadius: "5px",
+                      background: statusMeta.bg,
+                      width: "fit-content",
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: "6px",
+                        height: "6px",
+                        borderRadius: "50%",
+                        background: statusMeta.color,
+                        display: "inline-block",
+                      }}
+                      className={statusMeta.pulse ? "sv-pulse-indicator" : ""}
+                    />
+                    <span
+                      style={{
+                        fontFamily: "var(--sv-font-mono), 'JetBrains Mono', monospace",
+                        fontSize: "10.5px",
+                        letterSpacing: "0.04em",
+                        color: statusMeta.color,
+                        fontWeight: 600,
+                      }}
+                    >
+                      {statusMeta.label}
+                    </span>
                   </div>
 
                   {/* Description */}
-                  <p
-                    style={{
-                      fontSize: "13.5px",
-                      color: "var(--muted)",
-                      margin: "0 0 16px",
-                      lineHeight: "1.5",
-                      flex: 1,
-                      display: "-webkit-box",
-                      WebkitLineClamp: 3,
-                      WebkitBoxOrient: "vertical",
-                      overflow: "hidden",
-                    }}
-                  >
+                  <p style={{ margin: 0, fontSize: "13px", color: "var(--sv-text-muted, #5c6270)", lineHeight: "1.5" }}>
                     {agent.description}
                   </p>
 
-                  {/* Skills Pills */}
-                  <div style={{ marginBottom: "20px" }}>
-                    <div style={{ fontSize: "10px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--faint)", marginBottom: "8px", fontFamily: "var(--sv-font-mono), monospace" }}>
-                      Skills Asignados
-                    </div>
-                    {agent.skills.length === 0 ? (
-                      <span style={{ fontSize: "12px", color: "var(--faint)", fontStyle: "italic" }}>Ninguno</span>
-                    ) : (
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-                        {agent.skills.map((slug) => {
-                          const skill = skillsList[slug] || { name: slug };
-                          return (
-                            <NextLink
-                              key={slug}
-                              href={`/?q=${slug}`}
-                              style={{
-                                display: "inline-flex",
-                                alignItems: "center",
-                                padding: "4px 8px",
-                                borderRadius: "6px",
-                                background: "var(--raised, #f0ede6)",
-                                border: "1px solid var(--border)",
-                                color: "var(--text)",
-                                fontSize: "11.5px",
-                                fontWeight: 500,
-                                textDecoration: "none",
-                                transition: "all 0.15s ease",
-                              }}
-                              title={`Buscar ${slug} en catálogo`}
-                              onClick={(e) => {
-                                // Stop propagation so we don't trigger parent link clicks if any
-                                e.stopPropagation();
-                              }}
-                            >
-                              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--accent)", marginRight: "6px", display: "inline-block" }}></span>
-                              {skill.name}
-                            </NextLink>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
+                  {/* Code Chip prompt preview */}
+                  <span
+                    style={{
+                      fontFamily: "var(--sv-font-mono), 'JetBrains Mono', monospace",
+                      fontSize: "12px",
+                      color: "var(--sv-accent, #a9772e)",
+                      background: "var(--sv-subtle, #f0ede6)",
+                      border: "1px solid var(--sv-border, #e6e1d8)",
+                      borderRadius: "5px",
+                      padding: "4px 9px",
+                      width: "fit-content",
+                    }}
+                  >
+                    @{agent.name.toLowerCase().replace(/\s+/g, "-")}
+                  </span>
 
-                  {/* Action Row */}
-                  <div style={{ display: "flex", gap: "10px", marginTop: "auto", borderTop: "1px solid var(--border)", paddingTop: "16px" }}>
-                    <NextLink
-                      href={`/agents/chat/${agent.id}`}
-                      className="sv-btn-chat"
+                  {/* Bottom details row */}
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "2px" }}>
+                    <span style={{ fontSize: "12px", color: "var(--sv-text-faint, #8a8f99)", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 3v12M7 10l5 5 5-5M5 21h14"></path>
+                      </svg>
+                      {agent.skills.length} skills asignados
+                    </span>
+                    <span
                       style={{
-                        flex: 1,
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "6px",
-                        padding: "9px 16px",
-                        borderRadius: "8px",
-                        fontSize: "13px",
-                        fontWeight: 600,
-                        textDecoration: "none",
-                        textAlign: "center",
+                        fontFamily: "var(--sv-font-mono), 'JetBrains Mono', monospace",
+                        fontSize: "11px",
+                        color: "var(--sv-text-muted, #5c6270)",
+                        border: "1px solid var(--sv-border, #e6e1d8)",
+                        borderRadius: "5px",
+                        padding: "3px 9px",
                       }}
                     >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                      </svg>
-                      Iniciar Chat
-                    </NextLink>
+                      AI HARNESS
+                    </span>
                   </div>
+
+                  {/* Action Link Button */}
+                  <NextLink
+                    href={`/agents/chat/${agent.id}`}
+                    className="sv-btn-chat"
+                    style={{
+                      marginTop: "10px",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "6px",
+                      padding: "9px 16px",
+                      borderRadius: "8px",
+                      fontSize: "13px",
+                      fontWeight: 600,
+                      textDecoration: "none",
+                      textAlign: "center",
+                    }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    Iniciar Chat con Agente
+                  </NextLink>
                 </div>
               );
             })}
