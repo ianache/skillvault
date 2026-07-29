@@ -21,6 +21,11 @@ const NAVIGATION: NavigationGroup[] = [
     items: [
       { label: "Catálogo", href: "/", iconPath: "M4 4h16v4H4zM4 12h16v8H4z" },
       {
+        label: "Agentes IA",
+        href: "/agents",
+        iconPath: "M12 3l-1.912 5.813a2 2 0 01-1.275 1.275L3 12l5.813 1.912a2 2 0 011.275 1.275L12 21l1.912-5.813a2 2 0 011.275-1.275L21 12l-5.813-1.912a2 2 0 01-1.275-1.275Z",
+      },
+      {
         label: "Publicar skill",
         href: "/publish",
         iconPath: "M12 5v14M5 12h14",

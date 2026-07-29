@@ -9,12 +9,13 @@ function hrefs(roles: string[]): string[] {
 }
 
 test("user navigation contains only Catalog", () => {
-  assert.deepEqual(hrefs(["user"]), ["/"]);
+  assert.deepEqual(hrefs(["user"]), ["/", "/agents"]);
 });
 
 test("editor navigation includes publishing and owned content", () => {
   assert.deepEqual(hrefs(["editor"]), [
     "/",
+    "/agents",
     "/publish",
     "/dashboard",
     "/proposals",
@@ -24,6 +25,7 @@ test("editor navigation includes publishing and owned content", () => {
 test("reviewer navigation includes review but not administration", () => {
   assert.deepEqual(hrefs(["reviewer"]), [
     "/",
+    "/agents",
     "/dashboard",
     "/proposals",
     "/review",
@@ -33,6 +35,7 @@ test("reviewer navigation includes review but not administration", () => {
 test("admin navigation includes every protected area", () => {
   assert.deepEqual(hrefs(["admin"]), [
     "/",
+    "/agents",
     "/publish",
     "/dashboard",
     "/proposals",
@@ -41,3 +44,4 @@ test("admin navigation includes every protected area", () => {
     "/users",
   ]);
 });
+
