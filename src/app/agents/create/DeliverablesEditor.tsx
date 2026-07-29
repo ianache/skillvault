@@ -31,21 +31,21 @@ export function DeliverablesEditor({ items, onChange }: DeliverablesEditorProps)
               display: "flex",
               alignItems: "center",
               gap: "8px",
-              background: "var(--sv-bg-soft)",
-              border: "1px solid var(--sv-border)",
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
               borderRadius: "8px",
               padding: "9px 12px",
             }}
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--sv-teal)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
               <path d="M20 6L9 17l-5-5" />
             </svg>
-            <span style={{ flex: 1, fontSize: "13.5px", color: "var(--sv-text)" }}>{text}</span>
+            <span style={{ flex: 1, fontSize: "13.5px", color: "var(--text)" }}>{text}</span>
             <button
               type="button"
               onClick={() => removeDeliverable(idx)}
               aria-label="Eliminar entregable"
-              style={{ background: "none", border: "none", padding: "2px", cursor: "pointer", color: "var(--sv-text-faint)" }}
+              style={{ background: "none", border: "none", padding: "2px", cursor: "pointer", color: "var(--faint)" }}
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M18 6L6 18M6 6l12 12" />
@@ -70,12 +70,12 @@ export function DeliverablesEditor({ items, onChange }: DeliverablesEditorProps)
             flex: 1,
             boxSizing: "border-box",
             padding: "9px 12px",
-            border: "1px solid var(--sv-border)",
+            border: "1px solid var(--border)",
             borderRadius: "8px",
             fontFamily: "var(--sv-font-display)",
             fontSize: "13px",
-            background: "var(--sv-bg-soft)",
-            color: "var(--sv-text)",
+            background: "var(--surface)",
+            color: "var(--text)",
           }}
         />
         <button
@@ -84,9 +84,9 @@ export function DeliverablesEditor({ items, onChange }: DeliverablesEditorProps)
           style={{
             padding: "0 16px",
             borderRadius: "8px",
-            border: "1px solid var(--sv-border-strong)",
-            background: "var(--sv-surface)",
-            color: "var(--sv-text)",
+            border: "1px solid var(--border-subtle)",
+            background: "var(--surface)",
+            color: "var(--text)",
             fontFamily: "var(--sv-font-display)",
             fontWeight: 600,
             fontSize: "13px",

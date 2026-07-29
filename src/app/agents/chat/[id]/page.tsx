@@ -393,9 +393,9 @@ export default function AgentChatPage({ params }: PageProps) {
       {/* Dynamic CSS styles for animations */}
       <style>{`
         @keyframes sv-glow-teal {
-          0% { box-shadow: 0 0 0 0 rgba(15, 148, 136, 0.4); border-color: var(--sv-teal, #0f9488); }
-          70% { box-shadow: 0 0 0 8px rgba(15, 148, 136, 0); border-color: var(--sv-teal, #0f9488); }
-          100% { box-shadow: 0 0 0 0 rgba(15, 148, 136, 0); border-color: var(--sv-teal, #0f9488); }
+          0% { box-shadow: 0 0 0 0 rgba(15, 148, 136, 0.4); border-color: var(--green); }
+          70% { box-shadow: 0 0 0 8px rgba(15, 148, 136, 0); border-color: var(--green); }
+          100% { box-shadow: 0 0 0 0 rgba(15, 148, 136, 0); border-color: var(--green); }
         }
         .sv-pulsing-skill {
           animation: sv-glow-teal 1.6s infinite;
@@ -406,8 +406,8 @@ export default function AgentChatPage({ params }: PageProps) {
           width: 8px;
           height: 8px;
           border-radius: 50%;
-          background: var(--sv-teal, #0f9488);
-          box-shadow: 0 0 10px var(--sv-teal, #0f9488);
+          background: var(--green);
+          box-shadow: 0 0 10px var(--green);
           animation: pulse 0.8s infinite alternate;
         }
         @keyframes pulse {
@@ -420,20 +420,20 @@ export default function AgentChatPage({ params }: PageProps) {
         }
         .sv-terminal-cursor {
           animation: sv-blink 1s step-end infinite;
-          color: #a9772e;
+          color: var(--accent);
         }
         .sv-chip-btn {
-          background: #ffffff;
-          border: 1px solid #e6e1d8;
-          color: #6a645a;
+          background: var(--surface);
+          border: 1px solid var(--border);
+          color: var(--muted);
           box-shadow: 0 2px 4px rgba(0,0,0,0.02);
           transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
           cursor: pointer;
         }
         .sv-chip-btn:hover:not(:disabled) {
           background: rgba(169, 119, 46, 0.05);
-          border-color: var(--sv-accent, #a9772e);
-          color: var(--sv-accent, #a9772e);
+          border-color: var(--accent);
+          color: var(--accent);
           transform: translateY(-2px);
           box-shadow: 0 4px 8px rgba(169, 119, 46, 0.08);
         }
@@ -446,8 +446,8 @@ export default function AgentChatPage({ params }: PageProps) {
         }
         .sv-sidebar {
           width: 320px;
-          border-right: 1px solid var(--sv-border, #e6e1d8);
-          background: rgba(255, 255, 255, 0.85);
+          border-right: 1px solid var(--border);
+          background: var(--surface);
           backdrop-filter: blur(12px);
           display: flex;
           flex-direction: column;
@@ -460,7 +460,7 @@ export default function AgentChatPage({ params }: PageProps) {
           flex-direction: column;
           height: 100vh;
           position: relative;
-          background: linear-gradient(180deg, #fbfaf8 0%, #f7f5f0 100%);
+          background: var(--bg);
         }
         .sv-message-user {
           background: rgba(169, 119, 46, 0.04) !important;
@@ -469,9 +469,9 @@ export default function AgentChatPage({ params }: PageProps) {
           box-shadow: 0 4px 12px rgba(169, 119, 46, 0.02);
         }
         .sv-message-assistant {
-          background: #ffffff !important;
-          border: 1px solid #e6e1d8 !important;
-          border-left: 3px solid var(--sv-teal, #0f9488) !important;
+          background: var(--surface) !important;
+          border: 1px solid var(--border) !important;
+          border-left: 3px solid var(--green) !important;
           border-radius: 2px 14px 14px 14px !important;
           box-shadow: 0 4px 16px rgba(0, 0, 0, 0.015);
         }
@@ -568,11 +568,11 @@ export default function AgentChatPage({ params }: PageProps) {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "4px",
-                color: agent.status === "active" ? "var(--sv-teal, #0f9488)" : "var(--muted)",
+                color: agent.status === "active" ? "var(--green)" : "var(--muted)",
                 fontWeight: 600,
               }}
             >
-              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: agent.status === "active" ? "var(--sv-teal, #0f9488)" : "var(--muted)" }} />
+              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: agent.status === "active" ? "var(--green)" : "var(--muted)" }} />
               {agent.status === "active" ? "Activo" : agent.status === "draft" ? "Borrador" : "Pausado"}
             </span>
           </div>
@@ -618,7 +618,7 @@ export default function AgentChatPage({ params }: PageProps) {
                       gap: "10px",
                       padding: "12px",
                       background: "var(--raised, #1f1c16)",
-                      border: isRunning ? "1px solid var(--sv-teal, #0f9488)" : "1px solid var(--border)",
+                      border: isRunning ? "1px solid var(--green)" : "1px solid var(--border)",
                       borderRadius: "8px",
                       transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
                     }}
@@ -628,9 +628,9 @@ export default function AgentChatPage({ params }: PageProps) {
                         width: "8px",
                         height: "8px",
                         borderRadius: "50%",
-                        background: isRunning ? "var(--sv-teal, #0f9488)" : "var(--accent)",
+                        background: isRunning ? "var(--green)" : "var(--accent)",
                         flexShrink: 0,
-                        boxShadow: isRunning ? "0 0 8px var(--sv-teal, #0f9488)" : "none",
+                        boxShadow: isRunning ? "0 0 8px var(--green)" : "none",
                       }}
                     />
                     <div style={{ flex: 1, minWidth: 0 }}>
@@ -646,7 +646,7 @@ export default function AgentChatPage({ params }: PageProps) {
                         style={{
                           fontSize: "10px",
                           fontWeight: 700,
-                          color: "var(--sv-teal, #0f9488)",
+                          color: "var(--green)",
                           textTransform: "uppercase",
                           fontFamily: "var(--sv-font-mono), monospace",
                         }}
@@ -807,7 +807,7 @@ export default function AgentChatPage({ params }: PageProps) {
                               background: "none",
                               border: "none",
                               padding: "4px 0 10px",
-                              color: "var(--sv-teal, #0f9488)",
+                              color: "var(--green)",
                               fontSize: "11.5px",
                               fontWeight: 700,
                               textTransform: "uppercase",
@@ -857,7 +857,7 @@ export default function AgentChatPage({ params }: PageProps) {
                                         width: "8px",
                                         height: "8px",
                                         borderRadius: "50%",
-                                        background: isCompleted ? "var(--sv-teal, #0f9488)" : isRunning ? "var(--accent)" : "var(--muted)",
+                                        background: isCompleted ? "var(--green)" : isRunning ? "var(--accent)" : "var(--muted)",
                                         border: isRunning ? "2px solid var(--surface)" : "none",
                                       }}
                                       className={isRunning ? "sv-step-running-indicator" : ""}

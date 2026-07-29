@@ -26,14 +26,14 @@ export function StatusSegmented({ value, onChange }: StatusSegmentedProps) {
             style={{
               padding: "8px 16px",
               borderRadius: "6px",
-              border: `1px solid ${active ? "var(--sv-accent)" : "var(--sv-border-strong)"}`,
+              border: `1px solid ${active ? "var(--accent)" : "var(--border-subtle)"}`,
               fontFamily: "var(--sv-font-display)",
               fontSize: "13px",
               fontWeight: 600,
               cursor: "pointer",
               whiteSpace: "nowrap",
-              background: active ? "var(--sv-accent)" : "var(--sv-surface)",
-              color: active ? "var(--sv-surface)" : "var(--sv-text-muted)",
+              background: active ? "var(--accent)" : "var(--surface)",
+              color: active ? "#fff" : "var(--muted)",
             }}
           >
             {st.label}

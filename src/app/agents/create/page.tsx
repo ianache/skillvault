@@ -35,6 +35,7 @@ export default function CreateAgentPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [responsibility, setResponsibility] = useState("");
+  const [systemPrompt, setSystemPrompt] = useState("");
   const [deliverables, setDeliverables] = useState<string[]>([]);
   const [owner, setOwner] = useState("");
   const [model, setModel] = useState("claude-sonnet-4.5");
@@ -81,7 +82,7 @@ export default function CreateAgentPage() {
       description: description.trim(),
       responsibility: responsibility.trim(),
       deliverables,
-      systemPrompt: "",
+      systemPrompt: systemPrompt.trim(),
       owner: owner.trim(),
       model,
       harnesses,
@@ -94,14 +95,14 @@ export default function CreateAgentPage() {
 
   if (!mounted) {
     return (
-      <div style={{ minHeight: "100vh", background: "var(--sv-bg)" }}>
+      <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
         <PageHeader title="Crear agente" description="Cargando formulario..." />
       </div>
     );
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--sv-bg)", fontFamily: "var(--sv-font-display)" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg)", fontFamily: "var(--sv-font-display)" }}>
       <PageHeader
         title="Crear agente"
         description="Define la responsabilidad del agente, sus entregables y los skills que le dan capacidad para cumplirlos."
@@ -112,9 +113,9 @@ export default function CreateAgentPage() {
               style={{
                 padding: "10px 20px",
                 borderRadius: "8px",
-                border: "1px solid var(--sv-border)",
-                background: "var(--sv-surface)",
-                color: "var(--sv-text)",
+                border: "1px solid var(--border)",
+                background: "var(--surface)",
+                color: "var(--text)",
                 fontSize: "13.5px",
                 fontWeight: 600,
                 textDecoration: "none",
@@ -130,7 +131,7 @@ export default function CreateAgentPage() {
                 padding: "10px 22px",
                 borderRadius: "8px",
                 border: "none",
-                background: "var(--sv-accent)",
+                background: "var(--accent)",
                 color: "#fff",
                 fontSize: "13.5px",
                 fontWeight: 700,
@@ -156,71 +157,80 @@ export default function CreateAgentPage() {
             <div style={{ display: "flex", flexDirection: "column", gap: "22px" }}>
 
               {/* Información básica */}
-              <div style={{ background: "var(--sv-surface)", border: "1px solid var(--sv-border)", borderRadius: "12px", boxShadow: "var(--sv-shadow-sm)", padding: "22px 24px" }}>
-                <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--sv-text-faint)", fontFamily: "var(--sv-font-mono)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "16px" }}>
+              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "12px", boxShadow: "var(--sv-shadow-sm)", padding: "22px 24px" }}>
+                <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--faint)", fontFamily: "var(--sv-font-mono)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "16px" }}>
                   Información básica
                 </div>
 
-                <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "var(--sv-text-muted)", marginBottom: "6px" }}>Nombre del agente</label>
+                <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "var(--muted)", marginBottom: "6px" }}>Nombre del agente</label>
                 <input
                   type="text"
                   required
                   placeholder="ej. qa-story-reviewer"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  style={{ width: "100%", boxSizing: "border-box", padding: "10px 14px", border: "1px solid var(--sv-border)", borderRadius: "8px", fontFamily: "var(--sv-font-mono)", fontSize: "13.5px", background: "var(--sv-bg-soft)", color: "var(--sv-text)", marginBottom: "16px" }}
+                  style={{ width: "100%", boxSizing: "border-box", padding: "10px 14px", border: "1px solid var(--border)", borderRadius: "8px", fontFamily: "var(--sv-font-mono)", fontSize: "13.5px", background: "var(--surface)", color: "var(--text)", marginBottom: "16px" }}
                 />
 
-                <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "var(--sv-text-muted)", marginBottom: "6px" }}>Descripción breve</label>
+                <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "var(--muted)", marginBottom: "6px" }}>Descripción breve</label>
                 <textarea
                   rows={2}
                   required
                   placeholder="Qué hace este agente, en una frase."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  style={{ width: "100%", boxSizing: "border-box", padding: "10px 14px", border: "1px solid var(--sv-border)", borderRadius: "8px", fontFamily: "var(--sv-font-display)", fontSize: "13.5px", background: "var(--sv-bg-soft)", color: "var(--sv-text)", resize: "vertical", marginBottom: "16px" }}
+                  style={{ width: "100%", boxSizing: "border-box", padding: "10px 14px", border: "1px solid var(--border)", borderRadius: "8px", fontFamily: "var(--sv-font-display)", fontSize: "13.5px", background: "var(--surface)", color: "var(--text)", resize: "vertical", marginBottom: "16px" }}
                 />
 
-                <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "var(--sv-text-muted)", marginBottom: "6px" }}>Responsabilidad principal</label>
+                <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "var(--muted)", marginBottom: "6px" }}>Responsabilidad principal</label>
                 <textarea
                   rows={3}
                   placeholder="Qué debe cumplir este agente para considerarse exitoso."
                   value={responsibility}
                   onChange={(e) => setResponsibility(e.target.value)}
-                  style={{ width: "100%", boxSizing: "border-box", padding: "10px 14px", border: "1px solid var(--sv-border)", borderRadius: "8px", fontFamily: "var(--sv-font-display)", fontSize: "13.5px", background: "var(--sv-bg-soft)", color: "var(--sv-text)", resize: "vertical" }}
+                  style={{ width: "100%", boxSizing: "border-box", padding: "10px 14px", border: "1px solid var(--border)", borderRadius: "8px", fontFamily: "var(--sv-font-display)", fontSize: "13.5px", background: "var(--surface)", color: "var(--text)", resize: "vertical", marginBottom: "16px" }}
+                />
+
+                <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "var(--muted)", marginBottom: "6px" }}>System prompt</label>
+                <textarea
+                  rows={6}
+                  placeholder="Instrucciones de sistema que definen el comportamiento del agente..."
+                  value={systemPrompt}
+                  onChange={(e) => setSystemPrompt(e.target.value)}
+                  style={{ width: "100%", boxSizing: "border-box", padding: "10px 14px", border: "1px solid var(--border)", borderRadius: "8px", fontFamily: "var(--sv-font-mono)", fontSize: "12.5px", lineHeight: "1.5", background: "var(--surface)", color: "var(--text)", resize: "vertical" }}
                 />
               </div>
 
               {/* Entregables */}
-              <div style={{ background: "var(--sv-surface)", border: "1px solid var(--sv-border)", borderRadius: "12px", boxShadow: "var(--sv-shadow-sm)", padding: "22px 24px" }}>
-                <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--sv-text-faint)", fontFamily: "var(--sv-font-mono)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "16px" }}>
+              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "12px", boxShadow: "var(--sv-shadow-sm)", padding: "22px 24px" }}>
+                <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--faint)", fontFamily: "var(--sv-font-mono)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "16px" }}>
                   Entregables
                 </div>
                 <DeliverablesEditor items={deliverables} onChange={setDeliverables} />
               </div>
 
               {/* Configuración */}
-              <div style={{ background: "var(--sv-surface)", border: "1px solid var(--sv-border)", borderRadius: "12px", boxShadow: "var(--sv-shadow-sm)", padding: "22px 24px" }}>
-                <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--sv-text-faint)", fontFamily: "var(--sv-font-mono)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "16px" }}>
+              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "12px", boxShadow: "var(--sv-shadow-sm)", padding: "22px 24px" }}>
+                <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--faint)", fontFamily: "var(--sv-font-mono)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "16px" }}>
                   Configuración
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "16px" }}>
                   <div>
-                    <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "var(--sv-text-muted)", marginBottom: "6px" }}>Owner / equipo</label>
+                    <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "var(--muted)", marginBottom: "6px" }}>Owner / equipo</label>
                     <input
                       type="text"
                       placeholder="ej. Equipo QA"
                       value={owner}
                       onChange={(e) => setOwner(e.target.value)}
-                      style={{ width: "100%", boxSizing: "border-box", padding: "9px 12px", border: "1px solid var(--sv-border)", borderRadius: "8px", fontFamily: "var(--sv-font-display)", fontSize: "13.5px", background: "var(--sv-bg-soft)", color: "var(--sv-text)" }}
+                      style={{ width: "100%", boxSizing: "border-box", padding: "9px 12px", border: "1px solid var(--border)", borderRadius: "8px", fontFamily: "var(--sv-font-display)", fontSize: "13.5px", background: "var(--surface)", color: "var(--text)" }}
                     />
                   </div>
                   <div>
-                    <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "var(--sv-text-muted)", marginBottom: "6px" }}>Modelo LLM base</label>
+                    <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "var(--muted)", marginBottom: "6px" }}>Modelo LLM base</label>
                     <select
                       value={model}
                       onChange={(e) => setModel(e.target.value)}
-                      style={{ width: "100%", boxSizing: "border-box", padding: "9px 12px", border: "1px solid var(--sv-border)", borderRadius: "8px", fontFamily: "var(--sv-font-mono)", fontSize: "13px", background: "var(--sv-bg-soft)", color: "var(--sv-text)", cursor: "pointer" }}
+                      style={{ width: "100%", boxSizing: "border-box", padding: "9px 12px", border: "1px solid var(--border)", borderRadius: "8px", fontFamily: "var(--sv-font-mono)", fontSize: "13px", background: "var(--surface)", color: "var(--text)", cursor: "pointer" }}
                     >
                       {MODEL_GROUPS.map((grp) => (
                         <optgroup key={grp.provider} label={grp.provider}>
@@ -234,11 +244,11 @@ export default function CreateAgentPage() {
                 </div>
 
                 <div style={{ marginBottom: "16px" }}>
-                  <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "var(--sv-text-muted)", marginBottom: "6px" }}>Harness</label>
+                  <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "var(--muted)", marginBottom: "6px" }}>Harness</label>
                   <HarnessSelect value={harnesses} onChange={setHarnesses} options={VALID_HARNESSES} />
                 </div>
 
-                <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "var(--sv-text-muted)", marginBottom: "6px" }}>Estado</label>
+                <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "var(--muted)", marginBottom: "6px" }}>Estado</label>
                 <StatusSegmented value={status} onChange={setStatus} />
               </div>
             </div>

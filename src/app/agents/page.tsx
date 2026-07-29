@@ -85,18 +85,18 @@ export default function AgentsPage() {
         .sv-agent-card:hover {
           transform: translateY(-4px);
           box-shadow: var(--sv-shadow-md, 0 12px 32px rgba(20, 20, 20, 0.08)) !important;
-          border-color: var(--sv-accent, #a9772e) !important;
+          border-color: var(--accent) !important;
         }
         .sv-btn-chat {
-          background: var(--sv-surface, #ffffff);
-          border: 1px solid var(--sv-border, #e6e1d8);
-          color: var(--sv-text, #1a1d21);
+          background: var(--surface);
+          border: 1px solid var(--border);
+          color: var(--text);
           transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .sv-btn-chat:hover {
           background: rgba(169, 119, 46, 0.05);
-          border-color: var(--sv-accent, #a9772e);
-          color: var(--sv-accent, #a9772e);
+          border-color: var(--accent);
+          color: var(--accent);
           box-shadow: 0 4px 12px rgba(169, 119, 46, 0.08);
         }
       `}</style>
@@ -199,9 +199,9 @@ export default function AgentsPage() {
               const initials = getInitials(agent.name);
               const gradient = getGradient(agent.name);
               const STATUS_META: Record<AIAgent["status"], { label: string; color: string; bg: string; pulse: boolean }> = {
-                active: { label: "ACTIVO", color: "var(--sv-teal, #0f9488)", bg: "rgba(15, 148, 136, 0.12)", pulse: true },
-                draft: { label: "BORRADOR", color: "var(--sv-text-muted, #5c6270)", bg: "rgba(92, 98, 112, 0.12)", pulse: false },
-                paused: { label: "PAUSADO", color: "var(--sv-text-faint, #8a8f99)", bg: "rgba(138, 143, 153, 0.12)", pulse: false },
+                active: { label: "ACTIVO", color: "var(--green)", bg: "rgba(15, 148, 136, 0.12)", pulse: true },
+                draft: { label: "BORRADOR", color: "var(--muted)", bg: "rgba(92, 98, 112, 0.12)", pulse: false },
+                paused: { label: "PAUSADO", color: "var(--faint)", bg: "rgba(138, 143, 153, 0.12)", pulse: false },
               };
               const statusMeta = STATUS_META[agent.status] ?? STATUS_META.paused;
 
@@ -210,8 +210,8 @@ export default function AgentsPage() {
                   key={agent.id}
                   className="sv-agent-card"
                   style={{
-                    background: "var(--sv-surface, #ffffff)",
-                    border: "1px solid var(--sv-border, #e6e1d8)",
+                    background: "var(--surface)",
+                    border: "1px solid var(--border)",
                     borderRadius: "12px",
                     padding: "20px",
                     boxShadow: "0 1px 2px rgba(20,20,20,0.04)",
@@ -228,7 +228,7 @@ export default function AgentsPage() {
                         fontFamily: "var(--sv-font-mono), 'JetBrains Mono', monospace",
                         fontSize: "14.5px",
                         fontWeight: 600,
-                        color: "var(--sv-text, #1a1d21)",
+                        color: "var(--text)",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
@@ -240,7 +240,7 @@ export default function AgentsPage() {
                       style={{
                         fontFamily: "var(--sv-font-mono), 'JetBrains Mono', monospace",
                         fontSize: "12px",
-                        color: "var(--sv-text-faint, #8a8f99)",
+                        color: "var(--faint)",
                         flexShrink: 0,
                       }}
                     >
@@ -284,7 +284,7 @@ export default function AgentsPage() {
                   </div>
 
                   {/* Description */}
-                  <p style={{ margin: 0, fontSize: "13px", color: "var(--sv-text-muted, #5c6270)", lineHeight: "1.5" }}>
+                  <p style={{ margin: 0, fontSize: "13px", color: "var(--muted)", lineHeight: "1.5" }}>
                     {agent.description}
                   </p>
 
@@ -293,9 +293,9 @@ export default function AgentsPage() {
                     style={{
                       fontFamily: "var(--sv-font-mono), 'JetBrains Mono', monospace",
                       fontSize: "12px",
-                      color: "var(--sv-accent, #a9772e)",
-                      background: "var(--sv-subtle, #f0ede6)",
-                      border: "1px solid var(--sv-border, #e6e1d8)",
+                      color: "var(--accent)",
+                      background: "var(--raised)",
+                      border: "1px solid var(--border)",
                       borderRadius: "5px",
                       padding: "4px 9px",
                       width: "fit-content",
@@ -306,7 +306,7 @@ export default function AgentsPage() {
 
                   {/* Bottom details row */}
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "2px" }}>
-                    <span style={{ fontSize: "12px", color: "var(--sv-text-faint, #8a8f99)", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                    <span style={{ fontSize: "12px", color: "var(--faint)", display: "inline-flex", alignItems: "center", gap: "4px" }}>
                       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M12 3v12M7 10l5 5 5-5M5 21h14"></path>
                       </svg>
@@ -316,8 +316,8 @@ export default function AgentsPage() {
                       style={{
                         fontFamily: "var(--sv-font-mono), 'JetBrains Mono', monospace",
                         fontSize: "11px",
-                        color: "var(--sv-text-muted, #5c6270)",
-                        border: "1px solid var(--sv-border, #e6e1d8)",
+                        color: "var(--muted)",
+                        border: "1px solid var(--border)",
                         borderRadius: "5px",
                         padding: "3px 9px",
                       }}

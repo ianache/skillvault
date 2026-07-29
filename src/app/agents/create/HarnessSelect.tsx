@@ -30,12 +30,12 @@ export function HarnessSelect({ value, onChange, options }: HarnessSelectProps) 
           justifyContent: "space-between",
           gap: "8px",
           padding: "9px 12px",
-          border: "1px solid var(--sv-border)",
+          border: "1px solid var(--border)",
           borderRadius: "8px",
           fontFamily: "var(--sv-font-mono)",
           fontSize: "13px",
-          background: "var(--sv-bg-soft)",
-          color: "var(--sv-text)",
+          background: "var(--surface)",
+          color: "var(--text)",
           cursor: "pointer",
         }}
       >
@@ -51,8 +51,8 @@ export function HarnessSelect({ value, onChange, options }: HarnessSelectProps) 
             top: "calc(100% + 4px)",
             left: 0,
             right: 0,
-            background: "var(--sv-surface)",
-            border: "1px solid var(--sv-border)",
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
             borderRadius: "8px",
             boxShadow: "var(--sv-shadow-md)",
             padding: "6px",
@@ -77,7 +77,7 @@ export function HarnessSelect({ value, onChange, options }: HarnessSelectProps) 
                 type="checkbox"
                 checked={value.includes(h)}
                 onChange={() => toggle(h)}
-                style={{ width: "15px", height: "15px", accentColor: "var(--sv-accent)", cursor: "pointer" }}
+                style={{ width: "15px", height: "15px", accentColor: "var(--accent)", cursor: "pointer" }}
               />
               {h}
             </label>
