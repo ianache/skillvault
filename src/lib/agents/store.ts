@@ -2,10 +2,14 @@ export interface AIAgent {
   id: string;
   name: string;
   description: string;
+  responsibility: string;
+  deliverables: string[];
   systemPrompt: string;
   model: string;         // e.g., "claude-3-5-sonnet", "gpt-4o", "llama-3.3"
+  owner: string;
+  harnesses: string[];   // subset of VALID_HARNESSES, e.g. ["claude", "codex"]
   skills: string[];      // list of assigned skill slugs (e.g., ["terraform-lint", "pr-reviewer"])
-  status: 'active' | 'inactive';
+  status: 'active' | 'draft' | 'paused';
   createdAt: string;
 }
 
@@ -30,8 +34,12 @@ const DEFAULT_AGENTS: AIAgent[] = [
     id: "agent-1",
     name: "Especialista DevOps",
     description: "Analiza infraestructura con terraform-lint",
+    responsibility: "Revisar cambios de infraestructura como código y detectar configuraciones riesgosas antes de aplicarlas.",
+    deliverables: ["Reporte de lint de Terraform", "Lista de advertencias de seguridad"],
     systemPrompt: "Eres un agente especializado en DevOps e Infraestructura como Código.",
     model: "claude-3-5-sonnet",
+    owner: "Equipo DevOps",
+    harnesses: ["claude"],
     skills: ["terraform-lint"],
     status: "active",
     createdAt: new Date().toISOString()
@@ -40,8 +48,12 @@ const DEFAULT_AGENTS: AIAgent[] = [
     id: "agent-2",
     name: "Revisor de Código Senior",
     description: "Revisa Pull Requests de forma inteligente",
+    responsibility: "Revisar Pull Requests contra las guías de estilo del equipo y señalar riesgos antes del merge.",
+    deliverables: ["Comentarios de revisión", "Veredicto de aprobación"],
     systemPrompt: "Eres un Ingeniero de Software Principal que revisa PRs.",
     model: "claude-3-5-sonnet",
+    owner: "Equipo QA",
+    harnesses: ["claude", "codex"],
     skills: ["pr-reviewer"],
     status: "active",
     createdAt: new Date().toISOString()

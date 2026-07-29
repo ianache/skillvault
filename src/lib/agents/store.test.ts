@@ -6,12 +6,16 @@ test("AgentStore initializes with default agents and handles CRUD", () => {
   resetStore(); // Helper to clear state
   const agents = getAgents();
   assert.ok(agents.length > 0, "Debe tener agentes por defecto");
-  
+
   const newAgent = createAgent({
     name: "Test Agent",
     description: "Linter tool test",
+    responsibility: "Detectar errores de lint en el repositorio de prueba.",
+    deliverables: ["Reporte de lint"],
     systemPrompt: "You are a test linter",
     model: "gpt-4o",
+    owner: "Equipo QA",
+    harnesses: ["claude"],
     skills: ["terraform-lint"],
     status: "active"
   });
@@ -22,12 +26,12 @@ test("AgentStore initializes with default agents and handles CRUD", () => {
 
   // Test updating the agent
   if (foundAgent) {
-    const updated = { ...foundAgent, name: "Updated Test Agent", status: "inactive" as const };
+    const updated = { ...foundAgent, name: "Updated Test Agent", status: "paused" as const };
     updateAgent(updated);
     const postUpdateAgents = getAgents();
     const updatedAgent = postUpdateAgents.find(a => a.id === newAgent.id);
     assert.strictEqual(updatedAgent?.name, "Updated Test Agent");
-    assert.strictEqual(updatedAgent?.status, "inactive");
+    assert.strictEqual(updatedAgent?.status, "paused");
   }
 
   deleteAgent(newAgent.id);
