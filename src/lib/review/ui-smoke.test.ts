@@ -252,5 +252,8 @@ test("CLI Download links render clean inline SVGs for Windows, macOS, and Linux"
   assert.match(pageSource, /svg[^>]+viewBox="0 0 342 342"[^>]*className="linux-svg"/);
 });
 
-
-
+test("AppSidebar renders version from environment variable", async () => {
+  const sidebarSource = await source("../../components/shell/AppSidebar.tsx");
+  assert.match(sidebarSource, /NEXT_PUBLIC_APP_VERSION/);
+  assert.doesNotMatch(sidebarSource, /<span>v0\.3\.0<\/span>/);
+});

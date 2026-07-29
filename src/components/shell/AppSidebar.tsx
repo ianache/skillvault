@@ -122,7 +122,7 @@ export function AppSidebar({ collapsed, onToggleCollapse, userRoles = [] }: Prop
       {/* Footer Version */}
       {!collapsed && (
         <div style={{ padding: "12px 16px", borderTop: "1px solid var(--sv-sidebar-border)", fontSize: "11px", color: "var(--sv-sidebar-text-dim)", fontFamily: "var(--sv-font-mono), monospace", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span>v0.3.0</span>
+          <span>v{process.env.NEXT_PUBLIC_APP_VERSION || "0.0.0"}</span>
           <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
             <span>Status</span>
             <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--sv-teal)", boxShadow: "0 0 0 3px rgba(15,148,136,0.18)" }} />
