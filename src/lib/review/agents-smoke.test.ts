@@ -21,4 +21,14 @@ describe("AI Agents Feature Smoke Tests", () => {
     const page = await import("@/app/agents/create/page");
     assert.equal(typeof page.default, "function");
   });
+
+  test("agent chat page exports page component and contains correct imports", async () => {
+    const page = await import("@/app/agents/chat/[id]/page");
+    assert.equal(typeof page.default, "function");
+
+    const pageSource = await source("../../app/agents/chat/[id]/page.tsx");
+    assert.ok(pageSource.includes("getAgents"), "page.tsx must import getAgents store function");
+    assert.ok(pageSource.includes("simulateAgentResponse"), "page.tsx must import simulateAgentResponse");
+    assert.ok(pageSource.includes('"use client"'), "page.tsx must declare use client directive");
+  });
 });
