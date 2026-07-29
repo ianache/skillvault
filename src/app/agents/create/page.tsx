@@ -36,7 +36,6 @@ export default function CreateAgentPage() {
   const [description, setDescription] = useState("");
   const [responsibility, setResponsibility] = useState("");
   const [deliverables, setDeliverables] = useState<string[]>([]);
-  const [systemPrompt, setSystemPrompt] = useState("");
   const [owner, setOwner] = useState("");
   const [model, setModel] = useState("claude-sonnet-4.5");
   const [harnesses, setHarnesses] = useState<string[]>(["claude"]);
@@ -82,7 +81,7 @@ export default function CreateAgentPage() {
       description: description.trim(),
       responsibility: responsibility.trim(),
       deliverables,
-      systemPrompt: systemPrompt.trim(),
+      systemPrompt: "",
       owner: owner.trim(),
       model,
       harnesses,
