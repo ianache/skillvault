@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/js"; // wait, Next.js uses "next/link", not "next/js" - let's check imports
+
 import { getAgents, AIAgent } from "@/lib/agents/store";
 import { PageHeader } from "@/components/PageHeader";
 
@@ -164,7 +164,7 @@ export default function AgentsPage() {
               </svg>
             </div>
             <h3 style={{ fontSize: "16px", fontWeight: 700, marginBottom: "8px" }}>No hay agentes creados</h3>
-            <p style={{ fontSize: "13.5px", color: "var(--muted)", margin: "0 0 24px", lineHeigh: 1.5 }}>
+            <p style={{ fontSize: "13.5px", color: "var(--muted)", margin: "0 0 24px", lineHeight: 1.5 }}>
               Crea tu primer agente inteligente para automatizar tareas complejas usando tus skills publicados.
             </p>
             <NextLink
