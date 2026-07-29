@@ -392,25 +392,26 @@ export default function AgentChatPage({ params }: PageProps) {
       {/* Dynamic CSS styles for animations */}
       <style>{`
         @keyframes sv-glow-teal {
-          0% { box-shadow: 0 0 0 0 rgba(15, 148, 136, 0.5); border-color: var(--sv-teal, #0f9488); }
-          70% { box-shadow: 0 0 0 10px rgba(15, 148, 136, 0); border-color: var(--sv-teal, #0f9488); }
+          0% { box-shadow: 0 0 0 0 rgba(15, 148, 136, 0.4); border-color: var(--sv-teal, #0f9488); }
+          70% { box-shadow: 0 0 0 8px rgba(15, 148, 136, 0); border-color: var(--sv-teal, #0f9488); }
           100% { box-shadow: 0 0 0 0 rgba(15, 148, 136, 0); border-color: var(--sv-teal, #0f9488); }
         }
         .sv-pulsing-skill {
-          animation: sv-glow-teal 1.8s infinite;
-          background: var(--accent-muted) !important;
+          animation: sv-glow-teal 1.6s infinite;
+          background: rgba(15, 148, 136, 0.05) !important;
+          border-color: rgba(15, 148, 136, 0.4) !important;
         }
         .sv-step-running-indicator {
           width: 8px;
           height: 8px;
           border-radius: 50%;
           background: var(--sv-teal, #0f9488);
-          box-shadow: 0 0 8px var(--sv-teal, #0f9488);
-          animation: pulse 1s infinite alternate;
+          box-shadow: 0 0 10px var(--sv-teal, #0f9488);
+          animation: pulse 0.8s infinite alternate;
         }
         @keyframes pulse {
-          from { opacity: 0.4; }
-          to { opacity: 1; }
+          from { opacity: 0.3; transform: scale(0.9); }
+          to { opacity: 1; transform: scale(1.1); }
         }
         @keyframes sv-blink {
           0%, 100% { opacity: 0; }
@@ -418,34 +419,39 @@ export default function AgentChatPage({ params }: PageProps) {
         }
         .sv-terminal-cursor {
           animation: sv-blink 1s step-end infinite;
-          color: var(--accent);
+          color: #a9772e;
         }
         .sv-chip-btn {
-          background: var(--surface);
-          border: 1px solid var(--border);
-          color: var(--muted);
-          transition: all 0.15s ease;
+          background: #ffffff;
+          border: 1px solid #e6e1d8;
+          color: #6a645a;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
           cursor: pointer;
         }
         .sv-chip-btn:hover:not(:disabled) {
-          background: var(--accent-muted);
-          border-color: var(--accent);
-          color: var(--text);
-          transform: translateY(-1px);
+          background: rgba(169, 119, 46, 0.05);
+          border-color: var(--sv-accent, #a9772e);
+          color: var(--sv-accent, #a9772e);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 8px rgba(169, 119, 46, 0.08);
         }
         .sv-send-btn {
-          transition: transform 0.15s ease, opacity 0.15s ease;
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .sv-send-btn:hover:not(:disabled) {
-          transform: scale(1.04);
+          transform: translateY(-1px) scale(1.02);
+          box-shadow: 0 4px 12px rgba(169, 119, 46, 0.2);
         }
         .sv-sidebar {
           width: 320px;
-          border-right: 1px solid var(--border);
-          background: var(--surface);
+          border-right: 1px solid var(--sv-border, #e6e1d8);
+          background: rgba(255, 255, 255, 0.85);
+          backdrop-filter: blur(12px);
           display: flex;
           flex-direction: column;
           flex-shrink: 0;
+          box-shadow: 2px 0 10px rgba(0, 0, 0, 0.01);
         }
         .sv-main-chat {
           flex: 1;
@@ -453,6 +459,34 @@ export default function AgentChatPage({ params }: PageProps) {
           flex-direction: column;
           height: 100vh;
           position: relative;
+          background: linear-gradient(180deg, #fbfaf8 0%, #f7f5f0 100%);
+        }
+        .sv-message-user {
+          background: rgba(169, 119, 46, 0.04) !important;
+          border: 1px solid rgba(169, 119, 46, 0.15) !important;
+          border-radius: 14px 2px 14px 14px !important;
+          box-shadow: 0 4px 12px rgba(169, 119, 46, 0.02);
+        }
+        .sv-message-assistant {
+          background: #ffffff !important;
+          border: 1px solid #e6e1d8 !important;
+          border-left: 3px solid var(--sv-teal, #0f9488) !important;
+          border-radius: 2px 14px 14px 14px !important;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.015);
+        }
+        .sv-terminal-wrapper {
+          position: relative;
+        }
+        .sv-terminal-wrapper::after {
+          content: " ";
+          display: block;
+          position: absolute;
+          top: 0; left: 0; bottom: 0; right: 0;
+          background: linear-gradient(rgba(18, 16, 21, 0) 50%, rgba(0, 0, 0, 0.15) 50%);
+          background-size: 100% 4px;
+          z-index: 10;
+          pointer-events: none;
+          opacity: 0.15;
         }
         @media (max-width: 800px) {
           .sv-sidebar {
@@ -538,7 +572,7 @@ export default function AgentChatPage({ params }: PageProps) {
               }}
             >
               <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: agent.status === "active" ? "var(--sv-teal, #0f9488)" : "var(--muted)" }} />
-              {agent.status === "active" ? "Activo" : "Inactivo"}
+              {agent.status === "active" ? "Activo" : agent.status === "draft" ? "Borrador" : "Pausado"}
             </span>
           </div>
 
@@ -751,12 +785,11 @@ export default function AgentChatPage({ params }: PageProps) {
 
                     {/* Speech bubble */}
                     <div
+                      className={isUser ? "sv-message-user" : "sv-message-assistant"}
                       style={{
-                        background: isUser ? "var(--raised, #1f1c16)" : "var(--surface)",
-                        border: isUser ? "1px solid var(--border-subtle, #2b2721)" : "1px solid var(--border)",
-                        borderRadius: "12px",
-                        padding: "14px 18px",
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.02)",
+                        padding: "16px 20px",
+                        position: "relative",
+                        transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
                       }}
                     >
                       {/* Thought process section */}
