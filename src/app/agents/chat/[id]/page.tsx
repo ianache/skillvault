@@ -239,6 +239,7 @@ export default function AgentChatPage({ params }: PageProps) {
   // Submit Prompt Handler
   async function handleSend(text: string) {
     if (!text.trim() || isSimulating) return;
+    if (!agent) return;
 
     const userMsg: ChatMessage = {
       id: "msg-" + Math.random().toString(36).substring(2, 11),
