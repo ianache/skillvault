@@ -203,7 +203,7 @@ export default function AgentsPage() {
                 draft: { label: "BORRADOR", color: "var(--sv-text-muted, #5c6270)", bg: "rgba(92, 98, 112, 0.12)", pulse: false },
                 paused: { label: "PAUSADO", color: "var(--sv-text-faint, #8a8f99)", bg: "rgba(138, 143, 153, 0.12)", pulse: false },
               };
-              const statusMeta = STATUS_META[agent.status];
+              const statusMeta = STATUS_META[agent.status] ?? STATUS_META.paused;
 
               return (
                 <div

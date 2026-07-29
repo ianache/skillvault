@@ -97,7 +97,7 @@ export function SkillAssigner({ availableSkills, assignedSlugs, onChange, loadin
             </div>
           ) : available.length === 0 ? (
             <p style={{ margin: "4px 0", fontSize: "12.5px", color: "var(--sv-text-faint)", textAlign: "center" }}>
-              Sin coincidencias.
+              {search.trim() ? "Sin coincidencias." : "No hay skills publicados en el catálogo."}
             </p>
           ) : (
             available.map((sk) => (
