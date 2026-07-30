@@ -52,7 +52,7 @@ export default function AgentsPage() {
   const decorated = filtered.map((a) => decorateAgent(a, skillCatalog, a.id === selectedAgentId));
   const selectedRaw = agents.find((a) => a.id === selectedAgentId) ?? null;
   const selectedDecorated = selectedRaw ? decorateAgent(selectedRaw, skillCatalog, true) : null;
-  const resultsLabel = `${decorated.length} agente${decorated.length === 1 ? "" : "s"} encontrados`;
+  const resultsLabel = `${decorated.length} agente${decorated.length === 1 ? "" : "s"} encontrado${decorated.length === 1 ? "" : "s"}`;
 
   function openChat(id: string) {
     router.push(`/agents/chat/${id}`);
@@ -134,7 +134,7 @@ export default function AgentsPage() {
           agent={selectedDecorated}
           onClose={() => setSelectedAgentId(null)}
           onSkillClick={setSelectedSkill}
-          editHref={`/agents/create?id=${selectedDecorated.id}`}
+          editHref={`/agents/create?id=${encodeURIComponent(selectedDecorated.id)}`}
         />
       )}
 

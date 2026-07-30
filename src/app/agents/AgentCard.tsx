@@ -22,13 +22,27 @@ export function AgentCard({ agent, onSelect, onOpenChat }: AgentCardProps) {
         gap: "16px",
       }}
     >
-      <div onClick={onSelect} style={{ cursor: "pointer", display: "flex", flexDirection: "column", gap: "16px" }}>
+      <div
+        onClick={onSelect}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onSelect();
+          }
+        }}
+        style={{ cursor: "pointer", display: "flex", flexDirection: "column", gap: "16px" }}
+      >
         <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
           <div style={{ position: "relative", flexShrink: 0 }}>
             <div style={{ width: "46px", height: "46px", borderRadius: "12px", background: agent.avatarBg, color: agent.avatarFg, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--sv-font-display)", fontWeight: 700, fontSize: "15.5px" }}>
               {agent.initials}
             </div>
-            <span style={{ position: "absolute", bottom: "-3px", right: "-3px", width: "13px", height: "13px", borderRadius: "50%", background: agent.statusDotColor, border: "2.5px solid var(--surface)" }} />
+            <span
+              className={agent.statusPulse ? "sv-pulse-indicator" : ""}
+              style={{ position: "absolute", bottom: "-3px", right: "-3px", width: "13px", height: "13px", borderRadius: "50%", background: agent.statusDotColor, border: "2.5px solid var(--surface)" }}
+            />
           </div>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontWeight: 700, fontSize: "16px", lineHeight: 1.25, color: "var(--text)" }}>{agent.name}</div>
@@ -46,7 +60,7 @@ export function AgentCard({ agent, onSelect, onOpenChat }: AgentCardProps) {
             <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
               {agent.skillsPreview.map((sk) => (
                 <span key={sk.slug} style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "12.5px", fontWeight: 600, color: "var(--text)", background: "var(--raised)", padding: "5px 11px", borderRadius: "20px" }}>
-                  <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: agent.avatarBg, flexShrink: 0 }} />
+                  <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: agent.avatarFg, flexShrink: 0 }} />
                   {sk.name}
                 </span>
               ))}

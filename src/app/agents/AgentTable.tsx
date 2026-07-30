@@ -21,7 +21,7 @@ const thStyle: React.CSSProperties = {
 
 export function AgentTable({ agents, onSelect, onOpenChat }: AgentTableProps) {
   return (
-    <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "12px", overflow: "hidden", boxShadow: "var(--sv-shadow-sm)" }}>
+    <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "12px", overflowX: "auto", boxShadow: "var(--sv-shadow-sm)" }}>
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr style={{ background: "var(--raised)" }}>
@@ -34,14 +34,29 @@ export function AgentTable({ agents, onSelect, onOpenChat }: AgentTableProps) {
         </thead>
         <tbody>
           {agents.map((agent) => (
-            <tr key={agent.id} onClick={() => onSelect(agent.id)} style={{ borderTop: "1px solid var(--raised)", cursor: "pointer" }}>
+            <tr
+              key={agent.id}
+              onClick={() => onSelect(agent.id)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onSelect(agent.id);
+                }
+              }}
+              style={{ borderTop: "1px solid var(--raised)", cursor: "pointer" }}
+            >
               <td style={{ padding: "12px 16px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                   <div style={{ position: "relative", flexShrink: 0 }}>
                     <div style={{ width: "34px", height: "34px", borderRadius: "9px", background: agent.avatarBg, color: agent.avatarFg, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--sv-font-display)", fontWeight: 700, fontSize: "12.5px" }}>
                       {agent.initials}
                     </div>
-                    <span style={{ position: "absolute", bottom: "-2px", right: "-2px", width: "10px", height: "10px", borderRadius: "50%", background: agent.statusDotColor, border: "2px solid var(--surface)" }} />
+                    <span
+                      className={agent.statusPulse ? "sv-pulse-indicator" : ""}
+                      style={{ position: "absolute", bottom: "-2px", right: "-2px", width: "10px", height: "10px", borderRadius: "50%", background: agent.statusDotColor, border: "2px solid var(--surface)" }}
+                    />
                   </div>
                   <div style={{ fontWeight: 700, fontSize: "13.5px", color: "var(--text)" }}>{agent.name}</div>
                 </div>

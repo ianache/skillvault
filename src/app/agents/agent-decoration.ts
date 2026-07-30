@@ -10,7 +10,7 @@ export interface StatusMeta {
 }
 
 export const STATUS_META: Record<AIAgent["status"], StatusMeta> = {
-  active: { label: "ACTIVO", color: "var(--green)", bg: "rgba(15,148,136,0.12)", dotColor: "var(--green)", pulse: true },
+  active: { label: "ACTIVO", color: "var(--green)", bg: "rgba(var(--sv-teal-rgb),0.12)", dotColor: "var(--green)", pulse: true },
   draft: { label: "BORRADOR", color: "var(--muted)", bg: "var(--raised)", dotColor: "var(--faint)", pulse: false },
   paused: { label: "PAUSADO", color: "var(--red)", bg: "rgba(179,57,47,0.1)", dotColor: "var(--red)", pulse: false },
 };
@@ -71,7 +71,9 @@ export interface DecoratedAgent {
 export function decorateAgent(agent: AIAgent, skillCatalog: SkillRow[], isSelected: boolean): DecoratedAgent {
   const meta = STATUS_META[agent.status] ?? STATUS_META.paused;
   const tint = AVATAR_PALETTE[hashString(agent.id) % AVATAR_PALETTE.length];
-  const skillsResolved = agent.skills
+  const skills = agent.skills ?? [];
+  const deliverables = agent.deliverables ?? [];
+  const skillsResolved = skills
     .map((slug) => skillCatalog.find((sk) => sk.slug === slug))
     .filter((sk): sk is SkillRow => Boolean(sk));
 
@@ -80,9 +82,9 @@ export function decorateAgent(agent: AIAgent, skillCatalog: SkillRow[], isSelect
     name: agent.name,
     model: agent.model,
     description: agent.description,
-    owner: agent.owner,
-    responsibility: agent.responsibility,
-    deliverables: agent.deliverables,
+    owner: agent.owner ?? "",
+    responsibility: agent.responsibility ?? "",
+    deliverables,
     dateLabel: formatDateLabel(agent.createdAt),
     initials: getInitials(agent.name),
     avatarBg: tint.bg,
@@ -98,8 +100,8 @@ export function decorateAgent(agent: AIAgent, skillCatalog: SkillRow[], isSelect
     hasNoSkills: skillsResolved.length === 0,
     hasMoreSkills: skillsResolved.length > 2,
     extraSkillsCount: Math.max(0, skillsResolved.length - 2),
-    hasDeliverables: agent.deliverables.length > 0,
-    hasNoDeliverables: agent.deliverables.length === 0,
+    hasDeliverables: deliverables.length > 0,
+    hasNoDeliverables: deliverables.length === 0,
     isSelected,
   };
 }
