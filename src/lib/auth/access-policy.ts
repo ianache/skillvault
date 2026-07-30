@@ -62,6 +62,9 @@ export function getPageRule(pathname: string): PageRule {
   if (isPath(pathname, "/categories") || isPath(pathname, "/users")) {
     return { kind: "protected", capability: "admin:manage" };
   }
+  if (isPath(pathname, "/agents")) {
+    return { kind: "protected", capability: "content:manage" };
+  }
   if (isPath(pathname, "/skills")) {
     return { kind: "protected", capability: "content:manage" };
   }

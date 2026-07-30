@@ -49,3 +49,13 @@ test("unauthenticated protected pages require sign in", () => {
   assert.equal(decidePageAccess("/publish", false, []), "signin");
   assert.equal(decidePageAccess("/review/12", false, []), "signin");
 });
+
+test("agents area requires content:manage, same tier as Mis Skills", () => {
+  assert.equal(decidePageAccess("/agents", false, []), "signin");
+  assert.equal(decidePageAccess("/agents", true, ["user"]), "catalog");
+  assert.equal(decidePageAccess("/agents", true, ["author"]), "allow");
+  assert.equal(decidePageAccess("/agents/create", true, ["user"]), "catalog");
+  assert.equal(decidePageAccess("/agents/create", true, ["editor"]), "allow");
+  assert.equal(decidePageAccess("/agents/chat/agent-1", true, ["user"]), "catalog");
+  assert.equal(decidePageAccess("/agents/chat/agent-1", true, ["reviewer"]), "allow");
+});

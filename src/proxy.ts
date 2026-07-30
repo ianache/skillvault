@@ -29,5 +29,6 @@ export const config = {
     "/categories/:path*",
     "/users/:path*",
     "/skills/:path*",
+    "/agents/:path*",
   ],
 };
