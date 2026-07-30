@@ -40,6 +40,7 @@ export function AgentTable({ agents, onSelect, onOpenChat }: AgentTableProps) {
               role="button"
               tabIndex={0}
               onKeyDown={(e) => {
+                if (e.target !== e.currentTarget) return;
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
                   onSelect(agent.id);
