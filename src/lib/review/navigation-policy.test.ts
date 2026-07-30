@@ -9,7 +9,7 @@ function hrefs(roles: string[]): string[] {
 }
 
 test("user navigation contains only Catalog", () => {
-  assert.deepEqual(hrefs(["user"]), ["/", "/agents"]);
+  assert.deepEqual(hrefs(["user"]), ["/"]);
 });
 
 test("editor navigation includes publishing and owned content", () => {
