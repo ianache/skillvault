@@ -56,6 +56,7 @@ graph TD
 | `/skills/[slug]` | Detalle de Skill | *Pública* | Todos (Anónimos y Autenticados) |
 | `/dashboard` | Mis Skills | `content:manage` | `author`, `editor`, `reviewer`, `admin` |
 | `/proposals` | Mis Propuestas | `content:manage` | `author`, `editor`, `reviewer`, `admin` |
+| `/agents` | Agentes IA | `content:manage` | `author`, `editor`, `reviewer`, `admin` |
 | `/skills/[slug]/edit`| Editar Skill | `content:manage` | `author`, `editor`, `reviewer`, `admin` |
 | `/skills` | Listado de Skills | `content:manage` | `author`, `editor`, `reviewer`, `admin` |
 | `/publish` | Publicar Skill | `publish:create` | `editor`, `admin` |
