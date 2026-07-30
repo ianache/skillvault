@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { createAgent, AIAgent } from "@/lib/agents/store";
+import { useRouter, useSearchParams } from "next/navigation";
+import { createAgent, updateAgent, getAgents, AIAgent } from "@/lib/agents/store";
 import { VALID_HARNESSES } from "@/lib/skill-schema";
 import { PageHeader } from "@/components/PageHeader";
 import { DeliverablesEditor } from "./DeliverablesEditor";
@@ -30,7 +30,10 @@ const MODEL_GROUPS = [
 
 export default function CreateAgentPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const editId = searchParams.get("id");
   const [mounted, setMounted] = useState(false);
+  const [editingAgent, setEditingAgent] = useState<AIAgent | null>(null);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -48,6 +51,25 @@ export default function CreateAgentPage() {
 
   useEffect(() => {
     setMounted(true);
+
+    if (editId) {
+      const found = getAgents().find((a) => a.id === editId);
+      if (!found) {
+        router.push("/agents");
+        return;
+      }
+      setEditingAgent(found);
+      setName(found.name);
+      setDescription(found.description);
+      setResponsibility(found.responsibility);
+      setSystemPrompt(found.systemPrompt);
+      setDeliverables(found.deliverables);
+      setOwner(found.owner);
+      setModel(found.model);
+      setHarnesses(found.harnesses);
+      setStatus(found.status);
+      setSelectedSkills(found.skills);
+    }
 
     fetch("/api/skills")
       .then((res) => res.json())
@@ -67,7 +89,7 @@ export default function CreateAgentPage() {
         console.error("Error loading skills:", err);
         setLoadingSkills(false);
       });
-  }, []);
+  }, [editId, router]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,7 +99,7 @@ export default function CreateAgentPage() {
       return;
     }
 
-    createAgent({
+    const fields = {
       name: name.trim(),
       description: description.trim(),
       responsibility: responsibility.trim(),
@@ -88,15 +110,28 @@ export default function CreateAgentPage() {
       harnesses,
       skills: selectedSkills,
       status,
-    });
+    };
+
+    if (editingAgent) {
+      updateAgent({ ...editingAgent, ...fields });
+    } else {
+      createAgent(fields);
+    }
 
     router.push("/agents");
   };
 
+  const isEditMode = Boolean(editingAgent);
+  const pageTitle = isEditMode ? "Editar agente" : "Crear agente";
+  const pageDescription = isEditMode
+    ? "Actualiza la responsabilidad, entregables y skills de este agente."
+    : "Define la responsabilidad del agente, sus entregables y los skills que le dan capacidad para cumplirlos.";
+  const submitLabel = isEditMode ? "Guardar cambios" : "Guardar agente";
+
   if (!mounted) {
     return (
       <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
-        <PageHeader title="Crear agente" description="Cargando formulario..." />
+        <PageHeader title={pageTitle} description="Cargando formulario..." />
       </div>
     );
   }
@@ -104,8 +139,8 @@ export default function CreateAgentPage() {
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)", fontFamily: "var(--sv-font-display)" }}>
       <PageHeader
-        title="Crear agente"
-        description="Define la responsabilidad del agente, sus entregables y los skills que le dan capacidad para cumplirlos."
+        title={pageTitle}
+        description={pageDescription}
         actions={
           <>
             <NextLink
@@ -139,7 +174,7 @@ export default function CreateAgentPage() {
                 boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
               }}
             >
-              Guardar agente
+              {submitLabel}
             </button>
           </>
         }
@@ -156,7 +191,6 @@ export default function CreateAgentPage() {
           <div className="sv-create-agent-grid" style={{ display: "grid", gridTemplateColumns: "1.1fr 1fr", gap: "28px", alignItems: "start" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: "22px" }}>
 
-              {/* Información básica */}
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "12px", boxShadow: "var(--sv-shadow-sm)", padding: "22px 24px" }}>
                 <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--faint)", fontFamily: "var(--sv-font-mono)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "16px" }}>
                   Información básica
@@ -201,7 +235,6 @@ export default function CreateAgentPage() {
                 />
               </div>
 
-              {/* Entregables */}
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "12px", boxShadow: "var(--sv-shadow-sm)", padding: "22px 24px" }}>
                 <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--faint)", fontFamily: "var(--sv-font-mono)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "16px" }}>
                   Entregables
@@ -209,7 +242,6 @@ export default function CreateAgentPage() {
                 <DeliverablesEditor items={deliverables} onChange={setDeliverables} />
               </div>
 
-              {/* Configuración */}
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "12px", boxShadow: "var(--sv-shadow-sm)", padding: "22px 24px" }}>
                 <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--faint)", fontFamily: "var(--sv-font-mono)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "16px" }}>
                   Configuración
