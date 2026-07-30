@@ -91,6 +91,21 @@ describe("User and Role Synchronization (ensureUser)", () => {
     assert.deepEqual(created.roles.sort(), ["admin", "author"]);
   });
 
+  test("persists the user fallback role instead of filtering it out", async () => {
+    await ensureUser({
+      id: "usr-test-fallback",
+      username: "fallbackuser",
+      email: "fallback@skillvault.dev",
+      keycloakRoles: ["user"],
+    });
+
+    const users = await listUsers();
+    const created = users.find(u => u.id === "usr-test-fallback");
+
+    assert.ok(created);
+    assert.deepEqual(created.roles, ["user"]);
+  });
+
   test("propagates author_id updates to skills and skill_review_requests when Keycloak ID changes", async () => {
     // 1. Registrar usuario inicial con id antiguo
     await ensureUser({

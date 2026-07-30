@@ -1,6 +1,6 @@
-export type AppRole = "admin" | "author" | "reviewer";
+export type AppRole = "admin" | "author" | "reviewer" | "user";
 
-export const APP_ROLES: AppRole[] = ["admin", "author", "reviewer"];
+export const APP_ROLES: AppRole[] = ["admin", "author", "reviewer", "user"];
 
 export interface AppUser {
   id: string;

@@ -20,14 +20,15 @@ SkillVault recognizes these client roles:
 The application must give a successfully authenticated user the effective
 role `user` when the Keycloak client does not provide any recognized
 SkillVault role. This is an application-session fallback only: SkillVault
-must not mutate Keycloak or persist the fallback in the local `users` table.
+must not mutate Keycloak.
 
 ## Goals
 
 - Authenticate users successfully even when they have no recognized role on
   the Keycloak SkillVault client.
 - Assign `user` as the effective session role only when no recognized client
-  role exists.
+  role exists, and persist it to the local `users` table on login (see
+  `docs/superpowers/specs/2026-07-29-persist-user-role-design.md`).
 - Count only roles belonging to the SkillVault client; realm roles must not
   grant SkillVault permissions.
 - Give `user` access to the catalog at `/`, public skill detail pages at
@@ -39,7 +40,6 @@ must not mutate Keycloak or persist the fallback in the local `users` table.
 ## Non-Goals
 
 - Assigning or modifying roles through the Keycloak Admin API.
-- Persisting the effective fallback role in the local `users` table.
 - Changing the login protocol, Keycloak provider, or logout flow.
 - Redesigning the catalog, sidebar, unauthorized page, or role-management UI.
 - Automatically adding `user` to sessions that already contain a recognized

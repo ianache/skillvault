@@ -11,6 +11,7 @@ const ROLE_LABELS: Record<AppRole, { name: string; description: string }> = {
   admin: { name: "Admin", description: "Acceso total a la configuración del sistema" },
   author: { name: "Author", description: "Puede crear y editar contenido" },
   reviewer: { name: "Reviewer", description: "Puede revisar y aprobar contenido" },
+  user: { name: "User", description: "Acceso de solo lectura y calificación" },
 };
 
 const inputStyle: React.CSSProperties = {
