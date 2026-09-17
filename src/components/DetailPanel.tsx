@@ -6,6 +6,8 @@ import { useState, useEffect } from "react";
 interface Props {
   skill: SkillRow | null;
   onClose: () => void;
+  userRoles?: string[];
+  onRetire?: (slug: string) => void;
 }
 
 const HARNESSES = {
@@ -36,12 +38,13 @@ const LinuxIcon = () => (
   </svg>
 );
 
-export function DetailPanel({ skill, onClose }: Props) {
+export function DetailPanel({ skill, onClose, userRoles = [], onRetire }: Props) {
   const [harness, setHarness] = useState<HarnessKey>("claude");
   const [scope, setScope] = useState<"global" | "local">("global");
   const [copied, setCopied] = useState(false);
   const [liveCount, setLiveCount] = useState<number | null>(null);
   const [selectedOS, setSelectedOS] = useState<"windows" | "macos" | "linux">("windows");
+  const [retiring, setRetiring] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -60,6 +63,7 @@ export function DetailPanel({ skill, onClose }: Props) {
   const selectedSkill = skill;
 
   const meta = CATEGORY_META[skill.type] ?? { label: skill.type, color: "#8590A8", icon: "◇" };
+  const canRetire = userRoles.some((r) => ["admin", "reviewer", "editor"].includes(r.toLowerCase()));
   const h = HARNESSES[harness];
   const installPath = scope === "global" ? h.globalPath : h.localPath;
   const cmd = `skillvault install ${skill.slug} --harness ${harness} --scope ${scope}`;
@@ -83,6 +87,20 @@ export function DetailPanel({ skill, onClose }: Props) {
       .then((r) => r.json())
       .then((data) => { if (data.installCount) setLiveCount(data.installCount); })
       .catch(() => {});
+  }
+
+  async function handleRetire() {
+    if (!window.confirm(`¿Retirar "${selectedSkill.name}"? Dejará de estar visible en el catálogo.`)) return;
+    setRetiring(true);
+    try {
+      const res = await fetch(`/api/skills/${selectedSkill.slug}/retire`, { method: "POST" });
+      if (res.ok) {
+        onRetire?.(selectedSkill.slug);
+        onClose();
+      }
+    } finally {
+      setRetiring(false);
+    }
   }
 
   return (
@@ -518,36 +536,69 @@ export function DetailPanel({ skill, onClose }: Props) {
         </Section>
 
         {/* Stats */}
-        <div style={{ display: "flex", gap: "20px", paddingTop: "4px" }}>
-          <div>
-            <div
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", paddingTop: "4px" }}>
+          <div style={{ display: "flex", gap: "20px" }}>
+            <div>
+              <div
+                style={{
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                  fontSize: "18px",
+                  fontWeight: 700,
+                  color: liveCount !== null ? "var(--green)" : "var(--text)",
+                  fontVariantNumeric: "tabular-nums",
+                  transition: "color .4s",
+                }}
+              >
+                {displayCount.toLocaleString()}
+              </div>
+              <div style={{ fontSize: "11px", color: "var(--muted)" }}>instalaciones</div>
+            </div>
+            {(() => {
+              const ts = Number(skill.publishedAt);
+              if (!ts || isNaN(ts)) return null;
+              const d = new Date(ts * 1000);
+              if (isNaN(d.getTime())) return null;
+              return (
+                <div>
+                  <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "18px", fontWeight: 700, color: "var(--text)" }}>
+                    {d.toLocaleDateString("es-ES", { month: "short", year: "numeric" })}
+                  </div>
+                  <div style={{ fontSize: "11px", color: "var(--muted)" }}>publicado</div>
+                </div>
+              );
+            })()}
+          </div>
+          {canRetire && (
+            <button
+              type="button"
+              onClick={handleRetire}
+              disabled={retiring}
               style={{
                 fontFamily: "var(--font-jetbrains-mono), monospace",
-                fontSize: "18px",
-                fontWeight: 700,
-                color: liveCount !== null ? "var(--green)" : "var(--text)",
-                fontVariantNumeric: "tabular-nums",
-                transition: "color .4s",
+                fontSize: "11px",
+                fontWeight: 600,
+                padding: "5px 10px",
+                borderRadius: "4px",
+                border: "1px solid var(--border)",
+                color: "var(--muted)",
+                background: "none",
+                cursor: retiring ? "default" : "pointer",
+                opacity: retiring ? 0.6 : 1,
+                transition: "all .12s ease-in-out",
+              }}
+              onMouseEnter={(e) => {
+                if (retiring) return;
+                e.currentTarget.style.borderColor = "#E8503A";
+                e.currentTarget.style.color = "#E8503A";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = "var(--border)";
+                e.currentTarget.style.color = "var(--muted)";
               }}
             >
-              {displayCount.toLocaleString()}
-            </div>
-            <div style={{ fontSize: "11px", color: "var(--muted)" }}>instalaciones</div>
-          </div>
-          {(() => {
-            const ts = Number(skill.publishedAt);
-            if (!ts || isNaN(ts)) return null;
-            const d = new Date(ts * 1000);
-            if (isNaN(d.getTime())) return null;
-            return (
-              <div>
-                <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "18px", fontWeight: 700, color: "var(--text)" }}>
-                  {d.toLocaleDateString("es-ES", { month: "short", year: "numeric" })}
-                </div>
-                <div style={{ fontSize: "11px", color: "var(--muted)" }}>publicado</div>
-              </div>
-            );
-          })()}
+              {retiring ? "Retirando…" : "Retirar"}
+            </button>
+          )}
         </div>
       </div>
     </div>

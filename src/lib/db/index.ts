@@ -64,7 +64,7 @@ async function createSqliteDb() {
   const schema = await import("./schema");
 
   const url = dbUrl ? `file:${dbUrl}` : `file:${path.join(process.cwd(), "skills-vault.db")}`;
-  const libsqlClient = createClient({ url });
+  const libsqlClient = createClient({ url, timeout: 5000 });
   const db = drizzle(libsqlClient, { schema });
 
   // Wrap libsql client to normalize execute signature

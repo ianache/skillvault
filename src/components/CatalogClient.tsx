@@ -41,6 +41,11 @@ export function CatalogClient({ initialSkills, initialCategories, initialQuery =
     setSelected((prev) => (prev && prev.slug === slug ? { ...prev, type: newType } : prev));
   }, []);
 
+  const handleRetire = useCallback((slug: string) => {
+    setSkills((prev) => prev.filter((s) => s.slug !== slug));
+    setSelected((prev) => (prev && prev.slug === slug ? null : prev));
+  }, []);
+
   // Refresh categories when they may have changed
   useEffect(() => {
     fetch("/api/categories")
@@ -234,7 +239,12 @@ export function CatalogClient({ initialSkills, initialCategories, initialQuery =
             }}
             onClick={() => setSelected(null)}
           />
-          <DetailPanel skill={selected} onClose={() => setSelected(null)} />
+          <DetailPanel
+            skill={selected}
+            onClose={() => setSelected(null)}
+            userRoles={user?.roles ?? []}
+            onRetire={handleRetire}
+          />
         </>
       )}
     </div>
