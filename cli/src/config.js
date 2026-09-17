@@ -8,7 +8,7 @@ export const HARNESS_PATHS = {
   claude: { global: join(homedir(), ".claude", "skills"), local: join(".claude", "skills"), ext: "md" },
   codex: { global: join(homedir(), ".codex", "skills"), local: join(".codex", "skills"), ext: "md" },
   opencode: { global: join(homedir(), ".opencode", "skills"), local: join(".opencode", "skills"), ext: "md" },
-  agy: { global: join(homedir(), ".agy", "skills"), local: join(".agy", "skills"), ext: "md" },
+  agy: { global: join(homedir(), ".agy", "skills"), local: join(".agents", "skills"), ext: "md" },
   cursor: { global: join(homedir(), ".cursor", "rules"), local: join(".cursor", "rules"), ext: "mdc" },
 };
 

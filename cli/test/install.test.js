@@ -52,6 +52,15 @@ test("codex global target uses CODEX_HOME and canonical skill directory", async 
   assert.equal(target.skillFile, join(root, "skills", "demo-skill", "SKILL.md"));
 });
 
+test("agy local target uses .agents/skills and canonical skill directory", async () => {
+  const target = resolveSkillTarget("agy", "local", "demo-skill");
+
+  assert.equal(target.rootDir, join(".agents", "skills"));
+  assert.equal(target.skillDir, join(".agents", "skills", "demo-skill"));
+  assert.equal(target.skillFile, join(".agents", "skills", "demo-skill", "SKILL.md"));
+});
+
+
 test("install writes codex skills to <CODEX_HOME>/skills/<slug>/SKILL.md", async () => {
   const root = await mkdtemp(join(tmpdir(), "skillvault-install-"));
   const previousCodexHome = process.env.CODEX_HOME;
