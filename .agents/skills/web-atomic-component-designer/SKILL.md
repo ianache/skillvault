@@ -96,6 +96,7 @@ For page or MicroUI specifications also include the DDD boundary decision and it
 - Every CMP-* needs a real visual design in Stitch or Claude Design; the spec alone is not enough to build from. Developers implement against both.
 - Never fabricate Stitch or Claude Design ids/URLs; take them from the tool. Spec/design conflicts are recorded and set `REQUIRES_REVIEW`.
 - A component is not reusable merely because it appears twice; its boundary and variation model must be documented.
+- The visual design must use the product's canonical design system (for example the repository token source such as `_ds/`); create the Stitch or Claude Design system from those tokens and never accept the tool's generated default.
 - Framework and test tooling come from accepted ADRs; never default to one. The packaging decision is explicit before `READY_FOR_DEV`: internal module exports, or, only if an ADR decides a library, NPM exports, peer dependencies and semver impact.
 - An agent must never set `human-reviewed: true`; only a named human review event can do so.
 - `READY_FOR_DEV`, `REQUIRES_REVIEW` and `BLOCKED` are the only valid output statuses.

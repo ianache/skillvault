@@ -20,11 +20,11 @@ provenance:
 visual_design:
   tool: stitch
   project_id: "1874775286672335993"
-  screen_id: "03bff45a0fec48fa932d471d0f671d14"
-  url: "https://stitch.withgoogle.com/projects/1874775286672335993?node-id=03bff45a0fec48fa932d471d0f671d14"
-  design_system: "SkillVault Light (assets/71d2e6f7982a469294c1e9b1ada2adf1)"
-  covers: [empty-selection, populated-selection, incompatible-item-warning, loading-results, error-preserves-selection, disabled, desktop-two-column, narrow-stacked]
-  status: linked
+  screen_id: "652b2f937ad744e38cdb07334bfa1437"
+  url: "https://stitch.withgoogle.com/projects/1874775286672335993?node-id=652b2f937ad744e38cdb07334bfa1437"
+  design_system: "SkillVault Portal Light (assets/9009552743441703194) + Dark (assets/12691038429936688410), pendiente de generar"
+  covers: [empty-selection, populated-selection, retired-warning-line, loading-results, error-preserves-selection, disabled, latest-pinned-toggle]
+  status: pending
   last_synced: 2026-10-08
   waiver_reason: ""
 ---
@@ -95,11 +95,11 @@ export type SkillPickerEvent =
 ## Visual design
 
 - Tool: Stitch
-- Design link: Stitch project `1874775286672335993`, screen "SkillVault — Specimen CMP-ORG-003 PackageSkillPicker (Light)" <https://stitch.withgoogle.com/projects/1874775286672335993?node-id=03bff45a0fec48fa932d471d0f671d14>
-- Project / screen id: `1874775286672335993` / `03bff45a0fec48fa932d471d0f671d14`
-- Design system: SkillVault Light (`assets/71d2e6f7982a469294c1e9b1ada2adf1`)
-- Covered variants, states, breakpoints: empty-selection, populated-selection, incompatible-item-warning, loading-results, error-preserves-selection, disabled, desktop-two-column, narrow-stacked
-- Known gaps between design and spec: Cobertura según el prompt; no verificada visualmente. Tokens de form/card/status/focus aún sin decisión. Modo oscuro requerido (decisión humana (human:ianache), 2026-10-08); el diseño Stitch es solo Light.
+- Design link: Stitch project `1874775286672335993`, screen "SkillVault — Specimen CMP-ORG-003 PackageSkillPicker v3 (Light)" <https://stitch.withgoogle.com/projects/1874775286672335993?node-id=652b2f937ad744e38cdb07334bfa1437>
+- Project / screen id: `1874775286672335993` / `652b2f937ad744e38cdb07334bfa1437`
+- Design system: SkillVault Portal Light (`assets/9009552743441703194`) y Dark (`assets/12691038429936688410`), derivados de `_ds/skillvault` (pendiente de generar)
+- Covered variants, states, breakpoints: empty selection, populated selection, retired warning line, loading results, error preserves selection, disabled, latest pinned toggle
+- Known gaps between design and spec: **decisión humana (human:ianache), 2026-10-08: el sistema de diseño canónico es `_ds/skillvault`.** El diseño Stitch enlazado usa otro sistema (azul) y queda como referencia estructural no canónica; se regenera en claro y oscuro con los design systems indicados. Tokens en `design-token-contract.md`. Notas previas: Pantalla v3 enlazada por el usuario. Verificada en el HTML: badges Borrador/Publicado/Retirado equivalentes a la regla canónica (colores en hexadecimal, no tokens), IBM Plex Sans, anillo de foco #2250d4, aviso de retiro en línea ámbar aparte, sin "En revisión"; cobertura según el prompt, aspecto visual no revisado. Reemplaza a `03bff45a0fec48fa932d471d0f671d14` (descartar). Sistema de diseño Stitch azul, no el de `_ds/skillvault` (ver Q-10 de DCP-2026-001). Modo oscuro requerido (decisión humana (human:ianache), 2026-10-08); el diseño Stitch es solo Light.
 - Developer instruction: implement against this design AND this specification; do not infer visuals from the spec alone.
 
 ## Accessibility and security

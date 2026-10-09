@@ -19,6 +19,9 @@ sources:
 - Actualización de `index.md`.
 - Alta de `design/atomic-components/react-component-architecture.md` y `component-module-contract.md`, que reemplazan a `angular-library-architecture.md` y `npm-package-contract.md` (marcados `lifecycle: superseded`, sin borrarlos).
 - Alta de `implementation/DSP-2026-002-componentes-ui-paquetes.md` en el índice (faltaba).
+- Decisión Q-10 (opción A, decisión humana (human:ianache), 2026-10-08): sistema de diseño canónico `_ds/skillvault`. Reescrito `design-token-contract.md`; specs `CMP-Package*` a `visual_design.status: pending`; `DCP-2026-001`, `DSP-2026-002` y registro actualizados; design systems de Stitch `assets/9009552743441703194` y `assets/12691038429936688410` creados.
+- `CMP-ORG-002` enlazado al diseño Stitch v2 `95553adaab1d43939d07ad2cb9a224b6` indicado por el usuario (spec, registro visual y DSP-2026-002); desviaciones anotadas (IBM Plex Sans y foco).
+- `CMP-ORG-003` enlazado al diseño Stitch v3 `652b2f937ad744e38cdb07334bfa1437` (spec, registro visual y DSP-2026-002).
 - Decisiones humanas registradas en `DCP-2026-001`, `DSP-2026-002`, specs y registro visual: ambos modos de tema (claro y oscuro) y subcomponentes privados de `PackageCard`.
 - Alta de `implementation/DCP-2026-001-paquetes-ui-oleada-1.md`: Development Context Pack de `CMP-ATOM-001` y `CMP-ORG-001` (`REQUIRES_REVIEW`).
 - Skill `web-atomic-component-designer` 0.4.0: neutral al framework (se toma de la ADR aceptada), sección `## Component contract` en lugar de `## Angular contract`, nueva plantilla `component-module-contract-template.md`; el validador acepta ambos encabezados.

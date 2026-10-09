@@ -21,9 +21,9 @@ visual_design:
   project_id: "1874775286672335993"
   screen_id: "2dd84f1ca2ef4ec0b6edeba82e8ff05d"
   url: "https://stitch.withgoogle.com/projects/1874775286672335993?node-id=2dd84f1ca2ef4ec0b6edeba82e8ff05d"
-  design_system: "SkillVault Light (assets/71d2e6f7982a469294c1e9b1ada2adf1)"
+  design_system: "SkillVault Portal Light (assets/9009552743441703194) + Dark (assets/12691038429936688410), pendiente de generar"
   covers: [draft, published, retired, retired-with-warning, compact, version-suffix, unknown-status-error, loading, mobile-360]
-  status: linked
+  status: pending
   last_synced: 2026-10-08
   waiver_reason: ""
 ---
@@ -94,9 +94,9 @@ export interface PackageStatusInput {
 - Tool: Stitch
 - Design link: Stitch project `1874775286672335993`, screen "SkillVault — Specimen CMP-ATOM-001 PackageStatus (Light)" <https://stitch.withgoogle.com/projects/1874775286672335993?node-id=2dd84f1ca2ef4ec0b6edeba82e8ff05d>
 - Project / screen id: `1874775286672335993` / `2dd84f1ca2ef4ec0b6edeba82e8ff05d`
-- Design system: SkillVault Light (`assets/71d2e6f7982a469294c1e9b1ada2adf1`)
+- Design system: SkillVault Portal Light (`assets/9009552743441703194`) y Dark (`assets/12691038429936688410`), derivados de `_ds/skillvault` (pendiente de generar)
 - Covered variants, states, breakpoints: draft, published, retired, retired con warning, compact, sufijo de versión, estado desconocido (error), loading, contenedor móvil 360px
-- Known gaps between design and spec: Versión corregida (tokens SkillVault Light, IBM Plex Sans, nota "Regla de estados"). Reemplaza a `669d4feb3b9e48e9851750e8eb64c379` (descartar). Verificado en el HTML descargado (IBM Plex y fondo #fbf8ff presentes); aspecto visual no revisado. Modo oscuro requerido (decisión humana (human:ianache), 2026-10-08); el diseño Stitch es solo Light.
+- Known gaps between design and spec: **decisión humana (human:ianache), 2026-10-08: el sistema de diseño canónico es `_ds/skillvault`.** El diseño Stitch enlazado usa otro sistema (azul) y queda como referencia estructural no canónica; se regenera en claro y oscuro con los design systems indicados. Tokens en `design-token-contract.md`. Notas previas: Versión corregida (tokens SkillVault Light, IBM Plex Sans, nota "Regla de estados"). Reemplaza a `669d4feb3b9e48e9851750e8eb64c379` (descartar). Verificado en el HTML descargado (IBM Plex y fondo #fbf8ff presentes); aspecto visual no revisado. Modo oscuro requerido (decisión humana (human:ianache), 2026-10-08); el diseño Stitch es solo Light.
 - Developer instruction: implement against this design AND this specification; do not infer visuals from the spec alone.
 
 ## Accessibility and security

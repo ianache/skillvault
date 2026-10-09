@@ -19,11 +19,11 @@ provenance:
 visual_design:
   tool: stitch
   project_id: "1874775286672335993"
-  screen_id: "2568125a3b5349baa1c7bf79d6a14f33"
-  url: "https://stitch.withgoogle.com/projects/1874775286672335993?node-id=2568125a3b5349baa1c7bf79d6a14f33"
-  design_system: "SkillVault Light (assets/71d2e6f7982a469294c1e9b1ada2adf1)"
-  covers: [default, compact, filled-filters, focus, loading-disabled, no-matches, desktop-row, narrow-stacked, extra-actions-slot]
-  status: linked
+  screen_id: "95553adaab1d43939d07ad2cb9a224b6"
+  url: "https://stitch.withgoogle.com/projects/1874775286672335993?node-id=95553adaab1d43939d07ad2cb9a224b6"
+  design_system: "SkillVault Portal Light (assets/9009552743441703194) + Dark (assets/12691038429936688410), pendiente de generar"
+  covers: [default, compact, filled-filters, loading-disabled, no-matches, extra-actions-slot]
+  status: pending
   last_synced: 2026-10-08
   waiver_reason: ""
 ---
@@ -88,11 +88,11 @@ export interface PackageSearchPanelEvent { type: 'filtersChange' | 'clear'; filt
 ## Visual design
 
 - Tool: Stitch
-- Design link: Stitch project `1874775286672335993`, screen "SkillVault — Specimen CMP-ORG-002 PackageSearchPanel (Light)" <https://stitch.withgoogle.com/projects/1874775286672335993?node-id=2568125a3b5349baa1c7bf79d6a14f33>
-- Project / screen id: `1874775286672335993` / `2568125a3b5349baa1c7bf79d6a14f33`
-- Design system: SkillVault Light (`assets/71d2e6f7982a469294c1e9b1ada2adf1`)
-- Covered variants, states, breakpoints: default, compact, filled-filters, focus, loading-disabled, no-matches, desktop-row, narrow-stacked, extra-actions-slot
-- Known gaps between design and spec: Versión corregida (resultado de edición). Verificado en el HTML: sin "En revisión", badges equivalentes a la regla canónica (colores en hexadecimal, no tokens), IBM Plex Sans, anillo de foco #2250d4; cobertura según el prompt, aspecto visual no revisado. Reemplaza a `1a3f07cd786c4642b8eea0e87252df32` (descartar). Modo oscuro requerido (decisión humana (human:ianache), 2026-10-08); el diseño Stitch es solo Light.
+- Design link: Stitch project `1874775286672335993`, screen "SkillVault v2 — Specimen CMP-ORG-002 PackageSearchPanel (Light)" <https://stitch.withgoogle.com/projects/1874775286672335993?node-id=95553adaab1d43939d07ad2cb9a224b6>
+- Project / screen id: `1874775286672335993` / `95553adaab1d43939d07ad2cb9a224b6`
+- Design system: SkillVault Portal Light (`assets/9009552743441703194`) y Dark (`assets/12691038429936688410`), derivados de `_ds/skillvault` (pendiente de generar)
+- Covered variants, states, breakpoints: default, compact, filled filters, loading disabled, no matches, extra actions slot
+- Known gaps between design and spec: **decisión humana (human:ianache), 2026-10-08: el sistema de diseño canónico es `_ds/skillvault`.** El diseño Stitch enlazado usa otro sistema (azul) y queda como referencia estructural no canónica; se regenera en claro y oscuro con los design systems indicados. Tokens en `design-token-contract.md`. Notas previas: Pantalla v2 enlazada por el usuario. Verificada en el HTML: opciones de estado exactas (Todos, Borrador, Publicado, Retirado), roles genéricos (Rol A/B/C), sin "En revisión", chips de estado equivalentes a la regla canónica (clases Tailwind, no tokens). Desviaciones: IBM Plex Sans solo figura en una anotación y no se carga (el cuerpo cae a la tipografía por defecto), y no hay estilos de foco visibles (`focus:ring`), requisito de la spec. Cobertura según el prompt, aspecto visual no revisado. Alternativa descartada: `2568125a3b5349baa1c7bf79d6a14f33` (sí carga IBM Plex y tiene foco); original `1a3f07cd786c4642b8eea0e87252df32` (descartar). Sistema de diseño Stitch azul, no el de `_ds/skillvault` (ver Q-10 de DCP-2026-001). Modo oscuro requerido (decisión humana (human:ianache), 2026-10-08); el diseño Stitch es solo Light.
 - Developer instruction: implement against this design AND this specification; do not infer visuals from the spec alone.
 
 ## Accessibility and security

@@ -22,9 +22,9 @@ visual_design:
   project_id: "1874775286672335993"
   screen_id: "db8519d701bc4a8e9c735ff190a21b6c"
   url: "https://stitch.withgoogle.com/projects/1874775286672335993?node-id=db8519d701bc4a8e9c735ff190a21b6c"
-  design_system: "SkillVault Light (assets/71d2e6f7982a469294c1e9b1ada2adf1)"
+  design_system: "SkillVault Portal Light (assets/9009552743441703194) + Dark (assets/12691038429936688410), pendiente de generar"
   covers: [maintenance, public-readonly, draft, published, retired-with-warning, disabled, loading-skeleton, grid-desktop-3col, mobile-1col]
-  status: linked
+  status: pending
   last_synced: 2026-10-08
   waiver_reason: ""
 ---
@@ -116,9 +116,9 @@ export type PackageCardEvent =
 - Tool: Stitch
 - Design link: Stitch project `1874775286672335993`, screen "SkillVault — Specimen CMP-ORG-001 PackageCard (Light) v2" <https://stitch.withgoogle.com/projects/1874775286672335993?node-id=db8519d701bc4a8e9c735ff190a21b6c>
 - Project / screen id: `1874775286672335993` / `db8519d701bc4a8e9c735ff190a21b6c`
-- Design system: SkillVault Light (`assets/71d2e6f7982a469294c1e9b1ada2adf1`)
+- Design system: SkillVault Portal Light (`assets/9009552743441703194`) y Dark (`assets/12691038429936688410`), derivados de `_ds/skillvault` (pendiente de generar)
 - Covered variants, states, breakpoints: maintenance, public-readonly, draft, published, retired con warning, disabled, loading skeleton, grid desktop 3 columnas, móvil 1 columna
-- Known gaps between design and spec: Regenerada (v2) con la regla canónica de estados. Verificado en el HTML: badges Borrador/Publicado/Retirado canónicos, IBM Plex Sans, anillo de foco #2250d4, sin Retirado rojo/ámbar; cobertura de estados según el prompt, aspecto visual no revisado. Duplicados a eliminar en Stitch: `9834137732064cdfafa4254ed53c6124`, `d8eb3fa8982d464799b67312eefa9a89`, `dbabe18c61244b2895f234a4e6e14e38`. Modo oscuro requerido (decisión humana (human:ianache), 2026-10-08); el diseño Stitch es solo Light.
+- Known gaps between design and spec: **decisión humana (human:ianache), 2026-10-08: el sistema de diseño canónico es `_ds/skillvault`.** El diseño Stitch enlazado usa otro sistema (azul) y queda como referencia estructural no canónica; se regenera en claro y oscuro con los design systems indicados. Tokens en `design-token-contract.md`. Notas previas: Regenerada (v2) con la regla canónica de estados. Verificado en el HTML: badges Borrador/Publicado/Retirado canónicos, IBM Plex Sans, anillo de foco #2250d4, sin Retirado rojo/ámbar; cobertura de estados según el prompt, aspecto visual no revisado. Duplicados a eliminar en Stitch: `9834137732064cdfafa4254ed53c6124`, `d8eb3fa8982d464799b67312eefa9a89`, `dbabe18c61244b2895f234a4e6e14e38`. Modo oscuro requerido (decisión humana (human:ianache), 2026-10-08); el diseño Stitch es solo Light.
 - Developer instruction: implement against this design AND this specification; do not infer visuals from the spec alone.
 
 ## Accessibility and security

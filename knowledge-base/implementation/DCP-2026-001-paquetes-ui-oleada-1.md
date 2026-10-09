@@ -50,7 +50,7 @@ Implementar dos componentes React presentacionales en el portal Next.js 16 / Rea
 - Un valor desconocido es un error, no un fallback silencioso.
 - Etiquetas localizables: reutilizar `packageStatusLabel` de `src/lib/packages/ui.ts`.
 - Compatible con Server Components (sin estado ni eventos).
-- Diseño: Stitch `1874775286672335993` / `2dd84f1ca2ef4ec0b6edeba82e8ff05d`.
+- Diseño: pendiente de regenerar con el DS canónico (claro y oscuro). Referencia estructural no canónica: Stitch `2dd84f1ca2ef4ec0b6edeba82e8ff05d`.
 
 **2. `PackageCard` (CMP-ORG-001)**
 - Props: `package` (identidad, descripción, rol, estado, versión, `skillCount?`), `actions` (`edit`, `duplicate`, `review`, `retire`), `disabled`, `warningText?`. Callback `onEvent(event)` con unión discriminada (`open`, `edit`, `duplicate`, `review`, `retire`) (nombres propuestos).
@@ -58,12 +58,12 @@ Implementar dos componentes React presentacionales en el portal Next.js 16 / Rea
 - Compone `PackageStatus`. Elemento semántico `article`, nombre accesible del enlace a partir del nombre del paquete, foco visible, estado con texto, aviso de retiro anunciado.
 - Icono, meta (rol y versión) y acciones: elementos privados del mismo archivo, no exportados (D-8).
 - Requiere límite de cliente (`"use client"`) por los eventos.
-- Diseño: Stitch `1874775286672335993` / `db8519d701bc4a8e9c735ff190a21b6c`.
+- Diseño: pendiente de regenerar con el DS canónico (claro y oscuro). Referencia estructural no canónica: Stitch `db8519d701bc4a8e9c735ff190a21b6c`.
 
 **3. Transversal**
 - Ambos modos (claro y oscuro) en los dos componentes (D-7).
 - Stories de Storybook: una por variante y estado de cada spec, en claro y oscuro.
-- Pruebas: unitarias de contrato y de estados, interacción y teclado, accesibilidad, y verificación visual contra el diseño Stitch.
+- Pruebas: unitarias de contrato y de estados, interacción y teclado, accesibilidad, y verificación visual contra el diseño Stitch canónico.
 - Ubicación propuesta: `src/components/packages/` (junto a los `*Client.tsx`).
 
 ### Excluded work
@@ -87,6 +87,7 @@ Implementar dos componentes React presentacionales en el portal Next.js 16 / Rea
 | D-6 | Implementar contra spec **y** diseño; no inferir visuales solo de la spec. | specs |
 | D-7 | **Se soportan ambos modos (claro y oscuro).** El portal es oscuro por defecto y tiene selector de tema (`data-theme`, `ThemeToggle`). | decisión humana (human:ianache), 2026-10-08 |
 | D-8 | `PackageCard` implementa icono, meta y acciones como elementos **privados** en esta versión; no se exportan ni se especifican aparte. | decisión humana (human:ianache), 2026-10-08 |
+| D-9 | **Sistema de diseño canónico: `_ds/skillvault`** (acento marrón `#a9772e`, Space Grotesk y JetBrains Mono, tokens claro y oscuro). Los diseños Stitch en el sistema azul "SkillVault Light" quedan como referencia estructural no canónica. | decisión humana (human:ianache), 2026-10-08 |
 
 ### Assumptions and open questions
 
@@ -100,14 +101,14 @@ Implementar dos componentes React presentacionales en el portal Next.js 16 / Rea
 | Q-5 | Copy final de estados, icono de severidad y tokens semánticos oficiales (pendientes en las specs). | Mientras tanto se usan los valores del diseño Stitch. |
 | Q-6 | Nombres de props y callbacks propuestos (`onEvent`, etc.) y ubicación `src/components/packages/`. | Se confirman en la revisión de la spec. |
 | Q-7 | Propietario de cada componente: por confirmar en las specs. | Necesario para revisión. |
-| Q-8 | **Bloqueante.** Los diseños Stitch (`2dd84f1c…`, `db8519d7…`) son solo `SkillVault Light`. No existe referencia visual para el modo oscuro de ninguno de los dos componentes. El proyecto tiene un design system oscuro (`SkillVault`, `assets/9764606991015693018`) pero sin pantallas de estos componentes. ¿Se crean diseños oscuros en Stitch o se deriva el oscuro de los tokens existentes del portal? | Sin referencia oscura, el criterio "implementar contra el diseño" (D-6) no es verificable en ese modo. |
-| Q-9 | Estilos: los diseños usan colores fijos; el portal usa variables CSS (`--raised`, `--teal`, `--muted`, etc., con `[data-theme="light"]`). Propuesta (no decidida): estilar con las variables del portal para obtener ambos modos y mapear a ellas los valores del diseño claro. Hay que confirmar el mapeo de los colores de estado de D-3 (verde, gris punteado, neutro) en ambos modos y su contraste. | Define el sistema de estilos de ambos componentes. |
-| Q-10 | **Bloqueante, sistema de diseño.** El portal ya tiene un design system versionado en `_ds/skillvault/` (`styles.css`, `readme.md`, importado por `src/app/globals.css`): dirección cálida/editorial, acento marrón/dorado `--sv-accent: #a9772e`, éxito `--sv-teal: #0f9488`, peligro `--sv-danger: #b3392f`, Space Grotesk y JetBrains Mono, tokens para claro (`--sv-bg: #f7f5f0`) y oscuro (`--sv-dark-bg: #16140f`). Los diseños Stitch de estos componentes usan otro sistema (`SkillVault Light`: azul `#2250d4`, grises fríos, Geist e IBM Plex Sans). No coinciden. Esto contradice "tokens oficiales no identificados" de las specs y de `design-token-contract.md`. ¿Cuál es el sistema canónico para `CMP-*`? | Si es `_ds/skillvault`, los diseños Stitch vigentes están fuera de sistema y hay que regenerarlos; Q-8 y Q-9 se reducen a mapear tokens existentes. |
+| Q-8 | **Bloqueante.** Diseños canónicos en claro y oscuro: se están regenerando en Stitch con `SkillVault Portal Light` (`assets/9009552743441703194`) y `SkillVault Portal Dark` (`assets/12691038429936688410`), creados desde `_ds/skillvault`. Sin ellos, D-6 no es verificable. | Hasta verificarlos, los ids Stitch anteriores no son diseño canónico. |
+| Q-9 | Estilos: referencian las variables del portal (`--bg`, `--surface`, `--raised`, `--border`, `--text`, `--muted`, `--accent`, `--status-published`, etc.) según `design-token-contract.md`, para ambos modos. Falta decidir el enfoque (estilos en línea con `var(--…)` o Tailwind), el color del estado Retirado (Q-3) y el token de foco. | Define el sistema de estilos. |
+| Q-10 | ~~Sistema de diseño canónico.~~ **Resuelto por D-9:** `_ds/skillvault`. | Los diseños Stitch actuales son referencia estructural; se regeneran con los design systems de Stitch creados desde los tokens canónicos. |
 
 ### Risks and dependencies
 
 - **Storybook** no está instalado; su compatibilidad con Next.js 16 / React 19 no está verificada (ADR-005 lo deja abierto). Sin él no hay evidencia de pruebas.
-- **Diseños** verificados solo por su código HTML, no visualmente; el diseño de `PackageStatus` es una pantalla nueva (`2dd84f1c…`) creada por una edición, no la original. Hay pantallas duplicadas pendientes de borrar en Stitch.
+- **Diseños** del sistema azul de Stitch no canónicos (D-9); verificados solo por su código HTML, no visualmente; el diseño de `PackageStatus` es una pantalla nueva (`2dd84f1c…`) creada por una edición, no la original. Hay pantallas duplicadas pendientes de borrar en Stitch.
 - **Tema y tokens**: ambos modos soportados (D-7); riesgo de que el modo oscuro no tenga diseño de referencia (Q-8) y de rehacer estilos (Q-9). El contraste de los badges de estado debe cumplir WCAG 2.2 AA en ambos modos.
 - **Integración**: la tarjeta cambia el layout de SCR-001 respecto a la tabla actual; no incluida aquí.
 - **Dependencia de orden:** `PackageStatus` primero; `PackageCard` lo compone.
@@ -126,12 +127,12 @@ Implementar dos componentes React presentacionales en el portal Next.js 16 / Rea
   - Unitarias: todos los estados, valor desconocido, versión ausente, aviso, acciones opcionales.
   - Interacción: activación por teclado y contenido de los eventos.
   - Accesibilidad: estado sin depender del color, contraste, foco visible, nombre, rol y valor.
-  - Visual: cada estado y variante contra el diseño Stitch, en móvil y escritorio, y en claro y oscuro (el oscuro sin diseño de referencia: Q-8).
+  - Visual: cada estado y variante contra el diseño Stitch canónico, en móvil y escritorio, y en claro y oscuro (el oscuro sin diseño de referencia: Q-8).
   - Se mantienen `next build` y `tsx --test` existentes.
   - Este pack no aporta evidencia de ejecución.
 
 ## Next action
 
 - Owner: por confirmar (Product Owner, UX, Arquitectura y Dev lead).
-- Action: (0) resolver Q-10 (sistema de diseño canónico), que condiciona Q-8 y Q-9; (1) resolver Q-8 (diseño oscuro) y Q-9 (mapeo a variables del portal); (2) instalar y verificar Storybook con Next.js 16 / React 19; (3) revisión humana de las 2 specs y los 2 diseños; (4) asignar propietario.
+- Action: (0) Q-10 ya resuelto (D-9); (1) resolver Q-8 (diseño oscuro) y Q-9 (mapeo a variables del portal); (2) instalar y verificar Storybook con Next.js 16 / React 19; (3) revisión humana de las 2 specs y los 2 diseños; (4) asignar propietario.
 - Gate: pasa a `READY_FOR_DEV` solo cuando Q-8 y Q-9 estén resueltos, Storybook funcione y exista revisión humana registrada; hasta entonces permanece `REQUIRES_REVIEW` y `human-reviewed: false`. D-7 y D-8 ya están decididas.

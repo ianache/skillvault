@@ -62,6 +62,7 @@ Construir 4 componentes React presentacionales reutilizables (Next.js 16 / React
 
 - Las specs `CMP-*` conservan su contrato TypeScript, pero los selectores Angular, `@skillvault/ui/packages`, NPM, standalone, signals y semver de librería quedan **no normativos**. Cada spec incluye ahora la sección "Reconciliación con ADR-004".
 - Los componentes viven en el portal (propuesta: `src/components/packages/`, junto a los `*Client.tsx` existentes), no en una librería independiente.
+- Sistema de diseño canónico: `_ds/skillvault` (decisión humana (human:ianache), 2026-10-08); sustituye al sistema azul de Stitch en los diseños de referencia.
 - ADR-004 **no decide** el sistema de diseño ni la biblioteca de componentes, el renderizado por ruta (SSR/SSG/CSR) ni una futura extracción a otro framework o librería; esos puntos siguen abiertos.
 - `ADR-005` (decisión humana; texto pendiente de revisión): **Storybook** es la herramienta para desarrollar, documentar y probar estos componentes; una story por variante y estado de cada spec. No decide versión, addons, regresión visual ni CI.
 - Impacto en pruebas exigido por ADR-004: `next build`, pruebas existentes, regresión de componentes compartidos, WCAG 2.2 AA y verificación visual contra la especificación UX/UI.
@@ -72,8 +73,8 @@ Construir 4 componentes React presentacionales reutilizables (Next.js 16 / React
 |---|---|---|---|---|---|---|
 | 1 | CMP-ATOM-001 | `PackageStatus` | atom | `design/components/CMP-PackageStatus.md` | `2dd84f1ca2ef4ec0b6edeba82e8ff05d` | SCR-001, SCR-005 |
 | 2a | CMP-ORG-001 | `PackageCard` | organism | `design/components/CMP-PackageCard.md` | `db8519d701bc4a8e9c735ff190a21b6c` | SCR-001 |
-| 2b | CMP-ORG-002 | `PackageSearchPanel` | organism | `design/components/CMP-PackageSearchPanel.md` | `2568125a3b5349baa1c7bf79d6a14f33` | SCR-001 |
-| 3 | CMP-ORG-003 | `PackageSkillPicker` | organism | `design/components/CMP-PackageSkillPicker.md` | `03bff45a0fec48fa932d471d0f671d14` (corrección pendiente) | SCR-002 |
+| 2b | CMP-ORG-002 | `PackageSearchPanel` | organism | `design/components/CMP-PackageSearchPanel.md` | `95553adaab1d43939d07ad2cb9a224b6` | SCR-001 |
+| 3 | CMP-ORG-003 | `PackageSkillPicker` | organism | `design/components/CMP-PackageSkillPicker.md` | `652b2f937ad744e38cdb07334bfa1437` (v3) | SCR-002 |
 
 URL de cada diseño: `https://stitch.withgoogle.com/projects/1874775286672335993?node-id=<id>`.
 
@@ -131,8 +132,8 @@ El equipo recibe un alcance candidato, no una autorización de implementación. 
 
 1. ~~Framework y empaquetado~~ **Resuelta por `ADR-004`**: React dentro del portal. Queda abierta la extracción futura a otra librería (fuera de alcance).
 2. ~~Subcomponentes sin spec~~ **Decidido para `PackageCard` (decisión humana (human:ianache), 2026-10-08):** icono, meta y acciones son privados en esta versión. Pendiente confirmar el mismo criterio para el selector de filtro (`CMP-ATOM-003`) y para `CMP-MOL-003`/`CMP-MOL-004` de los otros organismos.
-3. **Bloqueante, `CMP-ORG-003`.** Su diseño `03bff…` sigue con Retirado ámbar, sin Borrador y foco no canónico. La regeneración automática en Stitch falló (2 intentos y 1 edición sin efecto); requiere corrección manual en Stitch o una nueva pantalla.
-4. Design System: tokens semánticos oficiales; los diseños Stitch usan colores en hexadecimal.
+3. ~~Diseño de `CMP-ORG-003`~~ **Resuelto:** v3 `652b2f937ad744e38cdb07334bfa1437` cumple la regla de estados (verificado en HTML; revisión visual humana pendiente). El diseño usa el sistema azul de Stitch, no `_ds/skillvault` (Q-10 de `DCP-2026-001`).
+4. ~~Design System y tokens oficiales~~ **Resuelto (decisión humana (human:ianache), 2026-10-08):** `_ds/skillvault`; mapeo en `design-token-contract.md`. Los diseños Stitch se regeneran con ese sistema (claro y oscuro). Pendientes: token de foco, color de Retirado, espaciado y breakpoints.
 5. Vocabulario de filtros de `CMP-ORG-002` (roles y estados reales) y política de debounce.
 6. Origen del contador de Skills y copy de estados en `CMP-ORG-001`.
 7. Contrato de la API de versiones de paquete (afecta `SelectedSkill` de `CMP-ORG-003`) y payload de advertencia de compatibilidad, máximo de resultados y paginación.
@@ -141,7 +142,7 @@ El equipo recibe un alcance candidato, no una autorización de implementación. 
 10. `knowledge-base/` no está versionado en git; las URL fuente de este DSP apuntan a `master` y no resolverán hasta que se publique.
 11. Revisión humana pendiente de las 4 specs y de los 4 diseños.
 12. ~~Tooling de pruebas de componentes~~ **Decidido por `ADR-005`: Storybook.** Abiertos: versión y compatibilidad con Next.js 16/React 19, addons y ejecutor de pruebas, método de regresión visual, integración en CI, instalación y configuración (hoy no existe en el repositorio).
-16. **Bloqueante, modo oscuro:** sin diseño de referencia para los 4 componentes (solo `SkillVault Light`) y mapeo a las variables CSS del portal sin decidir. Ver Q-8 y Q-9 de `DCP-2026-001`.
+16. **Bloqueante, diseños canónicos:** regeneración en Stitch con `SkillVault Portal Light` y `Dark` (claro y oscuro) para los 4 componentes; ver Q-8 de `DCP-2026-001`.
 13. Límite servidor/cliente y estrategia de renderizado de las rutas que consumen los organismos: no decididos por ADR-004.
 14. Nombres de props/callbacks marcados como propuesta en las specs (`onEvent`, `onFiltersChange`, `onClear`, `onSelectionChange`, `onSaveDraft`) y ubicación `src/components/packages/`.
 15. ~~Documentos de `design/atomic-components/` basados en Angular~~ **Reconciliados con ADR-004/ADR-005**: `react-component-architecture.md` y `component-module-contract.md` reemplazan a `angular-library-architecture.md` y `npm-package-contract.md` (conservados como historial).
