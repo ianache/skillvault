@@ -36,7 +36,7 @@ jobs:
         working-directory: cli
         run: |
           npx @yao-pkg/pkg dist/skillvault.bundle.cjs \
-            --target node20-win-x64 \
+            --target node18-win-x64 \
             --output dist/skillvault-win-x64.exe
 
       - name: Verify exe (basic smoke test)
