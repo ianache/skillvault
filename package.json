@@ -22,6 +22,8 @@
         "migrate:orphan-skills": "tsx src/lib/db/migrate-orphan-skills.ts",
         "migrate:packages": "tsx src/lib/db/migrate-packages.ts",
         "migrate:packages:mysql": "tsx src/lib/db/migrate-packages-mysql.ts",
+        "storybook": "storybook dev -p 6006",
+        "build-storybook": "storybook build",
         "test": "pnpm run test:review",
         "test:review": "tsx --test src/lib/review/*.test.ts"
     },
@@ -46,6 +48,9 @@
         "zustand": "^5.0.14"
     },
     "devDependencies": {
+        "@storybook/addon-a11y": "10.6.1",
+        "@storybook/addon-docs": "10.6.1",
+        "@storybook/nextjs-vite": "10.6.1",
         "@tailwindcss/postcss": "^4",
         "@types/better-sqlite3": "^7.6.13",
         "@types/node": "^20.19.43",
@@ -54,9 +59,11 @@
         "drizzle-kit": "^0.31.10",
         "eslint": "^9",
         "eslint-config-next": "16.2.10",
+        "storybook": "10.6.1",
         "tailwindcss": "^4",
         "tsx": "^4.23.1",
-        "typescript": "^5"
+        "typescript": "^5",
+        "vite": "^8.3.4"
     },
     "pnpm": {
         "onlyBuiltDependencies": [

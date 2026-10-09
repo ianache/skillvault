@@ -39,8 +39,8 @@ Reemplaza la versión anterior ("no existe catálogo oficial de tokens"), que er
 | `color.text.faint` | texto terciario | `--faint` | `#8a8f99` | `#6f6a5d` |
 | `color.accent` | acciones, marca | `--accent` | `#a9772e` | `#a9772e` |
 | `color.status.published` | estado publicado | `--status-published` (`--sv-teal`) | `#0f9488` | `#0f9488` |
-| `color.status.draft` | borrador | `--status-draft` | `#6f6a5d` | `#6f6a5d` |
-| `color.status.retired` | retirado | **pendiente** (ver abajo) | — | — |
+| `color.status.draft` | borrador (neutro, con borde punteado e icono de lápiz) | `--raised` (fondo), `--muted` (texto), `--border-subtle` (borde punteado) | `#f0ede6` / `#5c6270` / `#d8d2c5` | `#1f1c16` / `#a8a196` / `#2b2721` |
+| `color.status.retired` | retirado (neutro, con borde sólido e icono de archivo) | `--raised` (fondo), `--muted` (texto), `--border-subtle` (borde) | `#f0ede6` / `#5c6270` / `#d8d2c5` | `#1f1c16` / `#a8a196` / `#2b2721` |
 | `color.warning` | aviso de retiro | `--amber` | `#E88B3A` | `#E88B3A` |
 | `radius.control` | botones, inputs | `--sv-radius-sm` | `6px` | `6px` |
 | `radius.package.card` | tarjetas | `--sv-radius-md` / `--sv-radius-lg` | `8px` / `12px` | igual |
@@ -51,10 +51,10 @@ Reemplaza la versión anterior ("no existe catálogo oficial de tokens"), que er
 
 ## Sin token en el design system (pendiente)
 
-- `color.focus.package`: el DS no define foco. Propuesta: anillo de 2px con `--accent`.
-- `color.status.retired`: la regla de estados del diseño (Retirado neutro, con aviso ámbar aparte) choca con el portal actual, que pinta el retirado en rojo (`--sv-danger`, `#b3392f`). Hay que decidir cuál manda (Q-3 de `DCP-2026-001`).
+- `color.focus.package` **resuelto (decisión humana (human:ianache), 2026-10-08):** anillo de 2px con `--accent`. El portal ya lo aplica globalmente en `globals.css` (`:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }`); los componentes lo heredan y **no deben fijar `outline: 0`** ni otro indicador que lo anule. Contraste de `#a9772e` como indicador (mínimo 3:1, WCAG 1.4.11): 3,91:1 sobre tarjeta clara, 3,59:1 sobre página clara, 3,35:1 sobre fondo elevado claro, 4,70:1 sobre página oscura, 4,20:1 sobre tarjeta oscura y 4,34:1 sobre fondo elevado oscuro: cumple en ambos modos.
+- `color.status.retired` **resuelto (decisión humana (human:ianache), 2026-10-08):** Retirado es neutro, según los diseños; no se usa `--sv-danger`. Se distingue de Borrador por borde sólido (Borrador, punteado) e icono (`archive` frente a `edit_note`), y el estado nunca depende solo del color. El aviso de retiro es una línea ámbar aparte (`--amber`). El portal actual pinta Retirado en rojo (`PackageCatalogClient.tsx`): se alinea al integrar, fuera de `DCP-2026-001`.
 - `space.package.card` y `breakpoint.package.grid`: el DS no define espaciado ni breakpoints.
 
 ## Regla
 
-Los componentes referencian las variables del portal, no valores HEX, para obtener ambos modos sin duplicar estilos. Un valor nuevo se añade primero al design system. El enfoque de estilos (por ejemplo estilos en línea con `var(--…)`, como indica el readme del DS) queda como propuesta hasta la revisión.
+Los componentes referencian las variables del portal, no valores HEX, para obtener ambos modos sin duplicar estilos. Un valor nuevo se añade primero al design system. Enfoque de estilos **resuelto (decisión humana (human:ianache), 2026-10-08):** estilos en línea con `var(--…)`, como indica el readme del design system. Limitación aceptada (decisión humana (human:ianache), 2026-10-08): los estilos en línea no admiten media queries ni `:hover`/`:active`. El responsive debe lograrse con CSS grid o flex intrínsecos (`repeat(auto-fit, minmax(…))`, `flex-wrap`); los breakpoints siguen sin token (ver arriba).

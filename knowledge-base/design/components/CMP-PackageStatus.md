@@ -6,8 +6,8 @@ title: "Package status"
 generated:
   by: web-atomic-component-designer/0.2.0
   at: "2026-10-08T00:00:00-05:00"
-verified: false
-status: REQUIRES_REVIEW
+verified: true
+status: READY_FOR_DEV
 sources:
   - /knowledge-base/architecture/adrs/ADR-004-nextjs-react-frontend-web.md
   - /knowledge-base/design/screens/SCR-001-catalogo-mantenimiento-paquetes.md
@@ -19,11 +19,13 @@ provenance:
 visual_design:
   tool: stitch
   project_id: "1874775286672335993"
-  screen_id: "2dd84f1ca2ef4ec0b6edeba82e8ff05d"
-  url: "https://stitch.withgoogle.com/projects/1874775286672335993?node-id=2dd84f1ca2ef4ec0b6edeba82e8ff05d"
-  design_system: "SkillVault Portal Light (assets/9009552743441703194) + Dark (assets/12691038429936688410), pendiente de generar"
-  covers: [draft, published, retired, retired-with-warning, compact, version-suffix, unknown-status-error, loading, mobile-360]
-  status: pending
+  screen_id: "b7be4588b6cf4bb7bb978c5061a3dc0b"
+  url: "https://stitch.withgoogle.com/projects/1874775286672335993?node-id=b7be4588b6cf4bb7bb978c5061a3dc0b"
+  screen_id_dark: "aef5a5f1b84c4b57900c216cca0892cb"
+  url_dark: "https://stitch.withgoogle.com/projects/1874775286672335993?node-id=aef5a5f1b84c4b57900c216cca0892cb"
+  design_system: "SkillVault Portal Light (assets/9009552743441703194) + Dark (assets/12691038429936688410), derivados de _ds/skillvault"
+  covers: [draft, published, retired, retired-warning-line, compact, version-suffix, unknown-status-error, loading, mobile-360]
+  status: linked
   last_synced: 2026-10-08
   waiver_reason: ""
 ---
@@ -37,7 +39,7 @@ visual_design:
 - Atomic level: atom
 - Purpose: comunicar estado del paquete y advertencias de retiro sin depender solo del color.
 - Non-goals: calcular estado o llamar APIs.
-- Owner: por confirmar.
+- Owner: `human:ianache` (decisión humana (human:ianache), 2026-10-09).
 - Consumers: `PackageCard`, detalle público, revisión.
 
 ## Reconciliación con ADR-004
@@ -50,12 +52,14 @@ visual_design:
 | Inputs `value`, `version`, `warning`, `compact` | Props `value`, `version?`, `warning?`, `compact?` (mismo tipo TypeScript `PackageStatusInput`) |
 | Outputs | Ninguno |
 | Estrategia standalone/módulo, signals/observables | No aplica; estado local con hooks si hiciera falta |
-| Export `@skillvault/ui/packages` | Interno al portal: `src/components/packages/PackageStatus.tsx` (propuesta). Librería externa o extracción a otro framework: no decidido por ADR-004 |
+| Export `@skillvault/ui/packages` | Interno al portal: `src/components/packages/PackageStatus.tsx` (confirmado, decisión humana (human:ianache), 2026-10-09). Librería externa o extracción a otro framework: no decidido por ADR-004 |
 | Semver / clasificación de cambio | Solo relevante si se publica como librería; hoy el componente es interno |
 
+- Estado desconocido (decisión humana (human:ianache), 2026-10-09): `PackageStatus` muestra el estado de error del diseño; no usa fallback al valor crudo. El tipo estricto se aplica en el mapeo desde `PackageSummary.status` (`string`).
 - Servidor/cliente: Presentacional puro: sin estado ni eventos; compatible con Server Components. La estrategia de renderizado por ruta no la decide ADR-004.
+- Estilos y foco (decisión humana (human:ianache), 2026-10-08): estilos en línea con `var(--…)` (ver `design-token-contract.md`); foco visible con el anillo global de 2px `--accent` de `globals.css`, sin `outline: 0`. Los estilos en línea no admiten media queries ni `:hover`: el responsive se resuelve con grid o flex intrínsecos.
 - Verificación: `next build`, pruebas existentes y regresión de componentes compartidos (ADR-004, Impacto en pruebas). Storybook (ADR-005, decisión humana, texto pendiente de revisión): una story por variante y estado de esta spec, con pruebas de interacción y accesibilidad. WCAG 2.2 AA y revisión visual contra el diseño Stitch enlazado.
-- Los nombres de props/callbacks marcados como propuesta se confirman en la revisión humana de la spec.
+- Nombres de props/callbacks y ubicación confirmados (decisión humana (human:ianache), 2026-10-09).
 
 ## Component contract
 
@@ -75,7 +79,7 @@ export interface PackageStatusInput {
 - Outputs: ninguno.
 - Slots: ninguno.
 - Side effects: ninguno.
-- Public export: interno al portal, `src/components/packages/PackageStatus.tsx` (propuesta); librería externa no decidida por ADR-004.
+- Public export: interno al portal, `src/components/packages/PackageStatus.tsx` (confirmado, decisión humana (human:ianache), 2026-10-09); librería externa no decidida por ADR-004.
 
 ## Behavior and visual contract
 
@@ -87,16 +91,17 @@ export interface PackageStatusInput {
 | Error | invalid value should be rejected by input type/validator |
 | Responsive | inline and wrap-safe |
 | Localization | label map injected or supplied by parent |
-| Tokens | semantic status tokens pending Design System decision |
+| Tokens | ver `design-token-contract.md`; Retirado neutro (decisión humana (human:ianache), 2026-10-08) |
 
 ## Visual design
 
 - Tool: Stitch
-- Design link: Stitch project `1874775286672335993`, screen "SkillVault — Specimen CMP-ATOM-001 PackageStatus (Light)" <https://stitch.withgoogle.com/projects/1874775286672335993?node-id=2dd84f1ca2ef4ec0b6edeba82e8ff05d>
-- Project / screen id: `1874775286672335993` / `2dd84f1ca2ef4ec0b6edeba82e8ff05d`
-- Design system: SkillVault Portal Light (`assets/9009552743441703194`) y Dark (`assets/12691038429936688410`), derivados de `_ds/skillvault` (pendiente de generar)
-- Covered variants, states, breakpoints: draft, published, retired, retired con warning, compact, sufijo de versión, estado desconocido (error), loading, contenedor móvil 360px
-- Known gaps between design and spec: **decisión humana (human:ianache), 2026-10-08: el sistema de diseño canónico es `_ds/skillvault`.** El diseño Stitch enlazado usa otro sistema (azul) y queda como referencia estructural no canónica; se regenera en claro y oscuro con los design systems indicados. Tokens en `design-token-contract.md`. Notas previas: Versión corregida (tokens SkillVault Light, IBM Plex Sans, nota "Regla de estados"). Reemplaza a `669d4feb3b9e48e9851750e8eb64c379` (descartar). Verificado en el HTML descargado (IBM Plex y fondo #fbf8ff presentes); aspecto visual no revisado. Modo oscuro requerido (decisión humana (human:ianache), 2026-10-08); el diseño Stitch es solo Light.
+- Design link (claro): Stitch project `1874775286672335993`, screen "SkillVault Portal — Specimen CMP-ATOM-001 PackageStatus (Light)" <https://stitch.withgoogle.com/projects/1874775286672335993?node-id=b7be4588b6cf4bb7bb978c5061a3dc0b>
+- Design link (oscuro): screen "SkillVault Portal — Specimen CMP-ATOM-001 PackageStatus (Dark)" <https://stitch.withgoogle.com/projects/1874775286672335993?node-id=aef5a5f1b84c4b57900c216cca0892cb>
+- Project / screen id: `1874775286672335993` / `b7be4588b6cf4bb7bb978c5061a3dc0b` (claro), `aef5a5f1b84c4b57900c216cca0892cb` (oscuro)
+- Design system: SkillVault Portal Light (`assets/9009552743441703194`) y Dark (`assets/12691038429936688410`), derivados de `_ds/skillvault` (decisión humana (human:ianache), 2026-10-08)
+- Covered variants, states, breakpoints: draft, published, retired, retired-warning-line, compact, version-suffix, unknown-status-error, loading, mobile-360
+- Known gaps between design and spec: Diseño canónico generado con el design system del portal. Verificado en el HTML descargado: Space Grotesk, acento marrón `#a9772e`, fondos `#f7f5f0` (claro) y `#16140f` (oscuro), sin azul de acento (el azul aparece solo en resaltado de código y en iniciales de avatar de las muestras), badges Borrador/Publicado/Retirado con icono y etiqueta, forma de píldora y borde punteado en Borrador. Los estilos usan hexadecimales y clases Tailwind, no las variables `--*` del portal (ver `design-token-contract.md`). Cobertura según el prompt; aspecto visual revisado por `human:ianache` el 2026-10-09. Sustituye al diseño del sistema azul `2dd84f1ca2ef4ec0b6edeba82e8ff05d` (descartar).
 - Developer instruction: implement against this design AND this specification; do not infer visuals from the spec alone.
 
 ## Accessibility and security
@@ -116,7 +121,7 @@ export interface PackageStatusInput {
 
 - Change classification: additive for a new status only if API remains backward compatible.
 - Open questions: final copy, severity icon and semantic tokens.
-- Human review event: not set by agents.
+- Human review event: aprobación de `human:ianache`, 2026-10-09, resultado "aprobado" (checklist `RVW-2026-001`; declaración del revisor: "todo es conforme").
 
 ## Traceability
 

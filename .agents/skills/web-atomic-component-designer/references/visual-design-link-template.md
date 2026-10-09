@@ -32,6 +32,8 @@ visual_design:
   project_id: ""          # Stitch project id or Claude Design project id
   screen_id: ""           # Stitch screen id or Claude Design frame/artifact id
   url: ""                 # openable link, when the tool provides one
+  screen_id_dark: ""      # only when the product supports light and dark; its own screen
+  url_dark: ""
   design_system: ""       # design system id/name applied to the screen
   covers: []              # variants/states/breakpoints present in the design
   status: pending         # linked | pending | waived

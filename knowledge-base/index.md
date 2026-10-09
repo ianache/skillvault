@@ -51,6 +51,7 @@ Nota de actualizacion 2026-10-07: IMD-001 contiene respuestas propuestas para IM
 - [DSP-2026-001 — Paquetes de Skills por rol: catálogo, consumo público y UX/UI](implementation/DSP-2026-001-paquetes-skills-por-rol.md) — `DRAFT`/`REQUIRES_REVIEW`, Sprint no asignado; incluye UXR, FLW, SCR y CMP.
 - [DSP-2026-002 — Componentes UI reutilizables de paquetes de Skills](implementation/DSP-2026-002-componentes-ui-paquetes.md) — `DRAFT`/`REQUIRES_REVIEW`; sin Sprint.
 - [DCP-2026-001 — Development Context Pack: PackageStatus y PackageCard](implementation/DCP-2026-001-paquetes-ui-oleada-1.md) — `REQUIRES_REVIEW`; oleada 1 de DSP-2026-002.
+- [RVW-2026-001 — Checklist de revisión humana: PackageStatus y PackageCard](implementation/RVW-2026-001-checklist-revision-humana-oleada-1.md) — `REQUIRES_REVIEW`; la revisión debe registrarla una persona.
 - [TD-2026-001 — Diseño técnico: paquetes de Skills por rol](implementation/TD-2026-001-diseno-tecnico-paquetes-skills.md) — `REQUIRES_REVIEW`; modelo conceptual, contratos candidatos, instalación transaccional, seguridad, rollout y bloqueos.
 - [API-2026-001 — Contrato API: paquetes de Skills por rol](implementation/API-2026-001-contrato-paquetes-skills.md) — `REQUIRES_REVIEW`; recursos, DTOs, endpoints administrativos/públicos, JSON/ZIP, errores, seguridad y pruebas de contrato.
 - [IMP-2026-001 — Diseño de implementación: paquetes de Skills por rol](implementation/IMP-2026-001-diseno-implementacion-paquetes-skills.md) — `draft`; diseño arquitectónico de implementación, pruebas, rollout y tareas técnicas pendientes.

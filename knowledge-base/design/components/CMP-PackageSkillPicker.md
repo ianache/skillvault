@@ -20,11 +20,13 @@ provenance:
 visual_design:
   tool: stitch
   project_id: "1874775286672335993"
-  screen_id: "652b2f937ad744e38cdb07334bfa1437"
-  url: "https://stitch.withgoogle.com/projects/1874775286672335993?node-id=652b2f937ad744e38cdb07334bfa1437"
-  design_system: "SkillVault Portal Light (assets/9009552743441703194) + Dark (assets/12691038429936688410), pendiente de generar"
-  covers: [empty-selection, populated-selection, retired-warning-line, loading-results, error-preserves-selection, disabled, latest-pinned-toggle]
-  status: pending
+  screen_id: "21ff5a2089e24deb886c2d1506985c82"
+  url: "https://stitch.withgoogle.com/projects/1874775286672335993?node-id=21ff5a2089e24deb886c2d1506985c82"
+  screen_id_dark: "ef6203dda288420090f3b991a025bd44"
+  url_dark: "https://stitch.withgoogle.com/projects/1874775286672335993?node-id=ef6203dda288420090f3b991a025bd44"
+  design_system: "SkillVault Portal Light (assets/9009552743441703194) + Dark (assets/12691038429936688410), derivados de _ds/skillvault"
+  covers: [empty-selection, populated, loading-results, error-preserves-selection, disabled, latest-pinned-toggle, retired-warning-line]
+  status: linked
   last_synced: 2026-10-08
   waiver_reason: ""
 ---
@@ -48,14 +50,15 @@ visual_design:
 |---|---|
 | Selector `sv-package-skill-picker` | Componente `PackageSkillPicker` |
 | Inputs `availableSkills`, `selectedSkills`, `loading`, `disabled` | Props con los mismos nombres |
-| Output `selectionChange` / `saveDraft` | Callbacks `onSelectionChange(items)` y `onSaveDraft()` (propuesta); estado de la consulta interna con `useState` |
+| Output `selectionChange` / `saveDraft` | Callbacks `onSelectionChange(items)` y `onSaveDraft()` (confirmado, decisión humana (human:ianache), 2026-10-09); estado de la consulta interna con `useState` |
 | Estrategia standalone/módulo, signals/observables | No aplica; estado local con hooks si hiciera falta |
-| Export `@skillvault/ui/packages` | Interno al portal: `src/components/packages/PackageSkillPicker.tsx` (propuesta). Librería externa o extracción a otro framework: no decidido por ADR-004 |
+| Export `@skillvault/ui/packages` | Interno al portal: `src/components/packages/PackageSkillPicker.tsx` (confirmado, decisión humana (human:ianache), 2026-10-09). Librería externa o extracción a otro framework: no decidido por ADR-004 |
 | Semver / clasificación de cambio | Solo relevante si se publica como librería; hoy el componente es interno |
 
 - Servidor/cliente: Estado interno y eventos: requiere límite de cliente (`"use client"`). La estrategia de renderizado por ruta no la decide ADR-004.
+- Estilos y foco (decisión humana (human:ianache), 2026-10-08): estilos en línea con `var(--…)` (ver `design-token-contract.md`); foco visible con el anillo global de 2px `--accent` de `globals.css`, sin `outline: 0`. Los estilos en línea no admiten media queries ni `:hover`: el responsive se resuelve con grid o flex intrínsecos.
 - Verificación: `next build`, pruebas existentes y regresión de componentes compartidos (ADR-004, Impacto en pruebas). Storybook (ADR-005, decisión humana, texto pendiente de revisión): una story por variante y estado de esta spec, con pruebas de interacción y accesibilidad. WCAG 2.2 AA y revisión visual contra el diseño Stitch enlazado.
-- Los nombres de props/callbacks marcados como propuesta se confirman en la revisión humana de la spec.
+- Nombres de props/callbacks y ubicación confirmados (decisión humana (human:ianache), 2026-10-09).
 
 ## Component contract
 
@@ -76,7 +79,7 @@ export type SkillPickerEvent =
 - Slots: optional result-row and selected-row templates only if needed by Design System.
 - Signals/observables: no aplica en React; estado local con hooks si fuera necesario.
 - Side effects: none; API orchestration remains in page/service.
-- Public export: interno al portal, `src/components/packages/PackageSkillPicker.tsx` (propuesta); librería externa no decidida por ADR-004.
+- Public export: interno al portal, `src/components/packages/PackageSkillPicker.tsx` (confirmado, decisión humana (human:ianache), 2026-10-09); librería externa no decidida por ADR-004.
 
 ## Behavior and visual contract
 
@@ -90,16 +93,17 @@ export type SkillPickerEvent =
 | Disabled | add, policy, reorder and remove disabled |
 | Responsive | results and selected list stack within editor column |
 | Localization | search placeholder, actions and policy labels externalizable |
-| Tokens | form, card, status and focus tokens pending |
+| Tokens | ver `design-token-contract.md`; Retirado neutro (decisión humana (human:ianache), 2026-10-08) |
 
 ## Visual design
 
 - Tool: Stitch
-- Design link: Stitch project `1874775286672335993`, screen "SkillVault — Specimen CMP-ORG-003 PackageSkillPicker v3 (Light)" <https://stitch.withgoogle.com/projects/1874775286672335993?node-id=652b2f937ad744e38cdb07334bfa1437>
-- Project / screen id: `1874775286672335993` / `652b2f937ad744e38cdb07334bfa1437`
-- Design system: SkillVault Portal Light (`assets/9009552743441703194`) y Dark (`assets/12691038429936688410`), derivados de `_ds/skillvault` (pendiente de generar)
-- Covered variants, states, breakpoints: empty selection, populated selection, retired warning line, loading results, error preserves selection, disabled, latest pinned toggle
-- Known gaps between design and spec: **decisión humana (human:ianache), 2026-10-08: el sistema de diseño canónico es `_ds/skillvault`.** El diseño Stitch enlazado usa otro sistema (azul) y queda como referencia estructural no canónica; se regenera en claro y oscuro con los design systems indicados. Tokens en `design-token-contract.md`. Notas previas: Pantalla v3 enlazada por el usuario. Verificada en el HTML: badges Borrador/Publicado/Retirado equivalentes a la regla canónica (colores en hexadecimal, no tokens), IBM Plex Sans, anillo de foco #2250d4, aviso de retiro en línea ámbar aparte, sin "En revisión"; cobertura según el prompt, aspecto visual no revisado. Reemplaza a `03bff45a0fec48fa932d471d0f671d14` (descartar). Sistema de diseño Stitch azul, no el de `_ds/skillvault` (ver Q-10 de DCP-2026-001). Modo oscuro requerido (decisión humana (human:ianache), 2026-10-08); el diseño Stitch es solo Light.
+- Design link (claro): Stitch project `1874775286672335993`, screen "SkillVault Portal — Specimen CMP-ORG-003 PackageSkillPicker (Light)" <https://stitch.withgoogle.com/projects/1874775286672335993?node-id=21ff5a2089e24deb886c2d1506985c82>
+- Design link (oscuro): screen "SkillVault Portal — Specimen CMP-ORG-003 PackageSkillPicker (Dark)" <https://stitch.withgoogle.com/projects/1874775286672335993?node-id=ef6203dda288420090f3b991a025bd44>
+- Project / screen id: `1874775286672335993` / `21ff5a2089e24deb886c2d1506985c82` (claro), `ef6203dda288420090f3b991a025bd44` (oscuro)
+- Design system: SkillVault Portal Light (`assets/9009552743441703194`) y Dark (`assets/12691038429936688410`), derivados de `_ds/skillvault` (decisión humana (human:ianache), 2026-10-08)
+- Covered variants, states, breakpoints: empty-selection, populated, loading-results, error-preserves-selection, disabled, latest-pinned-toggle, retired-warning-line
+- Known gaps between design and spec: Diseño canónico generado con el design system del portal. Verificado en el HTML descargado: Space Grotesk, acento marrón `#a9772e`, fondos `#f7f5f0` (claro) y `#16140f` (oscuro), sin azul de acento (el azul aparece solo en resaltado de código y en iniciales de avatar de las muestras), badges Borrador/Publicado/Retirado con icono y etiqueta, forma de píldora y borde punteado en Borrador. Los estilos usan hexadecimales y clases Tailwind, no las variables `--*` del portal (ver `design-token-contract.md`). Cobertura según el prompt; aspecto visual no revisado. Sustituye al diseño del sistema azul `652b2f937ad744e38cdb07334bfa1437` (descartar).
 - Developer instruction: implement against this design AND this specification; do not infer visuals from the spec alone.
 
 ## Accessibility and security

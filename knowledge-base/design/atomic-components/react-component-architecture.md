@@ -31,7 +31,7 @@ Reemplaza a `angular-library-architecture.md` (ALA-DSP-2026-001), invalidado por
 - `ADR-005`: Storybook para desarrollar, documentar y probar los componentes UI.
 - No decididos: sistema de diseño o biblioteca de componentes, renderizado por ruta (SSR/SSG/CSR), extracción a otra librería o framework.
 
-## Boundary (propuesta)
+## Boundary (confirmado)
 
 Los componentes viven **dentro del portal**, en `src/components/packages/`, junto a los `*Client.tsx` existentes. No hay librería independiente ni entry point `@skillvault/ui/packages`.
 

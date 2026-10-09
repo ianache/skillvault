@@ -100,3 +100,14 @@ Las opciones y sus pros y contras son una reconstrucción del agente. El decisor
 - Las pruebas de interacción y accesibilidad de esos componentes se ejecutan sobre Storybook.
 - Debe mantenerse `next build` y la suite `tsx --test` existente.
 - La evidencia de QA del `DSP-2026-002` se apoya en Storybook una vez resueltos los puntos de "No se decide todavía".
+
+## Implementación inicial (2026-10-09)
+
+Se instaló y verificó Storybook en la rama `feat/storybook-package-status` (sin commit). Estas elecciones de implementación cubren parte de "No se decide todavía" y quedan **pendientes de revisión de esta ADR** (`verified: false`):
+
+- Versión: `storybook` y `@storybook/*` 10.6.1; framework `@storybook/nextjs-vite` (con `vite` 8.3.4); addons `@storybook/addon-a11y` y `@storybook/addon-docs`.
+- Compatibilidad: el build (`storybook build`) funciona con Next.js 16.2.10 y React 19.2.4.
+- Preview (`.storybook/preview.tsx`): carga `src/app/globals.css` (tokens del portal y anillo de foco global) y alterna `data-theme` claro/oscuro desde la barra de herramientas, como el `ThemeToggle` del portal. Las fuentes se cargan desde `.storybook/preview-head.html`.
+- Scripts: `storybook` (puerto 6006) y `build-storybook`. `storybook-static/` y `*storybook.log` están en `.gitignore`.
+- Primera story: `src/components/packages/PackageStatus.stories.tsx` (una story por variante y estado).
+- Siguen sin decidir: ejecutor de pruebas automatizado (por ejemplo el addon de Vitest), método de regresión visual, integración en CI y extensión a los componentes existentes del portal.

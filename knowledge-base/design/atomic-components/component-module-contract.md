@@ -25,7 +25,7 @@ human-reviewed: false
 
 Reemplaza a `npm-package-contract.md` (NPC-DSP-2026-001). ADR-004 no decide publicar los componentes como paquete NPM: no hay registro, peer dependencies ni semver de librería mientras no exista esa decisión.
 
-## Exports (propuesta)
+## Exports (confirmado)
 
 Módulo interno del portal, sin publicación:
 

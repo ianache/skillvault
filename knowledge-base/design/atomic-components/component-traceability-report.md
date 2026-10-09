@@ -34,7 +34,7 @@ provenance:
 
 ## Gaps
 
-- SCR-001 requires quantity of Skills per card, but `PackageSummary` currently does not expose it.
+- ~~SCR-001 requires quantity of Skills per card, but `PackageSummary` does not expose it.~~ Corregido (decisión humana (human:ianache), 2026-10-09): `PackageSummary` expone `skillCount?` y `retiredSkillCount?` (`src/lib/packages/types.ts`).
 - Design System mapping and official tokens are unresolved.
 - Angular no aplica: ADR-004 fija Next.js/React. Pendiente la evidencia de Storybook (ADR-005): no está instalado.
 - Loading, offline/recovery and access-denied visual references are not provided.

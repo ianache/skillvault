@@ -55,3 +55,7 @@ cli/node_modules/
 
 # subagent-driven-development scratch workspaces
 .superpowers/
+
+# storybook
+storybook-static/
+*storybook.log

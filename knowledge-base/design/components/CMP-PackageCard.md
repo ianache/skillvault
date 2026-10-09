@@ -6,8 +6,8 @@ title: "Package card"
 generated:
   by: web-atomic-component-designer/0.2.0
   at: "2026-10-08T00:00:00-05:00"
-verified: false
-status: REQUIRES_REVIEW
+verified: true
+status: READY_FOR_DEV
 sources:
   - /knowledge-base/architecture/adrs/ADR-004-nextjs-react-frontend-web.md
   - /knowledge-base/design/screens/SCR-001-catalogo-mantenimiento-paquetes.md
@@ -20,11 +20,13 @@ provenance:
 visual_design:
   tool: stitch
   project_id: "1874775286672335993"
-  screen_id: "db8519d701bc4a8e9c735ff190a21b6c"
-  url: "https://stitch.withgoogle.com/projects/1874775286672335993?node-id=db8519d701bc4a8e9c735ff190a21b6c"
-  design_system: "SkillVault Portal Light (assets/9009552743441703194) + Dark (assets/12691038429936688410), pendiente de generar"
-  covers: [maintenance, public-readonly, draft, published, retired-with-warning, disabled, loading-skeleton, grid-desktop-3col, mobile-1col]
-  status: pending
+  screen_id: "ee54232acf3a4329a697efa9a1c40230"
+  url: "https://stitch.withgoogle.com/projects/1874775286672335993?node-id=ee54232acf3a4329a697efa9a1c40230"
+  screen_id_dark: "9d68e663c80c4b768859ad536998dc97"
+  url_dark: "https://stitch.withgoogle.com/projects/1874775286672335993?node-id=9d68e663c80c4b768859ad536998dc97"
+  design_system: "SkillVault Portal Light (assets/9009552743441703194) + Dark (assets/12691038429936688410), derivados de _ds/skillvault"
+  covers: [maintenance, public-readonly, draft, published, retired-warning-line, disabled, loading-skeleton, grid-desktop-3col, mobile-1col]
+  status: linked
   last_synced: 2026-10-08
   waiver_reason: ""
 ---
@@ -38,7 +40,7 @@ visual_design:
 - Atomic level: organism
 - Purpose: mostrar identidad, rol, estado, versión y acciones de un paquete mantenible.
 - Non-goals: cargar datos, decidir permisos o ejecutar mutaciones.
-- Owner: por confirmar.
+- Owner: `human:ianache` (decisión humana (human:ianache), 2026-10-09).
 - Consumers: `PackageCardGrid`, catálogo de mantenimiento.
 
 ## Composition
@@ -57,14 +59,16 @@ visual_design:
 |---|---|
 | Selector `sv-package-card` | Componente `PackageCard` |
 | Inputs `package`, `actions`, `disabled`, `warningText?` | Props con los mismos nombres |
-| Output `event` (`PackageCardEvent`) | Prop callback `onEvent(event: PackageCardEvent)` (propuesta) |
+| Output `event` (`PackageCardEvent`) | Prop callback `onEvent(event: PackageCardEvent)` (confirmado, decisión humana (human:ianache), 2026-10-09) |
 | Estrategia standalone/módulo, signals/observables | No aplica; estado local con hooks si hiciera falta |
-| Export `@skillvault/ui/packages` | Interno al portal: `src/components/packages/PackageCard.tsx` (propuesta). Librería externa o extracción a otro framework: no decidido por ADR-004 |
+| Export `@skillvault/ui/packages` | Interno al portal: `src/components/packages/PackageCard.tsx` (confirmado, decisión humana (human:ianache), 2026-10-09). Librería externa o extracción a otro framework: no decidido por ADR-004 |
 | Semver / clasificación de cambio | Solo relevante si se publica como librería; hoy el componente es interno |
 
+- Aviso de Skills retirados (decisión humana (human:ianache), 2026-10-09): usa `retiredSkillCount` de `PackageSummary`; `skillCount` es opcional.
 - Servidor/cliente: Emite eventos por click: requiere límite de cliente (`"use client"`), como los `*Client.tsx` existentes. La estrategia de renderizado por ruta no la decide ADR-004.
+- Estilos y foco (decisión humana (human:ianache), 2026-10-08): estilos en línea con `var(--…)` (ver `design-token-contract.md`); foco visible con el anillo global de 2px `--accent` de `globals.css`, sin `outline: 0`. Los estilos en línea no admiten media queries ni `:hover`: el responsive se resuelve con grid o flex intrínsecos.
 - Verificación: `next build`, pruebas existentes y regresión de componentes compartidos (ADR-004, Impacto en pruebas). Storybook (ADR-005, decisión humana, texto pendiente de revisión): una story por variante y estado de esta spec, con pruebas de interacción y accesibilidad. WCAG 2.2 AA y revisión visual contra el diseño Stitch enlazado.
-- Los nombres de props/callbacks marcados como propuesta se confirman en la revisión humana de la spec.
+- Nombres de props/callbacks y ubicación confirmados (decisión humana (human:ianache), 2026-10-09).
 
 ## Component contract
 
@@ -93,7 +97,7 @@ export type PackageCardEvent =
 - Projection slots: optional `actions` slot only if Design System requires it.
 - Signals/observables: no aplica en React; estado local con hooks si fuera necesario.
 - Side effects/services: none.
-- Public export: interno al portal, `src/components/packages/PackageCard.tsx` (propuesta); librería externa no decidida por ADR-004.
+- Public export: interno al portal, `src/components/packages/PackageCard.tsx` (confirmado, decisión humana (human:ianache), 2026-10-09); librería externa no decidida por ADR-004.
 
 ## Behavior and visual contract
 
@@ -109,16 +113,17 @@ export type PackageCardEvent =
 | Offline/recovery | page displays recovery; card remains stable |
 | Responsive | one column mobile; grid columns desktop; breakpoint pending |
 | Localization | labels/status/actions externalizable |
-| Design tokens | official tokens not identified |
+| Design tokens | ver `design-token-contract.md`; Retirado neutro (decisión humana (human:ianache), 2026-10-08) |
 
 ## Visual design
 
 - Tool: Stitch
-- Design link: Stitch project `1874775286672335993`, screen "SkillVault — Specimen CMP-ORG-001 PackageCard (Light) v2" <https://stitch.withgoogle.com/projects/1874775286672335993?node-id=db8519d701bc4a8e9c735ff190a21b6c>
-- Project / screen id: `1874775286672335993` / `db8519d701bc4a8e9c735ff190a21b6c`
-- Design system: SkillVault Portal Light (`assets/9009552743441703194`) y Dark (`assets/12691038429936688410`), derivados de `_ds/skillvault` (pendiente de generar)
-- Covered variants, states, breakpoints: maintenance, public-readonly, draft, published, retired con warning, disabled, loading skeleton, grid desktop 3 columnas, móvil 1 columna
-- Known gaps between design and spec: **decisión humana (human:ianache), 2026-10-08: el sistema de diseño canónico es `_ds/skillvault`.** El diseño Stitch enlazado usa otro sistema (azul) y queda como referencia estructural no canónica; se regenera en claro y oscuro con los design systems indicados. Tokens en `design-token-contract.md`. Notas previas: Regenerada (v2) con la regla canónica de estados. Verificado en el HTML: badges Borrador/Publicado/Retirado canónicos, IBM Plex Sans, anillo de foco #2250d4, sin Retirado rojo/ámbar; cobertura de estados según el prompt, aspecto visual no revisado. Duplicados a eliminar en Stitch: `9834137732064cdfafa4254ed53c6124`, `d8eb3fa8982d464799b67312eefa9a89`, `dbabe18c61244b2895f234a4e6e14e38`. Modo oscuro requerido (decisión humana (human:ianache), 2026-10-08); el diseño Stitch es solo Light.
+- Design link (claro): Stitch project `1874775286672335993`, screen "SkillVault Portal — Specimen CMP-ORG-001 PackageCard (Light)" <https://stitch.withgoogle.com/projects/1874775286672335993?node-id=ee54232acf3a4329a697efa9a1c40230>
+- Design link (oscuro): screen "SkillVault Portal — Specimen CMP-ORG-001 PackageCard (Dark)" <https://stitch.withgoogle.com/projects/1874775286672335993?node-id=9d68e663c80c4b768859ad536998dc97>
+- Project / screen id: `1874775286672335993` / `ee54232acf3a4329a697efa9a1c40230` (claro), `9d68e663c80c4b768859ad536998dc97` (oscuro)
+- Design system: SkillVault Portal Light (`assets/9009552743441703194`) y Dark (`assets/12691038429936688410`), derivados de `_ds/skillvault` (decisión humana (human:ianache), 2026-10-08)
+- Covered variants, states, breakpoints: maintenance, public-readonly, draft, published, retired-warning-line, disabled, loading-skeleton, grid-desktop-3col, mobile-1col
+- Known gaps between design and spec: Diseño canónico generado con el design system del portal. Verificado en el HTML descargado: Space Grotesk, acento marrón `#a9772e`, fondos `#f7f5f0` (claro) y `#16140f` (oscuro), sin azul de acento (el azul aparece solo en resaltado de código y en iniciales de avatar de las muestras), badges Borrador/Publicado/Retirado con icono y etiqueta, forma de píldora y borde punteado en Borrador. Los estilos usan hexadecimales y clases Tailwind, no las variables `--*` del portal (ver `design-token-contract.md`). Cobertura según el prompt; aspecto visual revisado por `human:ianache` el 2026-10-09. Sustituye al diseño del sistema azul `db8519d701bc4a8e9c735ff190a21b6c` (descartar).
 - Developer instruction: implement against this design AND this specification; do not infer visuals from the spec alone.
 
 ## Accessibility and security
@@ -143,7 +148,7 @@ export type PackageCardEvent =
 - Change classification: unknown until the public props are frozen; semver applies only if published as a library (not decided by ADR-004).
 - Semver impact: candidate minor for additive inputs; confirm with library owner.
 - Open questions: skill count source, Design System tokens, exact status copy, owner.
-- Human review event: not set by agents.
+- Human review event: aprobación de `human:ianache`, 2026-10-09, resultado "aprobado" (checklist `RVW-2026-001`; declaración del revisor: "todo es conforme").
 
 ## Traceability
 

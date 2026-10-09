@@ -71,10 +71,10 @@ Construir 4 componentes React presentacionales reutilizables (Next.js 16 / React
 
 | Orden | ID | Componente React | Nivel | Spec | Diseño Stitch (proyecto `1874775286672335993`) | Pantallas que lo consumen |
 |---|---|---|---|---|---|---|
-| 1 | CMP-ATOM-001 | `PackageStatus` | atom | `design/components/CMP-PackageStatus.md` | `2dd84f1ca2ef4ec0b6edeba82e8ff05d` | SCR-001, SCR-005 |
-| 2a | CMP-ORG-001 | `PackageCard` | organism | `design/components/CMP-PackageCard.md` | `db8519d701bc4a8e9c735ff190a21b6c` | SCR-001 |
-| 2b | CMP-ORG-002 | `PackageSearchPanel` | organism | `design/components/CMP-PackageSearchPanel.md` | `95553adaab1d43939d07ad2cb9a224b6` | SCR-001 |
-| 3 | CMP-ORG-003 | `PackageSkillPicker` | organism | `design/components/CMP-PackageSkillPicker.md` | `652b2f937ad744e38cdb07334bfa1437` (v3) | SCR-002 |
+| 1 | CMP-ATOM-001 | `PackageStatus` | atom | `design/components/CMP-PackageStatus.md` | `b7be4588b6cf4bb7bb978c5061a3dc0b` y `aef5a5f1b84c4b57900c216cca0892cb` | SCR-001, SCR-005 |
+| 2a | CMP-ORG-001 | `PackageCard` | organism | `design/components/CMP-PackageCard.md` | `ee54232acf3a4329a697efa9a1c40230` y `9d68e663c80c4b768859ad536998dc97` | SCR-001 |
+| 2b | CMP-ORG-002 | `PackageSearchPanel` | organism | `design/components/CMP-PackageSearchPanel.md` | `56719e4f643d400e95bc6252657b9666` y `af91096679544801a9ef8918f7ede828` | SCR-001 |
+| 3 | CMP-ORG-003 | `PackageSkillPicker` | organism | `design/components/CMP-PackageSkillPicker.md` | `21ff5a2089e24deb886c2d1506985c82` y `ef6203dda288420090f3b991a025bd44` | SCR-002 |
 
 URL de cada diseño: `https://stitch.withgoogle.com/projects/1874775286672335993?node-id=<id>`.
 
@@ -132,19 +132,19 @@ El equipo recibe un alcance candidato, no una autorización de implementación. 
 
 1. ~~Framework y empaquetado~~ **Resuelta por `ADR-004`**: React dentro del portal. Queda abierta la extracción futura a otra librería (fuera de alcance).
 2. ~~Subcomponentes sin spec~~ **Decidido para `PackageCard` (decisión humana (human:ianache), 2026-10-08):** icono, meta y acciones son privados en esta versión. Pendiente confirmar el mismo criterio para el selector de filtro (`CMP-ATOM-003`) y para `CMP-MOL-003`/`CMP-MOL-004` de los otros organismos.
-3. ~~Diseño de `CMP-ORG-003`~~ **Resuelto:** v3 `652b2f937ad744e38cdb07334bfa1437` cumple la regla de estados (verificado en HTML; revisión visual humana pendiente). El diseño usa el sistema azul de Stitch, no `_ds/skillvault` (Q-10 de `DCP-2026-001`).
-4. ~~Design System y tokens oficiales~~ **Resuelto (decisión humana (human:ianache), 2026-10-08):** `_ds/skillvault`; mapeo en `design-token-contract.md`. Los diseños Stitch se regeneran con ese sistema (claro y oscuro). Pendientes: token de foco, color de Retirado, espaciado y breakpoints.
+3. ~~Diseño de `CMP-ORG-003`~~ **Resuelto:** diseño canónico claro y oscuro (verificado en HTML; revisión visual humana pendiente).
+4. ~~Design System y tokens oficiales~~ **Resuelto (decisión humana (human:ianache), 2026-10-08):** `_ds/skillvault`; mapeo en `design-token-contract.md`. Los diseños Stitch se regeneran con ese sistema (claro y oscuro). Estilos en línea con `var(--…)` y foco de 2px con `--accent` decididos (decisión humana (human:ianache), 2026-10-08). Retirado neutro decidido (decisión humana (human:ianache), 2026-10-08). Pendientes: espaciado y breakpoints.
 5. Vocabulario de filtros de `CMP-ORG-002` (roles y estados reales) y política de debounce.
 6. Origen del contador de Skills y copy de estados en `CMP-ORG-001`.
 7. Contrato de la API de versiones de paquete (afecta `SelectedSkill` de `CMP-ORG-003`) y payload de advertencia de compatibilidad, máximo de resultados y paginación.
-8. Propietario de cada componente (en las specs figura "por confirmar").
+8. Propietario de cada componente: asignado `human:ianache` para `CMP-ATOM-001` y `CMP-ORG-001` (decisión humana (human:ianache), 2026-10-09); por confirmar para `CMP-ORG-002` y `CMP-ORG-003`.
 9. Los diseños Stitch tienen pantallas duplicadas pendientes de eliminar (lista en `visual-design-registry.md`).
 10. `knowledge-base/` no está versionado en git; las URL fuente de este DSP apuntan a `master` y no resolverán hasta que se publique.
 11. Revisión humana pendiente de las 4 specs y de los 4 diseños.
 12. ~~Tooling de pruebas de componentes~~ **Decidido por `ADR-005`: Storybook.** Abiertos: versión y compatibilidad con Next.js 16/React 19, addons y ejecutor de pruebas, método de regresión visual, integración en CI, instalación y configuración (hoy no existe en el repositorio).
-16. **Bloqueante, diseños canónicos:** regeneración en Stitch con `SkillVault Portal Light` y `Dark` (claro y oscuro) para los 4 componentes; ver Q-8 de `DCP-2026-001`.
+16. ~~Diseños canónicos claro y oscuro~~ **Resueltos** para los 4 componentes (verificados en HTML; revisión visual humana pendiente).
 13. Límite servidor/cliente y estrategia de renderizado de las rutas que consumen los organismos: no decididos por ADR-004.
-14. Nombres de props/callbacks marcados como propuesta en las specs (`onEvent`, `onFiltersChange`, `onClear`, `onSelectionChange`, `onSaveDraft`) y ubicación `src/components/packages/`.
+14. ~~Nombres de props/callbacks y ubicación `src/components/packages/`~~ **Confirmados (decisión humana (human:ianache), 2026-10-09).**
 15. ~~Documentos de `design/atomic-components/` basados en Angular~~ **Reconciliados con ADR-004/ADR-005**: `react-component-architecture.md` y `component-module-contract.md` reemplazan a `angular-library-architecture.md` y `npm-package-contract.md` (conservados como historial).
 
 ## Definition of Ready
