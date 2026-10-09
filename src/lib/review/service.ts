@@ -39,6 +39,9 @@ function toRequest(row: Record<string, unknown>): ReviewRequest {
   return {
     id: asNumber(row.id),
     skillId: asNullableNumber(row.skill_id),
+    resourceType: row.resource_type === "package" ? "package" : "skill",
+    resourceId: asNullableNumber(row.resource_id),
+    packageVersionId: asNullableNumber(row.package_version_id),
     slug: String(row.slug),
     name: String(row.name),
     description: String(row.description),
@@ -250,6 +253,25 @@ async function activateApprovedRequest(
   comment: string | null,
   client: ReviewDatabaseClient
 ): Promise<void> {
+  if (request.resourceType === "package") {
+    if (request.packageVersionId === null) throw new Error("Package review is missing packageVersionId");
+    const publishedAt = Math.floor(Date.now() / 1000);
+    await client.execute({
+      sql: `UPDATE package_versions SET release_status = 'published', published_at = ? WHERE id = ? AND release_status = 'draft'`,
+      args: [publishedAt, request.packageVersionId],
+    });
+    await client.execute({
+      sql: `UPDATE packages SET status = 'published', current_version = ? WHERE id = ?`,
+      args: [request.version, request.resourceId],
+    });
+    await client.execute({
+      sql: `UPDATE skill_review_requests
+        SET status = ?, reviewer_id = ?, reviewer_handle = ?, general_comment = ?, reviewed_at = ?, updated_at = ?
+        WHERE id = ?`,
+      args: ["approved", actor.id, actor.handle ?? null, comment, publishedAt, publishedAt, request.id],
+    });
+    return;
+  }
   const { frontmatter } = relaxedSubmission(request.rawContent);
   if (request.skillId !== null) {
     await client.execute({
@@ -368,9 +390,29 @@ export async function createReviewRequest(
 ): Promise<ReviewRequest> {
   assertCanCreateReviewRequest(actor, input);
   if (input.acceptedResponsibility !== true) throw new Error("Debes aceptar continuar con la publicacion");
-  const { frontmatter, files } = relaxedSubmission(input.rawContent, input.files);
+  const resourceType = input.resourceType ?? "skill";
+  if (resourceType !== "skill" && resourceType !== "package") throw new Error("Invalid review resourceType");
+  if (resourceType === "package" && (input.resourceId == null || input.packageVersionId == null)) {
+    throw new Error("Package review requires resourceId and packageVersionId");
+  }
+  const packageRequest = resourceType === "package";
+  const { frontmatter, files } = packageRequest
+    ? {
+      frontmatter: {
+        name: input.resourceSlug ?? `package-${input.resourceId}`,
+        description: input.resourceDescription ?? "Package review",
+        version: input.resourceVersion ?? "1.0.0",
+        schema_version: "1.1",
+        metadata: { type: "package", triggers: [], tools: [] },
+        compatibility: [], dependencies: [], config_requirements: [],
+      },
+      files: [],
+    }
+    : relaxedSubmission(input.rawContent, input.files);
 
-  if (!input.skillId) {
+  if (packageRequest) {
+    // Package snapshots are validated by the package service before review submission.
+  } else if (!input.skillId) {
     const existingSkill = await client.execute({
       sql: "SELECT id FROM skills WHERE slug = ?",
       args: [frontmatter.name],
@@ -391,10 +433,10 @@ export async function createReviewRequest(
 
   await client.execute({
     sql: `INSERT INTO skill_review_requests
-      (skill_id, slug, name, description, type, version, schema_version, author_id, author_handle, raw_content, status, submitted_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)`,
+      (skill_id, slug, name, description, type, version, schema_version, author_id, author_handle, raw_content, status, submitted_at, updated_at, resource_type, resource_id, package_version_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?)`,
     args: [
-      input.skillId ?? null,
+      packageRequest ? null : input.skillId ?? null,
       frontmatter.name,
       frontmatter.name,
       frontmatter.description,
@@ -403,9 +445,12 @@ export async function createReviewRequest(
       frontmatter.schema_version,
       actor.id,
       actor.handle ?? null,
-      input.rawContent,
+      packageRequest ? input.rawContent || "{}" : input.rawContent,
       Math.floor(Date.now() / 1000),
       Math.floor(Date.now() / 1000),
+      resourceType,
+      packageRequest ? input.resourceId : null,
+      packageRequest ? input.packageVersionId : null,
     ],
   });
 

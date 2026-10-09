@@ -67,6 +67,12 @@ const NAVIGATION: NavigationGroup[] = [
         iconPath: "M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",
         capability: "admin:manage",
       },
+      {
+        label: "Gestionar paquetes",
+        href: "/packages",
+        iconPath: "M4 7.5 12 3l8 4.5v9L12 21l-8-4.5zM4 7.5l8 4.5 8-4.5M12 12v9",
+        capability: "content:manage",
+      },
     ],
   },
 ];

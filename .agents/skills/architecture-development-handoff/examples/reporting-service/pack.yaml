@@ -1,0 +1,30 @@
+schema: comsatel/development-context-pack/v1.0
+metadata:
+  product: cgo
+  feature: vehicle-position-summary
+  version: "1.0"
+  status: READY_FOR_REVIEW
+scope:
+  user_stories: [US-142]
+architecture:
+  affected_components: [reporting-service]
+  asrs: [ASR-008]
+  adrs: [ADR-017]
+  rules: [ARCH-RULE-023]
+  fitness_criteria: [FIT-012]
+traceability:
+  - user_story: US-142
+    asr: ASR-008
+    adr: ADR-017
+    rule: ARCH-RULE-023
+    fitness_criterion: FIT-012
+handoff_readiness:
+  recommendation: READY_FOR_DEV
+human_decision_gate:
+  status: PENDING
+  decision: null
+  role: Solution Architect
+superpowers:
+  enabled: true
+  architecture_constraints_are_immutable: true
+  escalation_on_conflict: true

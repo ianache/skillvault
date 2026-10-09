@@ -54,6 +54,9 @@ export const skillVersionFiles = sqliteTable("skill_version_files", {
 export const skillReviewRequests = sqliteTable("skill_review_requests", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   skillId: integer("skill_id"),
+  resourceType: text("resource_type").notNull().default("skill"),
+  resourceId: integer("resource_id"),
+  packageVersionId: integer("package_version_id"),
   slug: text("slug").notNull(),
   name: text("name").notNull(),
   description: text("description").notNull(),
@@ -131,6 +134,92 @@ export const users = sqliteTable("users", {
   roles: text("roles").notNull().default("[]"), // JSON array of app roles (admin | author | reviewer)
   lastLoginAt: integer("last_login_at").notNull().default(sql`(unixepoch())`),
   createdAt: integer("created_at").notNull().default(sql`(unixepoch())`),
+  updatedAt: integer("updated_at").notNull().default(sql`(unixepoch())`),
+});
+
+export const packages = sqliteTable("packages", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  slug: text("slug").notNull().unique(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  role: text("role").notNull(),
+  status: text("status").notNull().default("draft"),
+  currentVersion: text("current_version"),
+  ownerTeamId: text("owner_team_id"),
+  createdBy: text("created_by").notNull(),
+  createdAt: integer("created_at").notNull().default(sql`(unixepoch())`),
+  updatedAt: integer("updated_at").notNull().default(sql`(unixepoch())`),
+});
+
+export const packageVersions = sqliteTable("package_versions", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  packageId: integer("package_id").notNull(),
+  version: text("version").notNull(),
+  releaseStatus: text("release_status").notNull().default("draft"),
+  manifestJson: text("manifest_json").notNull().default("{}"),
+  createdBy: text("created_by").notNull(),
+  createdAt: integer("created_at").notNull().default(sql`(unixepoch())`),
+  publishedAt: integer("published_at"),
+});
+
+export const packageItems = sqliteTable("package_items", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  packageVersionId: integer("package_version_id").notNull(),
+  skillId: integer("skill_id").notNull(),
+  versionPolicy: text("version_policy").notNull(),
+  pinnedVersion: text("pinned_version"),
+  position: integer("position").notNull(),
+  retiredAtPublish: integer("retired_at_publish"),
+});
+
+export const packageInstallRuns = sqliteTable("package_install_runs", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  packageVersionId: integer("package_version_id").notNull(),
+  harness: text("harness").notNull(),
+  scope: text("scope").notNull(),
+  requestedBy: text("requested_by"),
+  status: text("status").notNull().default("pending"),
+  failureCode: text("failure_code"),
+  createdAt: integer("created_at").notNull().default(sql`(unixepoch())`),
+  updatedAt: integer("updated_at").notNull().default(sql`(unixepoch())`),
+  expiresAt: integer("expires_at").notNull(),
+});
+
+export const packageInstallItems = sqliteTable("package_install_items", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  runId: integer("run_id").notNull(),
+  skillId: integer("skill_id").notNull(),
+  resolvedVersion: text("resolved_version"),
+  status: text("status").notNull().default("pending"),
+  destination: text("destination"),
+  errorCode: text("error_code"),
+  position: integer("position").notNull(),
+});
+
+export const packageDownloadAudit = sqliteTable("package_download_audit", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  actorId: text("actor_id"),
+  occurredAt: integer("occurred_at").notNull().default(sql`(unixepoch())`),
+  sourceIp: text("source_ip").notNull(),
+  packageSlug: text("package_slug").notNull(),
+  skillSlug: text("skill_slug"),
+  version: text("version").notNull(),
+  format: text("format").notNull(),
+  result: text("result").notNull(),
+});
+
+export const packageDownloadRateLimits = sqliteTable("package_download_rate_limits", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  routeKey: text("route_key").notNull(),
+  sourceIp: text("source_ip").notNull(),
+  windowStartedAt: integer("window_started_at").notNull(),
+  requestCount: integer("request_count").notNull().default(0),
+});
+
+export const packageDownloadRateLimitConfig = sqliteTable("package_download_rate_limit_config", {
+  id: integer("id").primaryKey(),
+  maxDownloads: integer("max_downloads").notNull().default(10),
+  windowSeconds: integer("window_seconds").notNull().default(1800),
   updatedAt: integer("updated_at").notNull().default(sql`(unixepoch())`),
 });
 

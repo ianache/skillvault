@@ -1,6 +1,6 @@
 {
     "name": "02-skills-portal",
-    "version": "0.8.0",
+    "version": "0.9.0",
     "private": true,
     "packageManager": "pnpm@9.15.9",
     "scripts": {
@@ -20,6 +20,8 @@
         "migrate:skill-version-files": "tsx src/lib/db/migrate-skill-version-files.ts",
         "migrate:skill-version-files:mysql": "tsx src/lib/db/migrate-skill-version-files-mysql.ts",
         "migrate:orphan-skills": "tsx src/lib/db/migrate-orphan-skills.ts",
+        "migrate:packages": "tsx src/lib/db/migrate-packages.ts",
+        "migrate:packages:mysql": "tsx src/lib/db/migrate-packages-mysql.ts",
         "test": "pnpm run test:review",
         "test:review": "tsx --test src/lib/review/*.test.ts"
     },

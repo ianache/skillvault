@@ -8,7 +8,7 @@ function hrefs(roles: string[]): string[] {
   );
 }
 
-test("user navigation contains only Catalog", () => {
+test("user navigation contains only the public catalog", () => {
   assert.deepEqual(hrefs(["user"]), ["/"]);
 });
 
@@ -19,6 +19,7 @@ test("editor navigation includes publishing and owned content", () => {
     "/publish",
     "/dashboard",
     "/proposals",
+    "/packages",
   ]);
 });
 
@@ -29,6 +30,7 @@ test("reviewer navigation includes review but not administration", () => {
     "/dashboard",
     "/proposals",
     "/review",
+    "/packages",
   ]);
 });
 
@@ -42,6 +44,7 @@ test("admin navigation includes every protected area", () => {
     "/review",
     "/categories",
     "/users",
+    "/packages",
   ]);
 });
 

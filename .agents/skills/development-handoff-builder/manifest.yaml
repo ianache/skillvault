@@ -1,0 +1,5 @@
+name: development-handoff-builder
+version: 0.2.0
+standard: google-okf-v0.2
+entrypoint: SKILL.md
+template: templates/development-context-pack.md

@@ -1,0 +1,12 @@
+{
+  "name": "business-context-builder",
+  "version": "1.0.0",
+  "course": "AF-101",
+  "quality_gate": "BUSINESS_CONTEXT_READY",
+  "consumers": [
+    "AF-101 Requirements Context Pack",
+    "UX-101 UX Context Pack",
+    "ARQ-101 Architecture Context Pack"
+  ],
+  "boundary": "Business context only; no User Stories or functional requirements."
+}

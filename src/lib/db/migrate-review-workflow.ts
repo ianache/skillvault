@@ -10,6 +10,9 @@ async function migrate() {
   await client.execute(`CREATE TABLE IF NOT EXISTS skill_review_requests (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     skill_id INTEGER,
+    resource_type TEXT NOT NULL DEFAULT 'skill',
+    resource_id INTEGER,
+    package_version_id INTEGER,
     slug TEXT NOT NULL,
     name TEXT NOT NULL,
     description TEXT NOT NULL,
@@ -27,6 +30,14 @@ async function migrate() {
     reviewed_at INTEGER,
     updated_at INTEGER NOT NULL DEFAULT (unixepoch())
   )`);
+
+  for (const statement of [
+    "ALTER TABLE skill_review_requests ADD COLUMN resource_type TEXT NOT NULL DEFAULT 'skill'",
+    "ALTER TABLE skill_review_requests ADD COLUMN resource_id INTEGER",
+    "ALTER TABLE skill_review_requests ADD COLUMN package_version_id INTEGER",
+  ]) {
+    try { await client.execute(statement); } catch { /* Existing installations already have the column. */ }
+  }
 
   await client.execute(`CREATE TABLE IF NOT EXISTS skill_review_files (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

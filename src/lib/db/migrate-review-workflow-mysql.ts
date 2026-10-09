@@ -14,6 +14,9 @@ async function migrate() {
   await client.execute(`CREATE TABLE IF NOT EXISTS skill_review_requests (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     skill_id INT,
+    resource_type VARCHAR(20) NOT NULL DEFAULT 'skill',
+    resource_id INT,
+    package_version_id INT,
     slug VARCHAR(255) NOT NULL,
     name VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
@@ -31,6 +34,14 @@ async function migrate() {
     reviewed_at BIGINT,
     updated_at BIGINT NOT NULL DEFAULT 0
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`);
+
+  for (const statement of [
+    "ALTER TABLE skill_review_requests ADD COLUMN resource_type VARCHAR(20) NOT NULL DEFAULT 'skill'",
+    "ALTER TABLE skill_review_requests ADD COLUMN resource_id INT",
+    "ALTER TABLE skill_review_requests ADD COLUMN package_version_id INT",
+  ]) {
+    try { await client.execute(statement); } catch { /* Existing installations already have the column. */ }
+  }
 
   await client.execute(`CREATE TABLE IF NOT EXISTS skill_review_files (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,

@@ -1,0 +1,41 @@
+schema: comsatel/development-context-pack/v1.0
+metadata:
+  product: ""
+  feature: ""
+  version: "1.0"
+  status: DRAFT
+  created_at: ""
+  verified_at: ""
+scope:
+  user_stories: []
+architecture:
+  affected_components: []
+  asrs: []
+  adrs: []
+  rules: []
+  fitness_criteria: []
+contracts:
+  api: []
+  events: []
+  data: []
+quality:
+  nfrs: []
+security:
+  constraints: []
+open_items: []
+traceability: []
+handoff_readiness:
+  recommendation: NOT_VERIFIABLE
+  blocking_findings: []
+  observations: []
+human_decision_gate:
+  status: PENDING
+  decision: null
+  role: Solution Architect
+superpowers:
+  enabled: true
+  architecture_constraints_are_immutable: true
+  escalation_on_conflict: true
+knowledge:
+  context_policy: minimum_context_plus_pull
+  provenance_required: true

@@ -1,0 +1,8 @@
+name: stitch-ui-generator
+version: 2.0.0
+previous_version: 1.0
+breaking: true
+standard: google-okf-v0.2
+entrypoint: SKILL.md
+template: templates/concept-template.md
+validators: ../ux-development-handoff/validators

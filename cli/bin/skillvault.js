@@ -3,6 +3,7 @@ import { install } from "../src/commands/install.js";
 import { search }  from "../src/commands/search.js";
 import { list }    from "../src/commands/list.js";
 import { remove }  from "../src/commands/remove.js";
+import { installPackage } from "../src/commands/package-install.js";
 import { DEFAULT_SERVER, VALID_HARNESSES } from "../src/config.js";
 import { fmt, printError } from "../src/ui.js";
 
@@ -14,6 +15,7 @@ ${fmt.bold("USO")}
 
 ${fmt.bold("COMANDOS")}
   install <slug>    Instala un skill desde el portal
+  package install <slug>  Instala un paquete de Skills
   search  <query>   Busca skills en el portal
   list              Lista skills instalados localmente
   remove  <slug>    Elimina un skill instalado
@@ -39,6 +41,8 @@ function parseArgs(argv) {
     scope:   "global",
     server:  DEFAULT_SERVER,
     force:   false,
+    format:  "json",
+    version: "latest",
   };
   const positional = [];
 
@@ -48,6 +52,8 @@ function parseArgs(argv) {
     else if (a === "--scope")   { flags.scope   = args[++i]; }
     else if (a === "--server")  { flags.server  = args[++i]; }
     else if (a === "--force")   { flags.force   = true; }
+    else if (a === "--format") { flags.format  = args[++i]; }
+    else if (a === "--version") { flags.version = args[++i]; }
     else if (a === "--help" || a === "-h") { flags.help = true; }
     else if (!a.startsWith("--")) { positional.push(a); }
   }
@@ -84,6 +90,18 @@ async function main() {
   validateScope(flags.scope);
 
   switch (command) {
+    case "package": {
+      if (rest[0] !== "install" || !rest[1]) {
+        printError("Uso: skillvault package install <slug>");
+        process.exit(1);
+      }
+      if (flags.format !== "json" && flags.format !== "zip") {
+        printError("--format debe ser json o zip");
+        process.exit(1);
+      }
+      await installPackage(rest[1], flags);
+      break;
+    }
     case "install": {
       const slug = rest[0];
       if (!slug) {

@@ -5,6 +5,7 @@
 .worktrees
 node_modules
 coverage
+.pytest_cache
 dist
 cli/node_modules
 cli/dist

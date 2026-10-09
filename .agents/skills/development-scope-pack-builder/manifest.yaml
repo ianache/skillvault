@@ -1,0 +1,7 @@
+name: development-scope-pack-builder
+version: 0.1.0
+standard: google-okf-v0.2
+entrypoint: SKILL.md
+runtime: python3
+dependencies:
+  - PyYAML>=6.0,<7

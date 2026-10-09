@@ -35,3 +35,18 @@ export async function recordInstall(slug, server) {
   const url = `${server}/api/skills/${encodeURIComponent(slug)}/install`;
   await fetch(url, { method: "POST" }).catch(() => {}); // best-effort
 }
+
+export async function getPackageManifest(slug, { format = "json", version = "latest" } = {}, server = DEFAULT_SERVER) {
+  const url = `${server}/api/packages/${encodeURIComponent(slug)}/download?format=${encodeURIComponent(format)}&version=${encodeURIComponent(version)}`;
+  const res = await fetch(url).catch((e) => { throw new Error(`No se puede conectar al servidor ${server}\n  ${e.message}`); });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error ?? `HTTP ${res.status} en ${url}`);
+  }
+  if (format === "json") return res.json();
+  const JSZip = (await import("jszip")).default;
+  const archive = await JSZip.loadAsync(await res.arrayBuffer());
+  const manifestFile = archive.file("manifest.json");
+  if (!manifestFile) throw new Error("El ZIP del paquete no contiene manifest.json");
+  return JSON.parse(await manifestFile.async("string"));
+}

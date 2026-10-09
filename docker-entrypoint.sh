@@ -10,6 +10,7 @@ src/lib/db/migrate-review-workflow-mysql.ts
 src/lib/db/migrate-users-mysql.ts
 src/lib/db/migrate-skill-ratings-mysql.ts
 src/lib/db/migrate-skill-version-files-mysql.ts
+src/lib/db/migrate-packages-mysql.ts
 "
 
 run_mysql_migrations() {

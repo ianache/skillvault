@@ -28,6 +28,13 @@ export type CreateReviewRequestInput = {
   rawContent: string;
   files?: ReviewFileInput[];
   skillId?: number | null;
+  resourceType?: "skill" | "package";
+  resourceId?: number | null;
+  packageVersionId?: number | null;
+  resourceSlug?: string;
+  resourceName?: string;
+  resourceDescription?: string;
+  resourceVersion?: string;
   acceptedResponsibility?: boolean;
 };
 
@@ -59,6 +66,9 @@ export type DecideReviewRequestInput = {
 export type ReviewRequest = {
   id: number;
   skillId: number | null;
+  resourceType?: "skill" | "package";
+  resourceId?: number | null;
+  packageVersionId?: number | null;
   slug: string;
   name: string;
   description: string;
