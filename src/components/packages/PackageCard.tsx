@@ -67,13 +67,14 @@ const DISABLED_NOTE = "Las acciones no están disponibles en este momento.";
 const card: CSSProperties = {
   display: "flex",
   flexDirection: "column",
-  gap: 12,
-  padding: 20,
+  gap: 16,
+  minHeight: 354,
+  padding: 24,
   minWidth: 0,
   background: "var(--surface)",
   color: "var(--text)",
   border: "1px solid var(--border)",
-  borderRadius: "var(--sv-radius-md, 8px)",
+  borderRadius: "var(--sv-radius-lg, 12px)",
   boxShadow: "var(--sv-shadow-sm)",
   fontFamily: "var(--sv-font-display, sans-serif)",
 };
@@ -94,7 +95,7 @@ const button: CSSProperties = {
   alignItems: "center",
   justifyContent: "center",
   gap: 6,
-  minHeight: 40,
+  minHeight: 36,
   padding: "0 12px",
   background: "var(--raised)",
   color: "var(--text)",
@@ -105,7 +106,7 @@ const button: CSSProperties = {
   textDecoration: "none",
   cursor: "pointer",
 };
-const actionRow: CSSProperties = { display: "flex", flexWrap: "wrap", gap: 8, paddingTop: 12, borderTop: "1px solid var(--border)" };
+const actionRow: CSSProperties = { display: "flex", flexWrap: "wrap", gap: 8, paddingTop: 16, borderTop: "1px solid var(--border)", marginTop: "auto" };
 
 export function PackageCard({ package: pkg, actions, variant = "maintenance", disabled = false, warningText, onEvent }: PackageCardProps) {
   const titleId = useId();
@@ -121,15 +122,15 @@ export function PackageCard({ package: pkg, actions, variant = "maintenance", di
 
   return (
     <article aria-labelledby={titleId} style={card}>
-      <div style={{ display: "flex", alignItems: "flex-start", gap: 12, flexWrap: "wrap" }}>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 16, flexWrap: "wrap" }}>
         <span
           aria-hidden="true"
-          style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 40, height: 40, flexShrink: 0, background: "var(--raised)", color: "var(--accent)", border: "1px solid var(--border)", borderRadius: "var(--sv-radius-sm, 6px)" }}
+          style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 48, height: 48, flexShrink: 0, background: "var(--raised)", color: "var(--accent)", border: "1px solid var(--border)", borderRadius: "var(--sv-radius-md, 8px)" }}
         >
           <Icon path={ICON_PATHS.package} size={22} />
         </span>
         <div style={{ flex: "1 1 160px", minWidth: 0 }}>
-          <h3 id={titleId} style={{ margin: 0, fontSize: 16, fontWeight: 600, lineHeight: 1.3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <h3 id={titleId} style={{ margin: 0, fontSize: 17, fontWeight: 600, lineHeight: 1.3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {href ? (
               <Link href={href} onClick={() => onEvent?.({ type: "open", slug: pkg.slug })} style={{ color: "inherit", textDecoration: "none" }}>
                 {pkg.name}
@@ -138,7 +139,7 @@ export function PackageCard({ package: pkg, actions, variant = "maintenance", di
               pkg.name
             )}
           </h3>
-          <div style={{ ...mono, color: "var(--muted)", fontSize: 12, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{pkg.slug}</div>
+          <div style={{ ...mono, color: "var(--muted)", fontSize: 14, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{pkg.slug}</div>
         </div>
         <PackageStatus value={pkg.status} />
       </div>

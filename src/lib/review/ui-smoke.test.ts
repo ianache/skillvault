@@ -254,6 +254,17 @@ test("public package catalog uses readonly detail routes and renders package met
   assert.doesNotMatch(catalogSource, /\/packages\/\$\{item\.slug\}\/edit/);
 });
 
+test("PackageCard preserves the canonical Stitch maintenance geometry", async () => {
+  const cardSource = await source("../../components/packages/PackageCard.tsx");
+
+  assert.match(cardSource, /minHeight:\s*354/);
+  assert.match(cardSource, /padding:\s*24/);
+  assert.match(cardSource, /borderRadius:\s*"var\(--sv-radius-lg/);
+  assert.match(cardSource, /width:\s*48/);
+  assert.match(cardSource, /height:\s*48/);
+  assert.match(cardSource, /minHeight:\s*36/);
+});
+
 test("package editor exposes validation state and keeps fields accessible after errors", async () => {
   const editorSource = await source("../../components/packages/PackageEditorClient.tsx");
 
