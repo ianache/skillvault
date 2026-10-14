@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useId, type CSSProperties } from "react";
 import {
+  formatDownloadCount,
   formatPackageVersion,
+  formatRating,
   formatSkillCount,
   packageCardHref,
   retiredSkillsNote,
@@ -24,9 +26,18 @@ export type PackageCardPackage = {
   skillCount?: number;
   /** D-15: drives the retired-skills warning. */
   retiredSkillCount?: number;
+  /** Approved design: shown as "14.2k descargas". */
+  downloadCount?: number;
+  /** Approved design: shown as "★ 4.9" (0 to 5). */
+  rating?: number;
 };
 
-export type PackageCardActions = { edit?: boolean; duplicate?: boolean; review?: boolean; retire?: boolean };
+export type PackageCardActions = {
+  edit?: boolean;
+  duplicate?: boolean;
+  review?: boolean;
+  retire?: boolean;
+};
 
 export type PackageCardEvent =
   | { type: "open"; slug: string }
@@ -38,12 +49,12 @@ export type PackageCardProps = {
   variant?: PackageCardVariant;
   /** Disables the actions and shows an explanatory note. */
   disabled?: boolean;
-  /** Optional warning line (for example a retirement notice). */
+  /** Optional note line: a warning (amber), or an administrative note (neutral) when the actions are disabled. */
   warningText?: string | null;
   onEvent?: (event: PackageCardEvent) => void;
 };
 
-const ACTIONS = [
+const MAINTENANCE_ACTIONS = [
   { key: "edit", label: "Editar", icon: ICON_PATHS.edit },
   { key: "duplicate", label: "Duplicar", icon: ICON_PATHS.duplicate },
   { key: "review", label: "Revisar", icon: ICON_PATHS.review },
@@ -81,6 +92,7 @@ const mono: CSSProperties = { fontFamily: "var(--sv-font-mono, monospace)" };
 const button: CSSProperties = {
   display: "inline-flex",
   alignItems: "center",
+  justifyContent: "center",
   gap: 6,
   minHeight: 40,
   padding: "0 12px",
@@ -93,15 +105,19 @@ const button: CSSProperties = {
   textDecoration: "none",
   cursor: "pointer",
 };
+const actionRow: CSSProperties = { display: "flex", flexWrap: "wrap", gap: 8, paddingTop: 12, borderTop: "1px solid var(--border)" };
 
 export function PackageCard({ package: pkg, actions, variant = "maintenance", disabled = false, warningText, onEvent }: PackageCardProps) {
   const titleId = useId();
   const href = packageCardHref(pkg.slug, variant);
   const skills = formatSkillCount(pkg.skillCount);
   const retiredNote = retiredSkillsNote(pkg.retiredSkillCount);
-  const visibleActions = variant === "maintenance" ? ACTIONS.filter((action) => actions[action.key]) : [];
-  const buttonStyle: CSSProperties = disabled ? { ...button, opacity: 0.5, cursor: "not-allowed" } : button;
-  const explanation = disabled ? (warningText ?? DISABLED_NOTE) : warningText;
+  const extras = [formatDownloadCount(pkg.downloadCount), formatRating(pkg.rating)].filter((value): value is string => value !== null);
+  const visibleActions = variant === "maintenance" ? MAINTENANCE_ACTIONS.filter((action) => actions[action.key]) : [];
+  const fade: CSSProperties = disabled ? { opacity: 0.5, cursor: "not-allowed" } : {};
+  // Administrative notes (disabled actions) are neutral; any other note is a warning (amber).
+  const administrative = disabled;
+  const note = disabled ? (warningText ?? DISABLED_NOTE) : warningText;
 
   return (
     <article aria-labelledby={titleId} style={card}>
@@ -134,25 +150,40 @@ export function PackageCard({ package: pkg, actions, variant = "maintenance", di
       <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
         <span style={chip}>{pkg.role}</span>
         {skills ? <span style={{ color: "var(--muted)", fontSize: 12 }}>{skills}</span> : null}
-        <span style={{ ...mono, color: pkg.version ? "var(--text)" : "var(--muted)", fontSize: 12 }}>{formatPackageVersion(pkg.version)}</span>
+        <span style={{ ...mono, marginLeft: "auto", display: "inline-flex", flexWrap: "wrap", gap: 6, fontSize: 12 }}>
+          <span style={{ color: pkg.version ? "var(--text)" : "var(--muted)" }}>{formatPackageVersion(pkg.version)}</span>
+          {extras.map((extra) => (
+            <span key={extra} style={{ color: "var(--muted)" }}>
+              <span aria-hidden="true">• </span>
+              {extra}
+            </span>
+          ))}
+        </span>
       </div>
 
-      {explanation ? <PackageWarningNote text={explanation} /> : null}
+      {note ? <PackageWarningNote text={note} tone={administrative ? "neutral" : "warning"} /> : null}
       {retiredNote ? <PackageWarningNote text={retiredNote} /> : null}
 
       {variant === "public-readonly" ? (
         href ? (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            <Link href={href} onClick={() => onEvent?.({ type: "open", slug: pkg.slug })} aria-label={`Ver ficha de ${pkg.name}`} style={buttonStyle}>
+          <div style={actionRow}>
+            <Link href={href} onClick={() => onEvent?.({ type: "open", slug: pkg.slug })} aria-label={`Ver Ficha de ${pkg.name}`} style={{ ...button, ...fade, flex: "1 1 100px" }}>
               <Icon path={ICON_PATHS.open} size={16} />
-              Ver ficha
+              Ver Ficha
             </Link>
           </div>
         ) : null
       ) : visibleActions.length ? (
-        <div role="group" aria-label={`Acciones de ${pkg.name}`} style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+        <div role="group" aria-label={`Acciones de ${pkg.name}`} style={actionRow}>
           {visibleActions.map((action) => (
-            <button key={action.key} type="button" disabled={disabled} aria-label={`${action.label} ${pkg.name}`} onClick={() => onEvent?.({ type: action.key, slug: pkg.slug })} style={buttonStyle}>
+            <button
+              key={action.key}
+              type="button"
+              disabled={disabled}
+              aria-label={`${action.label} ${pkg.name}`}
+              onClick={() => onEvent?.({ type: action.key, slug: pkg.slug })}
+              style={{ ...button, ...fade }}
+            >
               <Icon path={action.icon} size={16} />
               {action.label}
             </button>

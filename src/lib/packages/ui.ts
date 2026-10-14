@@ -34,6 +34,19 @@ export function retiredSkillsNote(count: number | undefined): string | null {
   return `${count} ${count === 1 ? "skill retirado" : "skills retirados"}`;
 }
 
+/** Compact download count as in the approved design: 14.2k, 1.3M. */
+export function formatDownloadCount(count: number | undefined): string | null {
+  if (count === undefined || !Number.isFinite(count) || count < 0) return null;
+  const compact = (value: number, suffix: string) => `${Number(value.toFixed(1))}${suffix}`;
+  const text = count >= 1_000_000 ? compact(count / 1_000_000, "M") : count >= 1000 ? compact(count / 1000, "k") : String(count);
+  return `${text} ${count === 1 ? "descarga" : "descargas"}`;
+}
+
+export function formatRating(rating: number | undefined): string | null {
+  if (rating === undefined || !Number.isFinite(rating) || rating < 0 || rating > 5) return null;
+  return `★ ${rating.toFixed(1)}`;
+}
+
 export function formatPackageVersion(version: string | null): string {
   return version ? `v${version}` : "Sin versión";
 }
@@ -50,6 +63,21 @@ export function filterPackageSummaries(packages: PackageSummary[], filters: Pack
     const matchesStatus = !filters.status || filters.status === "Todos" || item.status === filters.status;
     return matchesQuery && matchesRole && matchesStatus;
   });
+}
+
+export function filterPublicPackageSummaries(packages: PackageSummary[], filters: { query: string; role: string }): PackageSummary[] {
+  return filterPackageSummaries(
+    packages.filter((item) => item.status === "published"),
+    { ...filters, status: "published" },
+  );
+}
+
+export function packageMetadataErrors(input: { name: string; description: string; role: string }): Record<string, string> {
+  return Object.fromEntries([
+    !input.name.trim() && ["name", "El nombre del paquete es obligatorio."],
+    !input.description.trim() && ["description", "La descripción y propósito son obligatorios."],
+    !input.role.trim() && ["role", "Selecciona un rol destinatario."],
+  ].filter(Boolean) as [string, string][]);
 }
 
 export function packageWarning(manifest: { excludedItems?: unknown[] }): string | null {

@@ -96,6 +96,11 @@ test("getPublishedManifest refuses an unpublished package version", async () => 
   await assert.rejects(() => getPublishedManifest("analista-funcional", undefined, db), /published/i);
 });
 
+test("getPublishedManifest refuses a retired package even when its version is published", async () => {
+  const db = fakeClient({ "SELECT p.*, pv.*": [{ slug: "analista-funcional", status: "retired", version: "1.0.0", release_status: "published", manifest_json: JSON.stringify({ package: "analista-funcional", version: "1.0.0", generatedAt: "2026-01-01", items: [], excludedItems: [] }) }] });
+  await assert.rejects(() => getPublishedManifest("analista-funcional", undefined, db), /published package/i);
+});
+
 test("updatePackage changes only draft metadata", async () => {
   const db = fakeClient({ "SELECT * FROM packages WHERE slug": [{ id: 4, slug: "analista-funcional", name: "Analista", description: "Skills", role: "analista", status: "draft" }] });
   const result = await updatePackage("analista-funcional", { name: "Analista actualizado" }, { id: "u1" }, db);

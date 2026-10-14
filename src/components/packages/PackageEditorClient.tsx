@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/PageHeader";
 import type { PackageDraftVersion, PackageSummary } from "@/lib/packages/types";
+import { packageMetadataErrors } from "@/lib/packages/ui";
 
 type Skill = { id: number; name: string; slug: string; version: string; status: string; description: string; compatibility?: string[] };
 
@@ -19,6 +20,9 @@ export function PackageEditorClient({ packageInfo, isNew = false, initialDraft =
   const [versionCreated, setVersionCreated] = useState(initialDraft?.releaseStatus === "draft");
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [validated, setValidated] = useState(false);
+  const validationErrors = validated ? packageMetadataErrors({ name, description, role }) : {};
+  const hasValidationErrors = Object.values(validationErrors).some(Boolean);
 
   useEffect(() => { fetch("/api/skills?sort=az").then((response) => response.json()).then((body) => setSkills(body.skills ?? [])).catch(() => setError("No se pudieron cargar los Skills.")); }, []);
 
@@ -48,6 +52,12 @@ export function PackageEditorClient({ packageInfo, isNew = false, initialDraft =
 
   async function saveDraft() {
     setError(null);
+    setValidated(true);
+    const currentErrors = packageMetadataErrors({ name, description, role });
+    if (Object.keys(currentErrors).length) {
+      setError("Corrige los campos marcados antes de guardar el borrador.");
+      return;
+    }
     const response = isNew ? await fetch("/api/packages", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ slug: packageSlug(), name, description, role }) }) : await fetch(`/api/packages/${packageInfo.slug}`, { method: "PATCH", headers: { "content-type": "application/json", "if-match": packageInfo.currentVersion ?? "draft" }, body: JSON.stringify({ name, description, role }) });
     const body = await response.json();
     if (!response.ok) { setError(body.error ?? "No se pudo guardar el borrador"); return; }
@@ -72,7 +82,7 @@ export function PackageEditorClient({ packageInfo, isNew = false, initialDraft =
   return <>
     <PageHeader title={isNew ? "Nuevo paquete" : name} description="Editor de paquete. Los cambios se guardan como borrador hasta publicarse." />
     <main style={{ maxWidth: 1400, margin: "0 auto", padding: "24px 32px 40px", display: "grid", gap: 20 }}>
-      {message && <p role="status" style={successBox}>{message}</p>}{error && <p role="alert" style={errorBox}>{error}</p>}
+      {message && <p role="status" style={successBox}>{message}</p>}{error && <p role="alert" style={errorBox}>{error}</p>}{validated && hasValidationErrors && <div id="package-editor-errors" role="alert" style={errorBox}>Revisa los campos obligatorios marcados.</div>}
       <div style={editorGrid}>
         <section style={card}><div style={cardHeading}><h2 style={{ margin: 0 }}>Información del paquete</h2><span style={draftBadge}>{isNew ? "nuevo" : packageInfo.status} · BORRADOR</span></div><label>Nombre *<input value={name} onChange={(event) => setName(event.target.value)} style={input} /></label><label>Descripción y propósito *<textarea value={description} onChange={(event) => setDescription(event.target.value)} rows={5} style={input} /><small style={{ color: "var(--muted)" }}>Se muestra en el catálogo público. Explica para quién es y qué resuelve.</small></label><label>Rol destinatario *<select value={role} onChange={(event) => setRole(event.target.value)} style={input}><option>QA</option><option>Product Owner</option><option>Desarrollador</option><option>Data</option><option>Seguridad</option><option>Todos</option></select></label><div style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}><strong>Política resultante</strong><p style={{ margin: "10px 0 0", color: "var(--muted)" }}>↑ Latest</p><small style={{ color: "var(--muted)" }}>Se instala la última versión publicada al momento de instalar.</small></div></section>
         <section style={card}><div style={cardHeading}><div><h2 style={{ margin: 0 }}>Skills incluidos</h2><p style={{ color: "var(--muted)" }}>El orden define la secuencia de instalación. Cada Skill se instala por separado según su estándar y la ruta de cada harness.</p></div><span style={{ color: "var(--muted)", whiteSpace: "nowrap" }}>{selectedSkills.length} skills · {selectedSkills.length} instalables</span></div><label style={{ fontWeight: 600 }}>Agregar skill<div style={searchBox}><input aria-label="Buscar skills" value={skillQuery} onChange={(event) => setSkillQuery(event.target.value)} placeholder="Buscar en el catálogo de skills..." style={{ ...input, marginTop: 0, border: 0, outline: 0 }} />{skillQuery && <button type="button" onClick={() => setSkillQuery("")} aria-label="Limpiar búsqueda" style={clearButton}>×</button>}</div></label><div style={availableList}>{availableSkills.map((skill) => <div key={skill.id} style={resultRow}><span><strong>{skill.name}</strong> <small style={{ color: "var(--muted)" }}>{skill.version}</small></span><button type="button" onClick={() => addSkill(skill.id)} style={secondaryButton}>+ Agregar</button></div>)}{!availableSkills.length && <p style={emptyState}>{skills.length ? "No hay Skills que coincidan con la búsqueda." : "No hay Skills publicados disponibles."}</p>}</div><div style={selectedList}>{selectedSkills.length ? selectedSkills.map((skill, index) => <div key={skill.id} style={selectedCard}><span style={orderNumber}>{String(index + 1).padStart(2, "0")}</span><div style={{ flex: 1 }}><strong>{skill.name}</strong><div style={{ color: "var(--muted)", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 13 }}>{skill.slug} · última {skill.version}</div><div style={selectedActions}><button type="button" onClick={() => moveSkill(skill.id, -1)} disabled={index === 0} style={iconButton} aria-label="Mover skill arriba">⌃</button><button type="button" onClick={() => moveSkill(skill.id, 1)} disabled={index === selectedSkills.length - 1} style={iconButton} aria-label="Mover skill abajo">⌄</button><button type="button" onClick={() => removeSkill(skill.id)} style={deleteButton} aria-label={`Quitar ${skill.name}`}>♧</button></div></div><select aria-label={`Política de versión de ${skill.name}`} value={selected[skill.id]} onChange={(event) => setPolicy(skill.id, event.target.value as "latest" | "pinned")} style={policySelect}><option value="latest">Latest</option><option value="pinned">Fijada {skill.version}</option></select></div>) : <p style={emptyState}>Agrega al menos un skill publicado desde el buscador.</p>}</div></section>

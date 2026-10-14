@@ -199,13 +199,13 @@ export async function getPublishedManifest(slug: string, version: string | undef
   validatePackageSlug(slug);
   const result = await client.execute({
     sql: `SELECT p.*, pv.* FROM packages p JOIN package_versions pv ON pv.package_id = p.id
-          WHERE p.slug = ? AND pv.release_status = 'published' ${version ? "AND pv.version = ?" : ""}
+          WHERE p.slug = ? AND p.status = 'published' AND pv.release_status = 'published' ${version ? "AND pv.version = ?" : ""}
           ORDER BY pv.published_at DESC, pv.id DESC LIMIT 1`,
     args: version ? [slug, version] : [slug],
   });
   const row = result.rows[0];
   if (!row) throw new Error("Published package version not found");
-  if (String(row.release_status ?? "") !== "published") throw new Error("Package version is not published");
+  if (String(row.status ?? "") !== "published" || String(row.release_status ?? "") !== "published") throw new Error("Published package is not available");
   const manifest = JSON.parse(String(row.manifest_json ?? "{}")) as PackageManifest;
   return validatePublishedManifest(manifest);
 }

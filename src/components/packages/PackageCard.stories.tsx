@@ -53,8 +53,17 @@ export const DisabledWithExplanation: Story = {
   args: { disabled: true, warningText: "Pendiente de revalidación por el equipo de seguridad." },
 };
 
+/** Approved design (public catalog): "Ver Ficha" with downloads and rating. */
 export const PublicReadonly: Story = {
-  args: { variant: "public-readonly" },
+  args: {
+    variant: "public-readonly",
+    package: { ...published, version: "1.8.0", skillCount: 14, downloadCount: 14200, rating: 4.9 },
+    actions: {},
+  },
+};
+
+export const MaintenanceWithRating: Story = {
+  args: { package: { ...published, version: "2.4.1", skillCount: 12, rating: 4.9 } },
 };
 
 export const LongContent: Story = {
@@ -110,5 +119,20 @@ export const DisabledEmitsNothing: Story = {
     await expect(edit).toBeDisabled();
     await userEvent.click(edit);
     await expect(args.onEvent).not.toHaveBeenCalled();
+  },
+};
+
+/** Interaction: the public variant offers only "Ver Ficha" (open); there is no install action (Q-13). */
+export const PublicEvents: Story = {
+  args: {
+    variant: "public-readonly",
+    package: { ...published, downloadCount: 14200, rating: 4.9 },
+    actions: {},
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.queryByRole("button")).toBeNull();
+    await userEvent.click(canvas.getByRole("link", { name: "Ver Ficha de QA Starter" }));
+    await expect(args.onEvent).toHaveBeenCalledWith({ type: "open", slug: "qa-starter" });
   },
 };

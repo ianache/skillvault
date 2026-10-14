@@ -25,8 +25,12 @@ const TONES: Record<PackageStatusValue, CSSProperties> = {
 
 const mono = "var(--sv-font-mono, monospace)";
 
-/** Amber message line with a warning icon. Shared by the status atom and the package card; announced with role="note". */
-export function PackageWarningNote({ text, size = 12 }: { text: string; size?: number }) {
+/**
+ * Message line with an icon, announced with role="note". Amber for warnings (retirement, retired skills);
+ * neutral with a gavel for administrative notes (disabled actions), as in the approved design.
+ */
+export function PackageWarningNote({ text, size = 12, tone = "warning" }: { text: string; size?: number; tone?: "warning" | "neutral" }) {
+  const neutral = tone === "neutral";
   return (
     <span
       role="note"
@@ -36,16 +40,16 @@ export function PackageWarningNote({ text, size = 12 }: { text: string; size?: n
         gap: 6,
         padding: "4px 8px",
         borderRadius: "var(--sv-radius-sm, 6px)",
-        background: "color-mix(in srgb, var(--amber) 12%, var(--surface))",
-        color: "color-mix(in srgb, var(--amber) 50%, var(--text))",
-        border: "1px solid color-mix(in srgb, var(--amber) 40%, transparent)",
+        background: neutral ? "var(--raised)" : "color-mix(in srgb, var(--amber) 12%, var(--surface))",
+        color: neutral ? "var(--muted)" : "color-mix(in srgb, var(--amber) 50%, var(--text))",
+        border: neutral ? "1px solid var(--border)" : "1px solid color-mix(in srgb, var(--amber) 40%, transparent)",
         fontSize: size,
         lineHeight: 1.4,
         overflowWrap: "anywhere",
       }}
     >
-      <span style={{ color: "var(--amber)", display: "inline-flex", paddingTop: 1 }}>
-        <Icon path={ICON_PATHS.warning} size={size + 2} />
+      <span style={{ color: neutral ? "var(--muted)" : "var(--amber)", display: "inline-flex", paddingTop: 1 }}>
+        <Icon path={neutral ? ICON_PATHS.gavel : ICON_PATHS.warning} size={size + 2} />
       </span>
       <span>{text}</span>
     </span>

@@ -228,6 +228,82 @@ test("navigation groups are divided into exactly two blocks and use SVG paths", 
   assert.ok(navSource.includes("iconPath:"), "Debe exportar iconPath en lugar de icon de emoji");
 });
 
+test("package maintenance catalog exposes table semantics and an explicit access-denied state", async () => {
+  const [pageSource, catalogSource] = await Promise.all([
+    source("../../app/packages/page.tsx"),
+    source("../../components/packages/PackageCatalogClient.tsx"),
+  ]);
+
+  assert.match(pageSource, /<h1>Paquetes<\/h1>/);
+  assert.match(pageSource, /role="alert"/);
+  assert.match(pageSource, /Reintentar/);
+  assert.match(catalogSource, /caption[^>]*>Paquetes de Skills administrables/);
+  assert.match(catalogSource, /\+ Nuevo paquete/);
+  assert.match(catalogSource, /Buscar paquetes/);
+  assert.match(catalogSource, /role="alert"/);
+});
+
+test("public package catalog uses readonly detail routes and renders package metadata", async () => {
+  const catalogSource = await source("../../components/packages/PublicPackageCatalogClient.tsx");
+
+  assert.match(catalogSource, /filterPublicPackageSummaries/);
+  assert.match(catalogSource, /packageCardHref\(item\.slug, "public-readonly"\)/);
+  assert.match(catalogSource, /Publicado/);
+  assert.match(catalogSource, /formatSkillCount/);
+  assert.match(catalogSource, /formatPackageVersion/);
+  assert.doesNotMatch(catalogSource, /\/packages\/\$\{item\.slug\}\/edit/);
+});
+
+test("package editor exposes validation state and keeps fields accessible after errors", async () => {
+  const editorSource = await source("../../components/packages/PackageEditorClient.tsx");
+
+  assert.match(editorSource, /validationErrors/);
+  assert.match(editorSource, /hasValidationErrors/);
+  assert.match(editorSource, /id="package-editor-errors"/);
+  assert.match(editorSource, /role="alert"/);
+});
+
+test("package review exposes validation warnings and preserves the review-mediated handoff", async () => {
+  const [reviewSource, pageSource] = await Promise.all([
+    source("../../components/packages/PackageReviewClient.tsx"),
+    source("../../app/packages/[slug]/review/page.tsx"),
+  ]);
+
+  assert.match(reviewSource, /Resumen de validaci/);
+  assert.match(reviewSource, /manifest\.items\.length/);
+  assert.match(reviewSource, /manifest\.excludedItems\.length/);
+  assert.match(reviewSource, /role="alert"/);
+  assert.match(reviewSource, /review-requests/);
+  assert.match(reviewSource, /Volver a editar/);
+  assert.match(reviewSource, /sending/);
+  assert.match(reviewSource, /disabled=\{sending\}/);
+  assert.match(reviewSource, /try/);
+  assert.match(reviewSource, /finally/);
+  assert.match(reviewSource, /setSending\(false\)/);
+  assert.match(reviewSource, /submitError/);
+  assert.match(pageSource, /publish:create/);
+  assert.match(pageSource, /Sin permisos/);
+});
+
+test("public package detail exposes downloads and an explicit CLI-only boundary", async () => {
+  const detailSource = await source("../../app/packages/public/[slug]/page.tsx");
+
+  assert.match(detailSource, /getPublishedManifest/);
+  assert.match(detailSource, /manifest\.items/);
+  assert.match(detailSource, /manifest\.excludedItems/);
+  assert.match(detailSource, /format=json/);
+  assert.match(detailSource, /format=zip/);
+  assert.match(detailSource, /Instalar desde CLI/);
+  assert.match(detailSource, /No se instala en el navegador/);
+  assert.doesNotMatch(detailSource, /\/api\/packages\/[^`]+\/install/);
+});
+
+test("package maintenance detail remains capability protected", async () => {
+  const detailSource = await source("../../app/packages/[slug]/page.tsx");
+  assert.match(detailSource, /content:manage/);
+  assert.match(detailSource, /capabilityError/);
+});
+
 test("AppSidebar renders SVG icons with paths and sutil horizontal divider", async () => {
   const sidebarSource = await source("../../components/shell/AppSidebar.tsx");
   assert.match(sidebarSource, /<svg/);
